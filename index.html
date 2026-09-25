@@ -42,6 +42,10 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1e1934;--ink:#f4f1ff;--panel:#26203c}}
 :root[data-theme="dark"]{--bg:#1e1934;--ink:#f4f1ff;--panel:#26203c}
+/* Background darkness, chosen in the menu (data-bg on <html>). */
+:root{--sky-a:#4a2a6e;--sky-1:#2a1f4a;--sky-2:#1e1934;--sky-3:#1a1630;--head:30,25,52}
+:root[data-bg="dark"]{--bg:#120e22;--sky-a:#2c1946;--sky-1:#17122b;--sky-2:#110d20;--sky-3:#0b0915;--head:18,14,33}
+:root[data-bg="black"]{--bg:#050409;--sky-a:#170d26;--sky-1:#08070f;--sky-2:#040308;--sky-3:#000;--head:7,6,12}
 *,*::before,*::after{box-sizing:inherit}
 [hidden]{display:none!important}
 html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%;background:var(--bg)}
@@ -54,7 +58,7 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 
 #dust{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
 #sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;
-  background:radial-gradient(120% 70% at 50% -10%,#4a2a6e 0%,rgba(74,42,110,0) 60%),linear-gradient(180deg,#2a1f4a,#1e1934 55%,#1a1630)}
+  background:radial-gradient(120% 70% at 50% -10%,var(--sky-a) 0%,transparent 60%),linear-gradient(180deg,var(--sky-1),var(--sky-2) 55%,var(--sky-3))}
 
 /* ------------------------------------------------------------------ Boot */
 .boot{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:var(--bg);transition:opacity .6s var(--ease)}
@@ -83,18 +87,35 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 .map-glow i{position:absolute;inset:0;transition:opacity .35s linear}
 .map-glow .warm{background:radial-gradient(95% 60% at 50% 0%,rgba(255,150,70,.3),rgba(255,120,60,0) 70%);opacity:var(--warm,1)}
 .map-glow .cold{background:radial-gradient(110% 65% at 50% 100%,rgba(90,170,255,.26),rgba(90,170,255,0) 70%);opacity:var(--cold,0)}
-.zone{max-width:480px;margin:0 auto;padding:2px 22px 0;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;font-size:13.5px;transition:opacity .25s var(--ease)}
-.zone b{font-weight:500}
-.zone small{color:var(--ink-3);font-size:12px}
+.zone{flex:1;min-width:0;margin:0;display:flex;justify-content:center;align-items:baseline;gap:8px;font-size:13px;white-space:nowrap;transition:opacity .25s var(--ease)}
+.zone b{font-weight:500;flex:none}
+.zone small{color:var(--ink-3);font-size:12px;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:620px){.zone small{display:none}}
+.mbar{padding:calc(var(--safe-t) + 6px) 10px 6px 16px}
+.mbar .logo{font-size:18px;gap:8px}
+.mbar .logo-mark{width:24px;height:24px}
+.mbar .logo-mark::after{top:8px;height:7px;left:-6px;right:-6px}
 .zone.swap{opacity:0}
-.map-head{position:sticky;top:0;z-index:3;padding-bottom:24px;background:linear-gradient(180deg,rgba(30,25,52,.97) calc(100% - 12px),rgba(30,25,52,0))}
-.map-intro{margin:0 auto;max-width:480px;padding:0 22px 6px;color:var(--ink-2);font-size:14px}
+.map-head{position:sticky;top:0;z-index:3;padding-bottom:14px;background:linear-gradient(180deg,rgba(var(--head),.94) calc(100% - 14px),rgba(var(--head),0))}
 .journey{position:relative;margin:0 auto;max-width:480px}
 .journey svg.route{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .route path{fill:none;stroke:rgba(236,232,255,.38);stroke-width:1.6;stroke-dasharray:5 7;stroke-linecap:round}
 .route path.done{stroke:var(--teal);stroke-opacity:.7}
 .node{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:6px;text-align:center;border-radius:28px;padding:6px}
 .node img{display:block;filter:drop-shadow(0 10px 24px rgba(0,0,0,.35));transition:transform .5s var(--ease)}
+.space{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+/* Live-rendered planets on the map: they spin in the canvas and bob gently here. */
+.node .pl{display:block;border-radius:50%;transition:scale .45s var(--ease);animation:bob 7s ease-in-out var(--d,0s) infinite alternate}
+/* In map mode the 3D renderer's canvas sits over the map and draws each planet onto its .pl placeholder. */
+.planets-layer{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+@keyframes bob{from{transform:translateY(-5px)}to{transform:translateY(5px)}}
+#map.lite .node .pl{animation:none}
+.node:hover .pl,.node:focus-visible .pl{scale:1.06}
+.node:active .pl{scale:.96}
+.node.go .pl{scale:1.2;transition:scale .3s var(--ease)}
+.node.secret .pl{box-shadow:0 0 40px 6px rgba(120,100,255,.35)}
+.node.pop .pl{animation:pop .7s var(--ease),bob 7s ease-in-out .7s infinite alternate}
+@keyframes pop{0%{transform:scale(.3)}55%{transform:scale(1.14)}100%{transform:scale(1)}}
 .node:hover img,.node:focus-visible img{transform:scale(1.06)}
 .node:active img{transform:scale(.96)}
 .node-name{font-family:var(--f-head);font-size:15px;line-height:1.1}
@@ -119,8 +140,17 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 .star-node .sun.poke{animation:sunpoke .35s var(--ease)}
 @keyframes sunpoke{50%{transform:scale(1.08)}}
 .rocket-mark{position:absolute;left:0;top:0;width:46px;height:46px;pointer-events:none;will-change:transform;z-index:2}
-.fuel{flex:none;position:relative;z-index:3;padding:14px 22px calc(var(--safe-b) + 16px);background:var(--panel);border-top:1px solid var(--line)}
-.fuel-in{max-width:480px;margin:0 auto}
+.map-dock{position:absolute;right:14px;bottom:calc(var(--safe-b) + 14px);z-index:4;display:flex;gap:8px;align-items:center}
+.dock-btn{position:relative;min-width:46px;height:46px;padding:0 12px;display:grid;place-items:center;border-radius:23px;font-size:13px;font-weight:500;
+  background:rgba(var(--head),.82);border:1px solid var(--line);color:var(--ink);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.dock-btn.ring{width:46px;padding:0}
+.dock-btn.ring svg{position:absolute;inset:3px;width:38px;height:38px;transform:rotate(-90deg)}
+.dock-btn.ring circle{fill:none;stroke-width:3.5}
+.ring-bg{stroke:rgba(236,232,255,.14)}
+.ring-fg{stroke:var(--teal);stroke-linecap:round;stroke-dasharray:106.8;stroke-dashoffset:106.8;transition:stroke-dashoffset .8s var(--ease)}
+.dock-btn.ring b{position:relative;font-size:10.5px;font-weight:500}
+.fuel-pop{position:absolute;right:0;bottom:56px;width:250px;padding:14px;border-radius:18px;background:var(--panel);border:1px solid var(--line);box-shadow:0 14px 40px rgba(0,0,0,.4)}
+.fuel-pop small{display:block;margin-top:8px;color:var(--ink-3);font-size:12px}
 .fuel-top{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-2);margin-bottom:8px}
 .fuel-top b{color:var(--ink);font-weight:500}
 .fuel-track{height:6px;border-radius:6px;background:var(--card-2);overflow:hidden}
@@ -158,6 +188,11 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .2s var(--ease),background-color .2s}
 .act:active{transform:scale(.95)}
 .act.hot{background:linear-gradient(135deg,#ff7a3d,#ff4f8b);border-color:transparent}
+#detail.entering .dbody{animation:rise .6s var(--ease) both}
+#detail.entering .dbar{animation:fadein .5s var(--ease) both}
+@keyframes rise{from{transform:translateY(46px);opacity:0}}
+@keyframes fadein{from{opacity:0}}
+#detail.leaving .dbody,#detail.leaving .dbar{transform:translateY(30px);opacity:0;transition:transform .4s var(--ease),opacity .35s}
 .dbody{grid-area:body;display:flex;flex-direction:column;min-height:0;background:var(--panel);border-radius:26px 26px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.25)}
 .chips{flex:none;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 16px 4px}
 .chip{background:var(--card);border-radius:16px;padding:9px 6px;text-align:center;min-width:0}
@@ -275,7 +310,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   .stage-hint{bottom:24px}
 }
 @media (prefers-reduced-motion: reduce){
-  .panel>*,.launch .rocket,.puff,.xsec path,.star-node .sun.poke{animation:none}
+  .panel>*,.launch .rocket,.puff,.xsec path,.star-node .sun.poke,.node .pl,#detail.entering .dbody,#detail.entering .dbar{animation:none}
   .zone,.map-glow i{transition:none}
   .puff{opacity:.85}
 }
@@ -296,25 +331,31 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 <!-- Map -->
 <section class="screen" id="map" aria-label="แผนที่ระบบดาว">
   <div class="map-glow" aria-hidden="true"><i class="warm"></i><i class="cold"></i></div>
+  <canvas class="space" id="space" aria-hidden="true"></canvas>
   <div class="map-scroll" id="mapScroll">
     <div class="map-head">
-      <header class="bar">
+      <header class="bar mbar">
         <div class="logo"><span class="logo-mark" aria-hidden="true"></span>สวนดาว</div>
+        <p class="zone" data-zone><b data-zone-name></b><small data-zone-note></small></p>
         <button class="icon-btn" type="button" data-open-menu aria-label="เปิดเมนู">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
       </header>
-      <p class="map-intro">แตะดาวเพื่อบินไปสำรวจ ปรับแต่งดาว และสร้างสิ่งมีชีวิตของคุณเอง</p>
-      <p class="zone" data-zone><b data-zone-name></b><small data-zone-note></small></p>
     </div>
     <div class="journey" id="journey"></div>
   </div>
-  <footer class="fuel">
-    <div class="fuel-in">
+  <div class="map-dock">
+    <button class="dock-btn" type="button" data-speed aria-label="ความเร็วของอวกาศ"><span data-speed-label>1×</span></button>
+    <button class="dock-btn ring" type="button" data-fuel-toggle aria-expanded="false" aria-controls="fuelPop" aria-label="ความคืบหน้าการสำรวจ">
+      <svg viewBox="0 0 38 38" aria-hidden="true"><circle class="ring-bg" cx="19" cy="19" r="17"/><circle class="ring-fg" cx="19" cy="19" r="17" data-fuel-ring/></svg>
+      <b class="num" data-fuel-pct>0%</b>
+    </button>
+    <div class="fuel-pop" id="fuelPop" hidden>
       <div class="fuel-top"><span>ความคืบหน้าการสำรวจ</span><b class="num" data-fuel-pct>0%</b></div>
       <div class="fuel-track"><i data-fuel-bar></i></div>
+      <small data-fuel-detail></small>
     </div>
-  </footer>
+  </div>
 </section>
 
 <!-- Launch -->
@@ -366,6 +407,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <div data-menu-main>
       <button class="menu-item" type="button" data-menu="howto"><span class="em">🧭</span><span>วิธีเล่น<small>บิน สำรวจ ปรับแต่ง และสร้างชีวิต</small></span></button>
       <button class="menu-item" type="button" data-sound-toggle aria-pressed="false"><span class="em" data-sound-ic>🔈</span><span>เสียง<small data-sound-label>ปิดอยู่ แตะเพื่อเปิด</small></span></button>
+      <button class="menu-item" type="button" data-bg-toggle><span class="em">🌌</span><span>ความมืดของพื้นหลัง<small data-bg-label>มืด แตะเพื่อเปลี่ยน</small></span></button>
       <button class="menu-item" type="button" data-menu="model"><span class="em">📐</span><span>ตัวเลขมาจากไหน<small>ระยะทาง เวลาเดินทาง และการคำนวณ</small></span></button>
       <button class="menu-item" type="button" data-menu="reset"><span class="em">🧹</span><span>เริ่มต้นใหม่ทั้งหมด<small>ล้างการปรับแต่งของทุกดาว</small></span></button>
     </div>
@@ -401,6 +443,8 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 const frame = () => new Promise(r => requestAnimationFrame(() => r()));
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const MOBILE = matchMedia('(max-width: 760px), (pointer: coarse)').matches;
+const PHONE = matchMedia('(max-width: 760px)').matches;
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
 
 function rng(seed) {
   let a = seed >>> 0;
@@ -483,7 +527,7 @@ const CONFIG = {
   auKm: 149597870.7,
   rocketKmh: 58000,          // roughly the speed of the New Horizons probe
   storeKey: 'suan-dao-v1',
-  segments: MOBILE ? 96 : 128,
+  segments: PHONE ? 128 : 176,
   samples: 2400,
   floraMax: MOBILE ? 380 : 620,
   idleMs: 7000               // untouched this long, the planet starts drifting on its own
@@ -912,7 +956,8 @@ void main(){
     col = mix(col, cVeg, spot * (0.55 + 0.45 * swirl) * (0.3 + uStorm));
     col = mix(col, vec3(dot(col, vec3(0.33))), (1.0 - uHumid) * 0.25);
   } else {
-    float h = vH;
+    // Per-pixel detail on top of the per-vertex height, so coastlines don't show the mesh's triangles.
+    float h = vH + snoise(p * 22.0) * 0.012 + snoise(p * 57.0) * 0.005;
     if (h < uSea) {
       float depth = clamp((uSea - h) / max(uSea, 0.05), 0.0, 1.0);
       if (uLavaSea > 0.5) {
@@ -1045,7 +1090,7 @@ class PlanetBody {
     this.spin.add(this.surface);
 
     if (!gas) {
-      const cg = new THREE.SphereGeometry(1.03, 64, 48);
+      const cg = new THREE.SphereGeometry(1.03, 96, 72);
       this.cloudU = { uTime: { value: 0 }, uCloud: { value: 0 }, uSun: { value: SUN }, cCloud: { value: hex(pal.cloud) } };
       const cm = new THREE.ShaderMaterial({ uniforms: this.cloudU, vertexShader: CLOUD_VERT, fragmentShader: CLOUD_FRAG, transparent: true, depthWrite: false });
       this.clouds = new THREE.Mesh(cg, cm);
@@ -1053,7 +1098,7 @@ class PlanetBody {
       this.disposables.push(cg, cm);
     }
 
-    const ag = new THREE.SphereGeometry(1.14, 48, 32);
+    const ag = new THREE.SphereGeometry(1.14, 96, 64);
     this.atmoU = { cAtmo: { value: hex(pal.atmo) }, uSun: { value: SUN }, uAtmo: { value: this.b.atmo } };
     const am = new THREE.ShaderMaterial({ uniforms: this.atmoU, vertexShader: ATMO_VERT, fragmentShader: ATMO_FRAG, transparent: true, depthWrite: false, side: THREE.BackSide, blending: THREE.AdditiveBlending });
     this.group.add(new THREE.Mesh(ag, am));
@@ -1267,6 +1312,44 @@ class Stage {
     this.size = new THREE.Vector2();
   }
   get pixelRatio() { return this.renderer.getPixelRatio(); }
+  /** Map mode: move the canvas over the map, full size, to draw every visible planet in place. */
+  mapMode(host) {
+    const c = this.renderer.domElement, w = host.clientWidth, h = host.clientHeight;
+    if (c.parentNode !== host) { host.insertBefore(c, host.querySelector('.map-scroll')); c.classList.add('planets-layer'); }
+    const pr = this.lite ? 1 : DPR;
+    if (this.mode !== 'map' || this.mw !== w || this.mh !== h || this.mpr !== pr) {
+      this.renderer.setPixelRatio(pr); this.renderer.setSize(w, h, false);
+      this.mw = w; this.mh = h; this.mpr = pr; this.mode = 'map';
+    }
+  }
+  /** Back to the planet view. */
+  detailMode() {
+    const c = this.renderer.domElement;
+    if (c.parentNode !== this.host) { this.host.prepend(c); c.classList.remove('planets-layer'); }
+    this.mode = 'detail';
+    this.resize();
+  }
+  beginMap() { const r = this.renderer; r.setScissorTest(false); r.setViewport(0, 0, this.mw, this.mh); r.clear(); r.setScissorTest(true); }
+  endMap() { this.renderer.setScissorTest(false); }
+  /** Draw one planet into a square at (x, y) in layer pixels, clipped above `clipTop` (under the header). */
+  drawAt(body, spin, x, y, size, clipTop) {
+    const r = this.renderer, H = this.mh, top = Math.max(y, clipTop), bottom = Math.min(y + size, H);
+    if (bottom <= top) return;
+    r.setViewport(x, H - y - size, size, size);
+    r.setScissor(x, H - bottom, size, bottom - top);
+    const parent = body.group.parent, rot = body.group.rotation.clone(), spin0 = body.spin.rotation.y;
+    const cloud0 = body.clouds ? body.clouds.rotation.y : 0;
+    this.thumbScene.add(body.group);
+    body.group.rotation.set(0.28, 0, 0); body.spin.rotation.y = spin;
+    if (body.clouds) body.clouds.rotation.y = spin * 1.05;
+    const cam = this.thumbCam; cam.aspect = 1; cam.updateProjectionMatrix();
+    cam.position.set(0, 0, this.fitDistance(body, cam, 1.04)); cam.lookAt(0, 0, 0);
+    r.render(this.thumbScene, cam);
+    this.thumbScene.remove(body.group);
+    body.group.rotation.copy(rot); body.spin.rotation.y = spin0;
+    if (body.clouds) body.clouds.rotation.y = cloud0;
+    if (parent) parent.add(body.group);
+  }
   resize() {
     const w = Math.max(1, this.host.clientWidth), h = Math.max(1, this.host.clientHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -1282,7 +1365,7 @@ class Stage {
     return R / Math.sin(Math.min(vfov, hfov)) * pad;
   }
   render() { this.renderer.render(this.scene, this.camera); }
-  snapshot(body, px = 240) {
+  snapshot(body, px = Math.round(200 * DPR)) {
     const r = this.renderer, prevPR = r.getPixelRatio();
     r.getSize(this.size);
     const parent = body.group.parent;
@@ -1357,8 +1440,14 @@ const Sound = {
   life() { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => this.tone(f, 0.6, { gain: 0.2, at: i * 0.09 })); },
   erupt() { this.noise(1.1, { from: 180, to: 60, gain: 0.6, q: 0.6 }); this.tone(70, 0.8, { type: 'triangle', gain: 0.3, slide: 0.6 }); },
   storm() { this.noise(1.4, { from: 500, to: 1600, gain: 0.3, q: 1.2 }); },
+  back() { this.tone(640, 0.32, { gain: 0.18, slide: 0.5 }); },
   secret() { this.tone(220, 1.8, { gain: 0.22, slide: 1.5 }); this.tone(330, 1.8, { gain: 0.14, slide: 0.75, at: 0.25 }); this.tone(880, 1.2, { type: 'triangle', gain: 0.06, at: 0.5 }); }
 };
+
+/* Player settings: how dark the sky is and how fast space moves on the map. */
+const BG_MODES = ['normal', 'dark', 'black'];
+const BG_LABEL = { normal: 'ปกติ', dark: 'มืด', black: 'มืดสนิท' };
+const SPEEDS = [0, 0.5, 1, 2, 4];
 
 /* ================================================================
    Persistence
@@ -1372,6 +1461,8 @@ const Store = {
     base.at = typeof s.at === 'number' ? s.at : -1;
     base.sound = s.sound === true;
     base.secret = s.secret === true;
+    if (BG_MODES.includes(s.bg)) base.bg = s.bg;
+    if (SPEEDS.includes(s.speed)) base.speed = s.speed;
     base.visited = Array.isArray(s.visited) ? s.visited : [];
     allPlanets().forEach(p => {
       const saved = s.planets && s.planets[p.id];
@@ -1383,7 +1474,7 @@ const Store = {
     return base;
   },
   fresh() {
-    return { v: 1, at: -1, visited: [], sound: false, secret: false, planets: Object.fromEntries(allPlanets().map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
+    return { v: 1, at: -1, visited: [], sound: false, secret: false, bg: 'dark', speed: REDUCED ? 0 : 1, planets: Object.fromEntries(allPlanets().map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
   },
   save(state) { try { localStorage.setItem(CONFIG.storeKey, JSON.stringify(state)); } catch (e) { /* storage may be unavailable; progress stays in memory */ } }
 };
@@ -1411,7 +1502,7 @@ function drawSky() {
    under reduced motion; paused while the page is hidden.
 ================================================================ */
 const Dust = {
-  scroll: 0, tx: 0, ty: 0, px: 0, py: 0, raf: null,
+  scroll: 0, tx: 0, ty: 0, px: 0, py: 0, raf: null, speed: 1, t: 0,
   init() {
     this.c = $('#dust'); this.g = this.c.getContext('2d');
     if (!this.g) return;
@@ -1447,7 +1538,8 @@ const Dust = {
   frame(now) {
     this.raf = requestAnimationFrame(this.frame);
     const dt = Math.min(0.05, (now - this.last) / 1000 || 0.016); this.last = now;
-    this.draw(dt, now / 1000);
+    this.t += dt * this.speed;
+    this.draw(dt * this.speed, this.t);
   },
   draw(dt, t) {
     const g = this.g, w = this.w, h = this.h, m = 20, W = w + m * 2, H = h + m * 2;
@@ -1491,7 +1583,10 @@ class App {
     this.rotX = 0.3; this.rotY = 0; this.velY = 0.12; this.velX = 0;
     this.lastPoke = 0; this.touched = false; this.idleShown = false;
     this.arrive = 1; this.spinIn = 0; this.sunTaps = [];
+    this.popT = 1; this.leaveT = null;
+    this.spaceT = 0; this.gFrame = 0; this.mraf = null;
     this.loop = this.loop.bind(this);
+    this.mapFrame = this.mapFrame.bind(this);
   }
 
   async init() {
@@ -1501,6 +1596,8 @@ class App {
     const step = (p, text) => { bar.style.width = Math.round(p * 100) + '%'; if (text) status.textContent = text; };
     this.bindUI();
     Sound.on = this.state.sound; this.syncSound();
+    this.applyBg(); this.syncSpeed();
+    this.initSpace();
     if (typeof THREE === 'undefined' || !this.webgl()) {
       step(1, 'อุปกรณ์นี้ไม่รองรับกราฟิก 3 มิติ จึงแสดงแผนที่แบบภาพนิ่ง');
       this.noGL = true;
@@ -1518,6 +1615,7 @@ class App {
     await wait(250);
     $('#boot').classList.add('is-done');
     $('#map').classList.add('is-active');
+    this.startMapLoop();
     setTimeout(() => $('#boot').remove(), 700);
   }
 
@@ -1617,7 +1715,7 @@ class App {
       btn.type = 'button'; btn.className = p.secret ? 'node secret' : 'node';
       btn.style.left = n.x + 'px'; btn.style.top = n.y + 'px';
       btn.setAttribute('aria-label', `บินไปดาว${p.name}, ${BIOMES[p.biome].kind}`);
-      const img = this.thumbs[p.id] ? `<img src="${this.thumbs[p.id]}" width="${size}" height="${size}" alt="">` :
+      const img = !this.noGL ? `<span class="pl" style="width:${size}px;height:${size}px;--d:${(-i * 1.7).toFixed(1)}s"></span>` :
         `<span style="display:block;width:${size * 0.7}px;height:${size * 0.7}px;border-radius:50%;background:${BIOMES[p.biome].palette.high}"></span>`;
       btn.innerHTML = `${img}<span class="node-name">${p.name}</span><span class="node-kind">${BIOMES[p.biome].kind}</span><span class="node-flags" data-flags></span>`;
       btn.addEventListener('click', () => this.travel(i));
@@ -1628,7 +1726,7 @@ class App {
       no.style.left = (n.x + side * (size / 2 + 26)) + 'px'; no.style.top = (n.y - size / 2 + 6) + 'px';
       no.innerHTML = `<i></i>${i + 1}.`;
       j.appendChild(no);
-      return { btn, no };
+      return { btn, no, size, pl: btn.querySelector('.pl'), spin: i * 1.3 };
     });
 
     const finish = document.createElement('div');
@@ -1643,6 +1741,271 @@ class App {
     this.placeRocket(this.state.at);
     this.refreshMap();
     this.updateZone();
+    // Orbit radius of each planet around the star, in map pixels.
+    this.orbitR = PLANETS.map((p, i) => Math.hypot(this.nodes[i + 1].x - this.nodes[0].x, this.nodes[i + 1].y - this.nodes[0].y));
+    this.resizeSpace();
+    this.drawLivePlanets(0);
+  }
+
+  /* ---------------- Map: live planets and the space around them ---------------- */
+  startMapLoop() { if (this.mraf) return; this.mlast = performance.now(); this.mraf = requestAnimationFrame(this.mapFrame); }
+  stopMapLoop() { cancelAnimationFrame(this.mraf); this.mraf = null; }
+  mapFrame(now) {
+    this.mraf = requestAnimationFrame(this.mapFrame);
+    const raw = (now - this.mlast) / 1000 || 0.016, dt = Math.min(0.05, raw); this.mlast = now;
+    this.watchPerf(raw);
+    // Everything follows the scroll every frame; otherwise every other frame is plenty (canvases keep their last image).
+    const top = $('#mapScroll').scrollTop, moved = top !== this.lastTop;
+    this.lastTop = top;
+    this.pAcc = (this.pAcc || 0) + dt * this.state.speed;
+    this.gFrame = (this.gFrame + 1) % 2;
+    if (!moved && (this.gFrame || this.state.speed === 0)) return;
+    if (!moved && this.lite && (this.liteN = ((this.liteN || 0) + 1) % 2)) return;   // low-power: every 4th frame
+    const sdt = this.pAcc; this.pAcc = 0;
+    this.spaceT += sdt;
+    this.drawSpace(sdt);
+    this.drawLivePlanets(sdt);
+  }
+
+  /**
+   * If the device can't keep up (frames slower than ~22 fps for a couple of seconds on the map),
+   * drop to a lighter mode: 1x resolution for the space and planet layers, no bobbing, fewer redraws.
+   */
+  watchPerf(raw) {
+    if (this.lite || raw > 0.5) return;          // ignore pauses (tab switches, first frame)
+    this.perfN = (this.perfN || 0) + 1;
+    this.perfAvg = this.perfAvg == null ? raw : lerp(this.perfAvg, raw, 0.05);
+    if (this.perfN > 120 && this.perfAvg > 0.045) {
+      this.lite = true;
+      $('#map').classList.add('lite');
+      this.resizeSpace();
+      if (this.stage) this.stage.lite = true;
+    }
+  }
+
+  /** Draw the planets on screen where their map nodes are, each spinning at a rate set by its day length. */
+  drawLivePlanets(dt) {
+    if (this.noGL || !this.nodeEls || !this.stage) return;
+    if (this.current >= 0) return;   // the planet view owns the renderer
+    const map = $('#map'), mr = map.getBoundingClientRect();
+    const clipTop = $('.map-head').getBoundingClientRect().bottom - mr.top - 14;
+    this.stage.mapMode(map);
+    this.stage.beginMap();
+    this.nodeEls.forEach((el, i) => {
+      if (!el.pl) return;
+      const r = el.pl.getBoundingClientRect();
+      if (r.bottom < mr.top || r.top > mr.bottom) return;
+      const p = PLANETS[i], body = this.bodies[p.id];
+      if (dt) body.update(dt);
+      el.spin += dt * (0.05 + 2 * Math.PI / (p.dayH * 1.3));
+      this.stage.drawAt(body, el.spin, r.left - mr.left, r.top - mr.top, r.width, clipTop);
+    });
+    this.stage.endMap();
+  }
+
+  initSpace() {
+    const r = rng(31);
+    // Rocks for the asteroid belt (between the desert world and the gas giant) and the icy Kuiper belt past the edge.
+    this.rocks = Array.from({ length: PHONE ? 200 : 300 }, (_, i) => ({
+      belt: i % 3 === 2 ? 1 : 0, a: r() * 6.283, f: r(), size: 0.8 + r() * 1.8, tone: Math.floor(r() * 3), w: 0.018 + r() * 0.02 }));
+    // Small drifting swarms of tiny bodies.
+    this.swarms = Array.from({ length: 4 }, () => ({ x: r(), y: r(), vx: (r() - 0.5) * 14, vy: (r() - 0.5) * 8, rot: r() * 6,
+      m: Array.from({ length: 5 + Math.floor(r() * 6) }, () => ({ a: r() * 6.283, d: 4 + r() * 16, s: 0.6 + r() * 1.3 })) }));
+    this.comets = []; this.meteors = [];
+    this.cometT = 4; this.meteorT = 1.5;
+  }
+
+  resizeSpace() {
+    const c = $('#space'), m = $('#map');
+    this.sw = m.clientWidth; this.sh = m.clientHeight;
+    const dpr = this.lite ? 1 : DPR;
+    c.width = Math.round(this.sw * dpr); c.height = Math.round(this.sh * dpr);
+    this.sg = c.getContext('2d'); this.sg.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  /** Map radius for a distance from the star, interpolated between the planets' orbits. */
+  orbitAt(au) {
+    const pts = [[0, 0], ...PLANETS.map((p, i) => [p.au, this.orbitR[i]])].sort((a, b) => a[0] - b[0]);
+    for (let i = 1; i < pts.length; i++) if (au <= pts[i][0]) return lerp(pts[i - 1][1], pts[i][1], (au - pts[i - 1][0]) / (pts[i][0] - pts[i - 1][0]));
+    const a = pts[pts.length - 2], b = pts[pts.length - 1];
+    return b[1] + (au - b[0]) * (b[1] - a[1]) / (b[0] - a[0]);
+  }
+
+  /** Orbits, zones, belts, moons, swarms, comets and meteors behind the map. `dt` is already scaled by speed. */
+  drawSpace(dt) {
+    const g = this.sg; if (!g || !this.nodes) return;
+    const W = this.sw, H = this.sh, t = this.spaceT, TAU = Math.PI * 2;
+    const jr = $('#journey').getBoundingClientRect(), mr = $('#map').getBoundingClientRect();
+    const ox = jr.left - mr.left, oy = jr.top - mr.top;
+    const sx = ox + this.nodes[0].x, sy = oy + this.nodes[0].y;
+    const onScreen = r => sy + r > -20 && sy - r < H + 20;
+    // Add only the part of a circle around the star that crosses the screen (orbits can be far larger than it).
+    const visArc = r => {
+      const lo = clamp((-20 - sy) / r, -1, 1), hi = clamp((H + 20 - sy) / r, -1, 1);
+      if (lo >= hi) return;
+      const a0 = Math.asin(lo), a1 = Math.asin(hi);
+      g.moveTo(sx + Math.cos(a0) * r, sy + Math.sin(a0) * r); g.arc(sx, sy, r, a0, a1);
+      g.moveTo(sx + Math.cos(Math.PI - a1) * r, sy + Math.sin(Math.PI - a1) * r); g.arc(sx, sy, r, Math.PI - a1, Math.PI - a0);
+    };
+    g.clearRect(0, 0, W, H);
+    g.font = '11px "IBM Plex Sans Thai", system-ui, sans-serif';
+
+    // Pulses spreading from the star.
+    for (let k = 0; k < 3; k++) {
+      const ph = (t * 0.22 + k / 3) % 1, r = 52 + ph * 120;
+      g.strokeStyle = `rgba(255,200,120,${((1 - ph) * 0.22).toFixed(3)})`; g.lineWidth = 1.2;
+      g.beginPath(); g.arc(sx, sy, r, 0, TAU); g.stroke();
+    }
+    // Label a ring where it crosses the lower right of the screen, keeping the whole text on screen.
+    const label = (r, text, color) => {
+      const tw = g.measureText(text).width;
+      const a = Math.acos(clamp((Math.min(W - tw - 22, sx + r * 0.8) - sx) / r, -1, 1));
+      const x = sx + Math.cos(a) * r, y = sy + Math.sin(a) * r;
+      if (y < 40 || y > H - 20) return;
+      g.fillStyle = color; g.fillText(text, x + 6, y - 4);
+    };
+
+    // Habitable zone band and frost line.
+    const h0 = this.orbitAt(0.95), h1 = this.orbitAt(1.4);
+    if (onScreen(h1)) {
+      g.strokeStyle = 'rgba(80,220,150,.06)'; g.lineWidth = h1 - h0;
+      g.beginPath(); visArc((h0 + h1) / 2); g.stroke(); g.lineWidth = 1;
+      label((h0 + h1) / 2, 'เขตอาศัยได้', 'rgba(120,235,170,.7)');
+    }
+    const fr = this.orbitAt(2.7);
+    if (onScreen(fr)) {
+      g.setLineDash([6, 6]); g.strokeStyle = 'rgba(140,200,255,.28)'; g.lineWidth = 1;
+      g.beginPath(); visArc(fr); g.stroke(); g.setLineDash([]);
+      label(fr, 'แนวหิมะ', 'rgba(160,210,255,.75)');
+    }
+
+    // Planet orbits: fine dashes that creep around the star.
+    g.lineWidth = 1; g.setLineDash([2, 7]); g.lineDashOffset = -t * 8;
+    this.orbitR.forEach((r, i) => {
+      if (!onScreen(r)) return;
+      const p = PLANETS[i];
+      g.strokeStyle = p.secret ? 'rgba(154,107,255,.3)' : this.state.visited.includes(p.id) ? 'rgba(63,214,198,.3)' : 'rgba(236,232,255,.16)';
+      g.beginPath(); visArc(r); g.stroke();
+    });
+    g.setLineDash([]); g.lineDashOffset = 0;
+
+    // Asteroid and Kuiper belts; inner rocks go round faster (Kepler).
+    const b0 = this.orbitAt(2.2), b1 = this.orbitAt(3.2), last = this.orbitR[this.orbitR.length - 1];
+    // Rocks are batched into six paths (two belts x three brightness tones) to keep draw calls low.
+    const batches = [[], [], [], [], [], []];
+    for (const k of this.rocks) {
+      const r = k.belt ? last + 60 + k.f * 110 : lerp(b0, b1, k.f);
+      const a = k.a + t * k.w * Math.pow(b0 / r, 1.5) * 4;
+      const x = sx + Math.cos(a) * r, y = sy + Math.sin(a) * r;
+      if (x < -4 || x > W + 4 || y < -4 || y > H + 4) continue;
+      batches[k.belt * 3 + k.tone].push(x, y, k.size);
+    }
+    batches.forEach((list, bi) => {
+      if (!list.length) return;
+      const al = [0.4, 0.6, 0.85][bi % 3];
+      g.fillStyle = bi >= 3 ? `rgba(170,215,255,${(al * 0.6).toFixed(2)})` : `rgba(220,205,255,${al})`;
+      g.beginPath();
+      for (let n = 0; n < list.length; n += 3) { g.moveTo(list[n] + list[n + 2], list[n + 1]); g.arc(list[n], list[n + 1], list[n + 2], 0, TAU); }
+      g.fill();
+    });
+    if (onScreen(b1)) label(b1 + 8, 'แถบดาวเคราะห์น้อย', 'rgba(220,205,255,.6)');
+    if (onScreen(last + 115)) label(last + 115, 'แถบไคเปอร์', 'rgba(170,215,255,.6)');
+
+    // Moons circling their planets on tilted rings.
+    PLANETS.forEach((p, i) => {
+      if (!p.moons || !this.nodeEls[i]) return;
+      const nx = ox + this.nodes[i + 1].x, ny = oy + this.nodes[i + 1].y, size = this.nodeEls[i].size;
+      if (ny < -size || ny > H + size) return;
+      for (let m = 0; m < p.moons; m++) {
+        const rx = size * (0.6 + m * 0.09), ry = rx * 0.3, tilt = -0.35 + m * 0.18;
+        g.strokeStyle = 'rgba(236,232,255,.12)'; g.lineWidth = 1;
+        g.beginPath(); g.ellipse(nx, ny, rx, ry, tilt, 0, TAU); g.stroke();
+        const a = t * (0.7 - m * 0.08) + m * 2.1 + i;
+        const ex = Math.cos(a) * rx, ey = Math.sin(a) * ry;
+        const x = nx + ex * Math.cos(tilt) - ey * Math.sin(tilt), y = ny + ex * Math.sin(tilt) + ey * Math.cos(tilt);
+        g.fillStyle = 'rgba(240,236,255,.9)';
+        g.beginPath(); g.arc(x, y, 2.2 + (m % 2) * 0.8, 0, TAU); g.fill();
+      }
+    });
+
+    // Drifting swarms of small bodies (screen space, with a little scroll parallax).
+    const sc = $('#mapScroll').scrollTop;
+    g.fillStyle = 'rgba(210,200,240,.55)';
+    g.beginPath();
+    for (const w of this.swarms) {
+      w.x += w.vx * dt / W; w.y += w.vy * dt / H; w.rot += dt * 0.15;
+      const cx = ((w.x % 1) + 1) % 1 * (W + 80) - 40, cy = ((((w.y * H - sc * 0.15) % (H + 80)) + H + 80) % (H + 80)) - 40;
+      for (const m of w.m) {
+        const a = m.a + w.rot, x = cx + Math.cos(a) * m.d, y = cy + Math.sin(a) * m.d * 0.6;
+        g.moveTo(x + m.s, y); g.arc(x, y, m.s, 0, TAU);
+      }
+    }
+    g.fill();
+
+    // Comets: slow, with a tail that always points away from the star.
+    this.cometT -= dt;
+    if (this.cometT <= 0) {
+      this.cometT = 9 + Math.random() * 12;
+      const fromLeft = Math.random() < 0.5, y0 = Math.random() * H * 0.8;
+      const tx = W * (0.3 + Math.random() * 0.4), ty = H * (0.2 + Math.random() * 0.6);
+      const x0 = fromLeft ? -60 : W + 60, d = Math.hypot(tx - x0, ty - y0), v = 55 + Math.random() * 45;
+      this.comets.push({ x: x0, y: y0, vx: (tx - x0) / d * v, vy: (ty - y0) / d * v, len: 70 + Math.random() * 70 });
+    }
+    this.comets = this.comets.filter(c => {
+      c.x += c.vx * dt; c.y += c.vy * dt;
+      if (c.x < -200 || c.x > W + 200 || c.y < -200 || c.y > H + 200) return false;
+      let dx = c.x - sx, dy = c.y - sy; const dl = Math.hypot(dx, dy) || 1; dx /= dl; dy /= dl;
+      const gr = g.createLinearGradient(c.x, c.y, c.x + dx * c.len, c.y + dy * c.len);
+      gr.addColorStop(0, 'rgba(200,240,255,.75)'); gr.addColorStop(1, 'rgba(200,240,255,0)');
+      g.strokeStyle = gr; g.lineWidth = 3; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(c.x, c.y); g.lineTo(c.x + dx * c.len, c.y + dy * c.len); g.stroke();
+      g.lineWidth = 1;
+      g.fillStyle = 'rgba(235,250,255,.95)'; g.beginPath(); g.arc(c.x, c.y, 2.6, 0, TAU); g.fill();
+      return true;
+    });
+
+    // Meteors: quick streaks.
+    this.meteorT -= dt;
+    if (this.meteorT <= 0) {
+      this.meteorT = 1.5 + Math.random() * 4;
+      const a = Math.PI * (0.62 + Math.random() * 0.16), v = 650 + Math.random() * 300;
+      this.meteors.push({ x: W * (0.2 + Math.random() * 0.8), y: H * Math.random() * 0.6, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0.7 });
+    }
+    this.meteors = this.meteors.filter(m => {
+      m.x += m.vx * dt; m.y += m.vy * dt; m.life -= dt;
+      if (m.life <= 0) return false;
+      const k = 0.09, al = Math.min(1, m.life * 2.5);
+      const gr = g.createLinearGradient(m.x, m.y, m.x - m.vx * k, m.y - m.vy * k);
+      gr.addColorStop(0, `rgba(255,250,240,${al.toFixed(2)})`); gr.addColorStop(1, 'rgba(255,250,240,0)');
+      g.strokeStyle = gr; g.lineWidth = 1.6;
+      g.beginPath(); g.moveTo(m.x, m.y); g.lineTo(m.x - m.vx * k, m.y - m.vy * k); g.stroke();
+      return true;
+    });
+  }
+
+  /* ---------------- Settings ---------------- */
+  applyBg() {
+    document.documentElement.dataset.bg = this.state.bg;
+    const l = $('[data-bg-label]'); if (l) l.textContent = `${BG_LABEL[this.state.bg]} แตะเพื่อเปลี่ยน`;
+  }
+  cycleBg() {
+    this.state.bg = BG_MODES[(BG_MODES.indexOf(this.state.bg) + 1) % BG_MODES.length];
+    this.applyBg(); this.save();
+  }
+  syncSpeed() {
+    const s = this.state.speed;
+    $('[data-speed-label]').textContent = s === 0 ? '⏸' : s + '×';
+    Dust.speed = s;
+  }
+  cycleSpeed() {
+    this.state.speed = SPEEDS[(SPEEDS.indexOf(this.state.speed) + 1) % SPEEDS.length];
+    this.syncSpeed(); this.save();
+    this.toast(this.state.speed === 0 ? 'หยุดการเคลื่อนที่ในอวกาศ' : `ความเร็วอวกาศ ${this.state.speed}×`);
+  }
+  toggleFuel(open) {
+    const pop = $('#fuelPop'), btn = $('[data-fuel-toggle]');
+    open = open ?? pop.hidden;
+    pop.hidden = !open; btn.setAttribute('aria-expanded', String(open));
   }
 
   /** Tint the map and name the region at the middle of the screen, from its distance to the star. */
@@ -1716,13 +2079,18 @@ class App {
       if (img && this.thumbs[p.id] && img.src !== this.thumbs[p.id]) img.src = this.thumbs[p.id];
     });
     const score = (st.visited.length + PLANETS.filter(p => st.planets[p.id].eco).length) / (PLANETS.length * 2);
-    $('[data-fuel-pct]').textContent = pct(score * 100);
+    $$('[data-fuel-pct]').forEach(el => { el.textContent = pct(score * 100); });
     $('[data-fuel-bar]').style.width = (score * 100) + '%';
+    $('[data-fuel-ring]').style.strokeDashoffset = (106.8 * (1 - score)).toFixed(1);
+    $('[data-fuel-detail]').textContent = `สำรวจแล้ว ${st.visited.filter(id => PLANETS.some(p => p.id === id)).length}/${PLANETS.length} ดวง · มีชีวิต ${PLANETS.filter(p => st.planets[p.id].eco).length}/${PLANETS.length} ดวง`;
   }
 
   async travel(i) {
     if (this.busy) return;
     this.busy = true;
+    this.toggleFuel(false);
+    const node = this.nodeEls[i] && this.nodeEls[i].btn;
+    if (node) node.classList.add('go');
     const from = this.state.at;
     const p = PLANETS[i];
     if (!this.noGL && from !== i) {
@@ -1774,18 +2142,24 @@ class App {
     $('[data-d-kicker]').textContent = `ดาวดวงที่ ${i + 1}, ${b.kind}`;
     $('[data-d-name]').textContent = p.name;
     this.poke();
+    this.stopMapLoop();
+    $$('.node.go').forEach(n => n.classList.remove('go'));
     $('#map').classList.remove('is-active');
-    $('#detail').classList.add('is-active');
+    const d = $('#detail');
+    d.classList.remove('leaving');
+    d.classList.add('is-active');
+    if (!REDUCED) { d.classList.remove('entering'); void d.offsetWidth; d.classList.add('entering'); clearTimeout(this.enterT); this.enterT = setTimeout(() => d.classList.remove('entering'), 700); }
     if (!this.noGL) {
       const body = this.bodies[p.id];
       this.stage.scene.children.filter(o => o.isGroup).forEach(o => this.stage.scene.remove(o));
       this.stage.scene.add(body.group);
       body.group.rotation.set(0, 0, 0);
       this.rotX = 0.3; this.rotY = -0.4; this.velY = 0.12;
-      this.stage.resize();
+      this.stage.detailMode();
       this.stage.camZ = this.stage.fitDistance(body, this.stage.camera, 1.12);
       this.stage.camera.position.set(0, 0, this.stage.camZ * 1.35);
       this.arrive = REDUCED ? 1 : 0;
+      this.popT = REDUCED ? 1 : 0;
       this.startLoop();
     }
     this.renderActions();
@@ -1802,9 +2176,28 @@ class App {
     }
     $('#detail').classList.remove('is-active');
     $('#map').classList.add('is-active');
+    this.current = -1;
     this.refreshMap();
     this.updateZone();
-    this.current = -1;
+    this.drawLivePlanets(0);
+    this.startMapLoop();
+  }
+
+  /** Back to the map: the planet bounces, shrinks away, and pops back into its place on the map. */
+  leaveDetail() {
+    if (this.current < 0 || this.leaveT != null) return;
+    if (this.noGL || REDUCED) { this.closeDetail(); return; }
+    this.leaveT = 0;
+    $('#detail').classList.add('leaving');
+    Sound.back();
+  }
+  finishLeave() {
+    const i = this.current;
+    this.leaveT = null;
+    this.closeDetail();
+    setTimeout(() => $('#detail').classList.remove('leaving'), 500);
+    const el = this.nodeEls && this.nodeEls[i];
+    if (el) { el.btn.classList.remove('pop'); void el.btn.offsetWidth; el.btn.classList.add('pop'); setTimeout(() => el.btn.classList.remove('pop'), 800); }
   }
 
   renderActions() {
@@ -2031,6 +2424,16 @@ class App {
     body.idle = damp(body.idle, idleOn ? 1 : 0, idleOn ? 0.35 : 4, dt);
     this.idleHint(body.idle > 0.5);
     body.update(dt);
+    // Springy entrance, and a bounce-then-shrink on the way out.
+    if (this.leaveT != null) {
+      this.leaveT = Math.min(1, this.leaveT + dt / 0.5);
+      const t = this.leaveT;
+      body.group.scale.multiplyScalar(t < 0.22 ? lerp(1, 1.1, Math.sin(t / 0.22 * Math.PI / 2)) : 1.1 * Math.pow(1 - (t - 0.22) / 0.78, 2.2));
+      if (t >= 1) { this.stage.render(); this.finishLeave(); return; }
+    } else if (this.popT < 1) {
+      this.popT = Math.min(1, this.popT + dt / 1.1);
+      body.group.scale.multiplyScalar(1 - 0.8 * Math.exp(-5.5 * this.popT) * Math.cos(9 * this.popT));
+    }
     if (body.sparkU) body.sparkU.uPixelRatio.value = this.stage.pixelRatio;
     if (!this.drag.active) {
       this.velY = damp(this.velY, REDUCED ? 0.03 : 0.12, 1.2, dt);
@@ -2065,7 +2468,10 @@ class App {
   /* ---------------- Events ---------------- */
   bindUI() {
     $$('[data-open-menu]').forEach(b => b.addEventListener('click', () => this.openMenu()));
-    $('[data-back]').addEventListener('click', () => this.closeDetail());
+    $('[data-back]').addEventListener('click', () => this.leaveDetail());
+    $('[data-speed]').addEventListener('click', () => this.cycleSpeed());
+    $('[data-fuel-toggle]').addEventListener('click', e => { e.stopPropagation(); this.toggleFuel(); });
+    $('#map').addEventListener('click', e => { if (!e.target.closest('.map-dock')) this.toggleFuel(false); });
     $$('.tab').forEach(t => t.addEventListener('click', () => this.setTab(t.dataset.tab)));
     $('#panel').addEventListener('input', e => { if (e.target.matches('[data-ctl]')) this.onSlider(e.target); });
     $('#panel').addEventListener('click', e => {
@@ -2123,24 +2529,27 @@ class App {
       if (e.target.closest('[data-menu-back]')) this.menuPage(null);
       if (e.target.closest('[data-confirm-reset]')) this.resetAll();
       if (e.target.closest('[data-sound-toggle]')) this.toggleSound();
+      if (e.target.closest('[data-bg-toggle]')) this.cycleBg();
     });
     addEventListener('keydown', e => {
       if (e.key !== 'Escape') return;
       if (!$('#menu').hidden) this.closeMenu();
-      else if (this.current >= 0) this.closeDetail();
+      else if (this.current >= 0) this.leaveDetail();
     });
 
     let rt;
     addEventListener('resize', () => {
       clearTimeout(rt);
       rt = setTimeout(() => {
-        drawSky(); Dust.resize();
+        drawSky(); Dust.resize(); this.resizeSpace();
         if (this.stage && this.current >= 0) this.stage.resize();
         if (this.nodes) { const top = $('#mapScroll').scrollTop; this.buildMap(); $('#mapScroll').scrollTop = top; }
       }, 150);
     });
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) this.stopLoop(); else if (this.current >= 0 && !this.noGL) this.startLoop();
+      if (document.hidden) { this.stopLoop(); this.stopMapLoop(); }
+      else if (this.current >= 0) { if (!this.noGL) this.startLoop(); }
+      else if ($('#map').classList.contains('is-active')) this.startMapLoop();
     });
     addEventListener('pagehide', e => { if (!e.persisted) { Store.save(this.state); this.dispose(); } });
   }
@@ -2191,7 +2600,7 @@ class App {
     if (!page) { main.hidden = false; pg.hidden = true; return; }
     main.hidden = true; pg.hidden = false;
     const back = '<button class="btn ghost" type="button" data-menu-back style="width:100%;margin-top:10px">กลับ</button>';
-    if (page === 'howto') pg.innerHTML = `<h3>วิธีเล่น</h3><p>1. แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงได้ในเมนู<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`;
+    if (page === 'howto') pg.innerHTML = `<h3>วิธีเล่น</h3><p>1. แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงและปรับความมืดของพื้นหลังได้ในเมนู<br>ปุ่ม 1× มุมขวาล่างของแผนที่ใช้ปรับความเร็วของอวกาศ ส่วนวงกลม % แสดงความคืบหน้า<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`;
     if (page === 'model') pg.innerHTML = `<h3>ตัวเลขมาจากไหน</h3><p>ระยะห่างของดาวใช้หน่วยดาราศาสตร์ (1 หน่วย ≈ 149.6 ล้าน กม.) และคิดตอนดาวเรียงอยู่ด้านเดียวกันของดาวฤกษ์ เวลาเดินทางคิดจากยานความเร็ว ${nf.format(CONFIG.rocketKmh)} กม./ชม. ใกล้เคียงยานนิวฮอไรซันส์<br><br>อุณหภูมิ ออกซิเจน และจำนวนประชากรมาจากแบบจำลองอย่างง่ายเพื่อการเล่น ไม่ใช่การคำนวณทางวิทยาศาสตร์จริง สัดส่วนน้ำและดินนับจากจุด 2,400 จุดบนพื้นผิวดาวจริงที่เห็นบนจอ</p>${back}`;
     if (page === 'reset') pg.innerHTML = `<h3>เริ่มต้นใหม่ทั้งหมด?</h3><p>การปรับแต่ง ระบบนิเวศ และความคืบหน้าของทุกดาวจะหายไป</p>
       <button class="btn primary" type="button" data-confirm-reset style="background:linear-gradient(135deg,#ff4f8b,#e8457a)">ล้างข้อมูลทั้งหมด</button>${back}`;
@@ -2200,8 +2609,8 @@ class App {
   resetAll() {
     this.closeMenu();
     if (this.current >= 0) this.closeDetail();
-    const sound = this.state.sound;
-    this.state = Store.fresh(); this.state.sound = sound; Store.save(this.state);
+    const { sound, bg, speed } = this.state;
+    this.state = Store.fresh(); Object.assign(this.state, { sound, bg, speed }); Store.save(this.state);
     // The secret planet hides again until it is earned.
     if (PLANETS.includes(SECRET)) PLANETS.splice(PLANETS.indexOf(SECRET), 1);
     if (!this.noGL) {
