@@ -154,6 +154,8 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 @keyframes sunpoke{50%{transform:scale(1.08)}}
 .rocket-mark{position:absolute;left:0;top:0;width:46px;height:46px;pointer-events:none;will-change:transform;z-index:2}
 .map-dock{position:absolute;right:14px;bottom:calc(var(--safe-b) + 14px);z-index:4;display:flex;gap:8px;align-items:center}
+.dock-btn.stack{display:flex;flex-direction:column;justify-content:center;gap:0;padding:0 8px;line-height:1.1}
+.dock-btn.stack small{font-size:9.5px;font-weight:400;color:var(--ink-2)}
 .dock-btn{position:relative;min-width:46px;height:46px;padding:0 12px;display:grid;place-items:center;border-radius:23px;font-size:13px;font-weight:500;
   background:rgba(var(--head),.82);border:1px solid var(--line);color:var(--ink);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .dock-btn.ring{width:46px;padding:0}
@@ -449,6 +451,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   <div class="map-dock">
     <button class="dock-btn" type="button" data-view3d aria-pressed="false" aria-label="มุมมองระบบดาว 3 มิติ"><span data-view-label>🪐 3D</span></button>
     <button class="dock-btn" type="button" data-speed aria-label="ความเร็วของอวกาศ"><span data-speed-label>1×</span></button>
+    <button class="dock-btn stack" type="button" data-flight-toggle aria-label="ความเร็วยานอวกาศ"><span aria-hidden="true">🚀</span><small data-flight-label>ปกติ</small></button>
     <button class="dock-btn" type="button" data-bg-toggle aria-label="ความมืดของพื้นหลัง"><span data-bg-icon>🌘</span></button>
     <button class="dock-btn ring" type="button" data-fuel-toggle aria-expanded="false" aria-controls="fuelPop" aria-label="ความคืบหน้าการสำรวจ">
       <svg viewBox="0 0 38 38" aria-hidden="true"><circle class="ring-bg" cx="19" cy="19" r="17"/><circle class="ring-fg" cx="19" cy="19" r="17" data-fuel-ring/></svg>
@@ -565,7 +568,6 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <div class="grab" aria-hidden="true"></div>
     <div data-menu-main>
       <button class="menu-item" type="button" data-menu="howto"><span class="em">🧭</span><span>วิธีเล่น<small>บิน สำรวจ ปรับแต่ง และสร้างชีวิต</small></span></button>
-      <button class="menu-item" type="button" data-flight-toggle><span class="em">🚀</span><span>ความเร็วยานอวกาศ<small data-flight-label>ปกติ แตะเพื่อเปลี่ยน</small></span></button>
       <button class="menu-item" type="button" data-sound-toggle aria-pressed="false"><span class="em" data-sound-ic>🔈</span><span>เสียง<small data-sound-label>ปิดอยู่ แตะเพื่อเปิด</small></span></button>
       <button class="menu-item" type="button" data-menu="model"><span class="em">📐</span><span>ตัวเลขมาจากไหน<small>ระยะทาง เวลาเดินทาง และการคำนวณ</small></span></button>
       <button class="menu-item" type="button" data-menu="reset"><span class="em">🧹</span><span>เริ่มต้นใหม่ทั้งหมด<small>ล้างการปรับแต่งของทุกดาว</small></span></button>
@@ -3245,11 +3247,14 @@ class App {
     // Render below the header, with each planet lit from the star.
     this.stage.mapMode(map);
     const r = this.stage.renderer;
+    // Opaque background: additive glow on a transparent canvas composites differently in Safari (coloured specks).
+    r.setClearColor(this.sysBg || 0x0b0915, 1);
     r.setScissorTest(false); r.setViewport(0, 0, this.stage.mw, this.stage.mh); r.clear();
     r.setScissorTest(true); r.setScissor(0, 0, this.stage.mw, Math.max(0, this.stage.mh - clipTop));
     SUN_FROM = S.sun.position;
     r.render(S.scene, cam);
     SUN_FROM = null; SUN.copy(SUN0);
+    r.setClearColor(0x000000, 0);
     r.setScissorTest(false);
   }
 
@@ -3693,6 +3698,7 @@ class App {
   /* ---------------- Settings ---------------- */
   applyBg() {
     document.documentElement.dataset.bg = this.state.bg;
+    this.sysBg = new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--sky-2').trim() || '#0b0915');
     $('[data-bg-icon]').textContent = { normal: '🌗', dark: '🌘', black: '🌑' }[this.state.bg];
     $('[data-bg-toggle]').setAttribute('aria-label', `ความมืดของพื้นหลัง: ${BG_LABEL[this.state.bg]}`);
   }
@@ -3703,7 +3709,8 @@ class App {
   }
   get flightK() { return FLIGHTS[this.state.flight][0]; }
   syncFlight() {
-    const l = $('[data-flight-label]'); if (l) l.textContent = `${FLIGHTS[this.state.flight][1]} แตะเพื่อเปลี่ยน`;
+    const l = $('[data-flight-label]'); if (l) l.textContent = FLIGHTS[this.state.flight][1];
+    const b = $('[data-flight-toggle]'); if (b) b.setAttribute('aria-label', `ความเร็วยานอวกาศ: ${FLIGHTS[this.state.flight][1]}`);
   }
   cycleFlight() {
     const keys = Object.keys(FLIGHTS);
@@ -4217,6 +4224,7 @@ class App {
     $('[data-back]').addEventListener('click', () => this.leaveDetail());
     $('[data-speed]').addEventListener('click', () => this.cycleSpeed());
     $('[data-bg-toggle]').addEventListener('click', () => this.cycleBg());
+    $('[data-flight-toggle]').addEventListener('click', () => this.cycleFlight());
     $('[data-view3d]').addEventListener('click', () => this.setView(this.sys3d ? 'map' : '3d'));
     $('[data-expand]').addEventListener('click', () => this.expandPanel());
     // The planet view resizes when the controls fold or unfold.
@@ -4299,7 +4307,6 @@ class App {
       if (e.target.closest('[data-menu-back]')) this.menuPage(null);
       if (e.target.closest('[data-confirm-reset]')) this.resetAll();
       if (e.target.closest('[data-sound-toggle]')) this.toggleSound();
-      if (e.target.closest('[data-flight-toggle]')) this.cycleFlight();
     });
     addEventListener('keydown', e => {
       if (e.key !== 'Escape') return;
@@ -4375,7 +4382,7 @@ class App {
     if (!page) { main.hidden = false; pg.hidden = true; return; }
     main.hidden = true; pg.hidden = false;
     const back = '<button class="btn ghost" type="button" data-menu-back style="width:100%;margin-top:10px">กลับ</button>';
-    if (page === 'howto') pg.innerHTML = `<h3>วิธีเล่น</h3><p>1. เริ่มจากสถานีอวกาศข้างดาวฤกษ์ แตะสถานีเพื่อสำรวจและปรับแต่งโมดูล ซึ่งมีผลต่อความเร็วยาน<br>แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น กด 🛬 ลงสำรวจ เพื่อลงไปเดินดูพื้นผิวที่สร้างจากค่าที่ปรับไว้ แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงได้ในเมนู<br>ปุ่มมุมขวาล่าง: 🪐 3D สลับเป็นมุมมองระบบดาว 3 มิติ (ลากเพื่อหมุน บีบนิ้วเพื่อซูม), 1× ปรับความเร็วของอวกาศ, 🌘 ปรับความมืดของพื้นหลัง, วงกลม % แสดงความคืบหน้า<br>แตะดาวหรือพื้นหลังในหน้าดาวเพื่อพับแผงปรับแต่ง แล้วกดปุ่มด้านล่างเพื่อเปิดกลับ<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`;
+    if (page === 'howto') pg.innerHTML = `<h3>วิธีเล่น</h3><p>1. เริ่มจากสถานีอวกาศข้างดาวฤกษ์ แตะสถานีเพื่อสำรวจและปรับแต่งโมดูล ซึ่งมีผลต่อความเร็วยาน<br>แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น กด 🛬 ลงสำรวจ เพื่อลงไปเดินดูพื้นผิวที่สร้างจากค่าที่ปรับไว้ แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงได้ในเมนู<br>ปุ่มมุมขวาล่าง: 🪐 3D สลับเป็นมุมมองระบบดาว 3 มิติ (ลากเพื่อหมุน บีบนิ้วเพื่อซูม), 1× ปรับความเร็วของอวกาศ, 🚀 ปรับความเร็วยาน, 🌘 ปรับความมืดของพื้นหลัง, วงกลม % แสดงความคืบหน้า<br>แตะดาวหรือพื้นหลังในหน้าดาวเพื่อพับแผงปรับแต่ง แล้วกดปุ่มด้านล่างเพื่อเปิดกลับ<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`;
     if (page === 'model') pg.innerHTML = `<h3>ตัวเลขมาจากไหน</h3><p>ระยะห่างของดาวใช้หน่วยดาราศาสตร์ (1 หน่วย ≈ 149.6 ล้าน กม.) และคิดตอนดาวเรียงอยู่ด้านเดียวกันของดาวฤกษ์ เวลาเดินทางคิดจากยานความเร็ว ${nf.format(CONFIG.rocketKmh)} กม./ชม. ใกล้เคียงยานนิวฮอไรซันส์<br><br>อุณหภูมิ ออกซิเจน และจำนวนประชากรมาจากแบบจำลองอย่างง่ายเพื่อการเล่น ไม่ใช่การคำนวณทางวิทยาศาสตร์จริง สัดส่วนน้ำและดินนับจากจุด 2,400 จุดบนพื้นผิวดาวจริงที่เห็นบนจอ</p>${back}`;
     if (page === 'reset') pg.innerHTML = `<h3>เริ่มต้นใหม่ทั้งหมด?</h3><p>การปรับแต่ง ระบบนิเวศ สถานีอวกาศ และความคืบหน้าของทุกดาวจะหายไป</p>
       <button class="btn primary" type="button" data-confirm-reset style="background:linear-gradient(135deg,#ff4f8b,#e8457a)">ล้างข้อมูลทั้งหมด</button>${back}`;
