@@ -110,6 +110,17 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 .planets-layer{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
 @keyframes bob{from{transform:translateY(-5px)}to{transform:translateY(5px)}}
 #map.lite .node .pl{animation:none}
+/* 3D system view: the path map hides; a hit area takes drags, pinches and taps; labels follow the planets. */
+#map.sys #journey,#map.sys .space{visibility:hidden}
+#map.sys .map-scroll{overflow:hidden}
+.sys-hit{position:absolute;left:0;right:0;bottom:0;z-index:3;touch-action:none;cursor:grab}
+.sys-hit:active{cursor:grabbing}
+.sys-labels{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+#map:not(.sys) .sys-hit,#map:not(.sys) .sys-labels{display:none}
+.sys-label{position:absolute;left:0;top:0;display:grid;justify-items:center;font-size:12.5px;line-height:1.2;white-space:nowrap;text-shadow:0 1px 6px rgba(0,0,0,.8)}
+.sys-label b{font-family:var(--f-head);font-weight:500}
+.sys-label small{color:var(--ink-3);font-size:11px}
+.sys-label.secret b{color:#cdb8ff}
 .node:hover .pl,.node:focus-visible .pl{scale:1.06}
 .node:active .pl{scale:.96}
 .node.go .pl{scale:1.2;transition:scale .3s var(--ease)}
@@ -193,6 +204,19 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 @keyframes rise{from{transform:translateY(46px);opacity:0}}
 @keyframes fadein{from{opacity:0}}
 #detail.leaving .dbody,#detail.leaving .dbar{transform:translateY(30px);opacity:0;transition:transform .4s var(--ease),opacity .35s}
+/* Tapping the planet view folds the controls into a small button; tapping that springs them back. */
+.panel-pill{position:absolute;left:50%;bottom:calc(var(--safe-b) + 18px);z-index:5;display:none;align-items:center;gap:10px;padding:11px 18px;border-radius:24px;
+  background:rgba(var(--head),.9);border:1px solid var(--line);font-size:14px;color:var(--ink);white-space:nowrap;transform:translateX(-50%);
+  box-shadow:0 10px 30px rgba(0,0,0,.4);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.panel-pill small{color:var(--ink-2);font-size:12.5px}
+.panel-pill b{font-weight:500}
+#detail.collapsed .panel-pill{display:flex;animation:pillin .45s var(--ease)}
+@keyframes pillin{from{transform:translate(-50%,24px) scale(.8);opacity:0}}
+#detail.collapsed{grid-template-rows:auto 1fr;grid-template-areas:"bar" "stage"}
+#detail.collapsed .dbody{display:none}
+#detail.collapsing .dbody{transform:translateY(50px);opacity:0;transition:transform .22s ease-in,opacity .2s}
+#detail.expanding .dbody{animation:springup .6s cubic-bezier(.3,1.45,.5,1) both}
+@keyframes springup{from{transform:translateY(70%);opacity:0}}
 .dbody{grid-area:body;display:flex;flex-direction:column;min-height:0;background:var(--panel);border-radius:26px 26px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.25)}
 .chips{flex:none;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 16px 4px}
 .chip{background:var(--card);border-radius:16px;padding:9px 6px;text-align:center;min-width:0}
@@ -308,9 +332,10 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   .dbar{background:var(--panel)}
   .dbody{border-radius:0;box-shadow:none}
   .stage-hint{bottom:24px}
+  #detail.collapsed{grid-template-columns:1fr;grid-template-rows:auto 1fr;grid-template-areas:"bar" "stage"}
 }
 @media (prefers-reduced-motion: reduce){
-  .panel>*,.launch .rocket,.puff,.xsec path,.star-node .sun.poke,.node .pl,#detail.entering .dbody,#detail.entering .dbar{animation:none}
+  .panel>*,.launch .rocket,.puff,.xsec path,.star-node .sun.poke,.node .pl,#detail.entering .dbody,#detail.entering .dbar,#detail.expanding .dbody,#detail.collapsed .panel-pill{animation:none}
   .zone,.map-glow i{transition:none}
   .puff{opacity:.85}
 }
@@ -332,6 +357,8 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 <section class="screen" id="map" aria-label="แผนที่ระบบดาว">
   <div class="map-glow" aria-hidden="true"><i class="warm"></i><i class="cold"></i></div>
   <canvas class="space" id="space" aria-hidden="true"></canvas>
+  <div class="sys-labels" data-sys-labels aria-hidden="true"></div>
+  <div class="sys-hit" data-sys-hit></div>
   <div class="map-scroll" id="mapScroll">
     <div class="map-head">
       <header class="bar mbar">
@@ -345,6 +372,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <div class="journey" id="journey"></div>
   </div>
   <div class="map-dock">
+    <button class="dock-btn" type="button" data-view3d aria-pressed="false" aria-label="มุมมองระบบดาว 3 มิติ"><span data-view-label>3D</span></button>
     <button class="dock-btn" type="button" data-speed aria-label="ความเร็วของอวกาศ"><span data-speed-label>1×</span></button>
     <button class="dock-btn ring" type="button" data-fuel-toggle aria-expanded="false" aria-controls="fuelPop" aria-label="ความคืบหน้าการสำรวจ">
       <svg viewBox="0 0 38 38" aria-hidden="true"><circle class="ring-bg" cx="19" cy="19" r="17"/><circle class="ring-fg" cx="19" cy="19" r="17" data-fuel-ring/></svg>
@@ -398,6 +426,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     </nav>
     <div class="panel" id="panel" role="tabpanel"></div>
   </div>
+  <button class="panel-pill" type="button" data-expand aria-label="แสดงแผงปรับแต่ง">🎛️ <span>แผงปรับแต่ง</span><small><b class="num" data-b="temp">–</b> · O₂ <b class="num" data-b="o2">–</b></small><span aria-hidden="true">▴</span></button>
 </section>
 
 <!-- Menu -->
@@ -1059,6 +1088,15 @@ void main(){
    3D: one planet body
 ================================================================ */
 const SUN = new THREE.Vector3(-0.55, 0.45, 0.7).normalize();
+const SUN0 = SUN.clone();
+/**
+ * In the 3D system view every planet is lit from the star, not from the fixed SUN direction.
+ * While SUN_FROM holds the star's position, each planet mesh points the shared SUN vector at it
+ * just before it draws (its material's uniforms upload after onBeforeRender).
+ */
+let SUN_FROM = null;
+const _sunWp = new THREE.Vector3();
+function followSun() { if (SUN_FROM) { this.getWorldPosition(_sunWp); SUN.subVectors(SUN_FROM, _sunWp).normalize(); } }
 
 class PlanetBody {
   constructor(planet, terrain) {
@@ -1118,6 +1156,7 @@ class PlanetBody {
     if (this.b.controls.includes('eruption')) this.buildSparks(pal);
 
     this.cur = null;
+    this.group.traverse(o => { if (o.material && o.material.uniforms && o.material.uniforms.uSun) o.onBeforeRender = followSun; });
   }
 
   fillHeights() {
@@ -1463,6 +1502,7 @@ const Store = {
     base.secret = s.secret === true;
     if (BG_MODES.includes(s.bg)) base.bg = s.bg;
     if (SPEEDS.includes(s.speed)) base.speed = s.speed;
+    if (s.view === '3d') base.view = '3d';
     base.visited = Array.isArray(s.visited) ? s.visited : [];
     allPlanets().forEach(p => {
       const saved = s.planets && s.planets[p.id];
@@ -1474,7 +1514,7 @@ const Store = {
     return base;
   },
   fresh() {
-    return { v: 1, at: -1, visited: [], sound: false, secret: false, bg: 'dark', speed: REDUCED ? 0 : 1, planets: Object.fromEntries(allPlanets().map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
+    return { v: 1, at: -1, visited: [], sound: false, secret: false, bg: 'dark', speed: REDUCED ? 0 : 1, view: 'map', planets: Object.fromEntries(allPlanets().map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
   },
   save(state) { try { localStorage.setItem(CONFIG.storeKey, JSON.stringify(state)); } catch (e) { /* storage may be unavailable; progress stays in memory */ } }
 };
@@ -1524,7 +1564,7 @@ const Dust = {
     const dpr = Math.min(window.devicePixelRatio || 1, 2), w = innerWidth, h = innerHeight;
     this.w = w; this.h = h;
     this.c.width = w * dpr; this.c.height = h * dpr; this.g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const r = rng(19), n = Math.round(clamp(w * h / 12000, 36, MOBILE ? 70 : 110));
+    const r = rng(19), n = Math.round(clamp(w * h / 5500, 80, PHONE ? 160 : 240));
     this.p = Array.from({ length: n }, () => {
       const z = 0.25 + r() * 0.75;   // depth: near motes are bigger, brighter and move more
       const bokeh = r() < 0.07;      // a few large, faint, out-of-focus motes for depth
@@ -1612,6 +1652,8 @@ class App {
     }
     step(1, 'พร้อมออกเดินทาง');
     this.buildMap();
+    if (this.noGL) $('[data-view3d]').hidden = true;
+    else if (this.state.view === '3d') this.setView('3d');
     await wait(250);
     $('#boot').classList.add('is-done');
     $('#map').classList.add('is-active');
@@ -1654,7 +1696,7 @@ class App {
 
   /** Tapping the star five times in a row makes it whisper a hint. */
   pokeSun(el) {
-    el.classList.remove('poke'); void el.offsetWidth; el.classList.add('poke');
+    if (el) { el.classList.remove('poke'); void el.offsetWidth; el.classList.add('poke'); }
     Sound.tap();
     const now = performance.now();
     this.sunTaps = this.sunTaps.filter(t => now - t < 3000).concat(now);
@@ -1754,6 +1796,7 @@ class App {
     this.mraf = requestAnimationFrame(this.mapFrame);
     const raw = (now - this.mlast) / 1000 || 0.016, dt = Math.min(0.05, raw); this.mlast = now;
     this.watchPerf(raw);
+    if (this.sys3d) { this.drawSystem(dt); return; }
     // Everything follows the scroll every frame; otherwise every other frame is plenty (canvases keep their last image).
     const top = $('#mapScroll').scrollTop, moved = top !== this.lastTop;
     this.lastTop = top;
@@ -1785,7 +1828,7 @@ class App {
 
   /** Draw the planets on screen where their map nodes are, each spinning at a rate set by its day length. */
   drawLivePlanets(dt) {
-    if (this.noGL || !this.nodeEls || !this.stage) return;
+    if (this.noGL || !this.nodeEls || !this.stage || this.sys3d) return;
     if (this.current >= 0) return;   // the planet view owns the renderer
     const map = $('#map'), mr = map.getBoundingClientRect();
     const clipTop = $('.map-head').getBoundingClientRect().bottom - mr.top - 14;
@@ -1809,8 +1852,10 @@ class App {
     this.rocks = Array.from({ length: PHONE ? 200 : 300 }, (_, i) => ({
       belt: i % 3 === 2 ? 1 : 0, a: r() * 6.283, f: r(), size: 0.8 + r() * 1.8, tone: Math.floor(r() * 3), w: 0.018 + r() * 0.02 }));
     // Small drifting swarms of tiny bodies.
-    this.swarms = Array.from({ length: 4 }, () => ({ x: r(), y: r(), vx: (r() - 0.5) * 14, vy: (r() - 0.5) * 8, rot: r() * 6,
-      m: Array.from({ length: 5 + Math.floor(r() * 6) }, () => ({ a: r() * 6.283, d: 4 + r() * 16, s: 0.6 + r() * 1.3 })) }));
+    this.swarms = Array.from({ length: PHONE ? 8 : 12 }, () => ({ x: r(), y: r(), vx: (r() - 0.5) * 30, vy: (r() - 0.5) * 16, rot: r() * 6, spin: (r() - 0.5) * 0.6,
+      m: Array.from({ length: 6 + Math.floor(r() * 10) }, () => ({ a: r() * 6.283, d: 4 + r() * 22, s: 0.6 + r() * 1.4 })) }));
+    // Fine particles drifting through the system, at three depths for parallax.
+    this.motes = Array.from({ length: PHONE ? 220 : 360 }, () => ({ x: r(), y: r(), z: Math.floor(r() * 3), vx: (r() - 0.5) * 10, vy: (r() - 0.5) * 6, s: 0.5 + r() * 1.1 }));
     this.comets = []; this.meteors = [];
     this.cometT = 4; this.meteorT = 1.5;
   }
@@ -1930,10 +1975,22 @@ class App {
 
     // Drifting swarms of small bodies (screen space, with a little scroll parallax).
     const sc = $('#mapScroll').scrollTop;
+    for (let z = 0; z < 3; z++) {
+      g.fillStyle = ['rgba(200,190,255,.35)', 'rgba(220,215,255,.5)', 'rgba(240,236,255,.7)'][z];
+      g.beginPath();
+      for (const m of this.motes) {
+        if (m.z !== z) continue;
+        m.x += m.vx * (z + 1) * dt / W; m.y += m.vy * (z + 1) * dt / H;
+        const x = ((m.x % 1) + 1) % 1 * W, y = ((((m.y * H - sc * (0.05 + z * 0.08)) % H) + H) % H);
+        const rr = m.s * (0.7 + z * 0.35);
+        g.moveTo(x + rr, y); g.arc(x, y, rr, 0, TAU);
+      }
+      g.fill();
+    }
     g.fillStyle = 'rgba(210,200,240,.55)';
     g.beginPath();
     for (const w of this.swarms) {
-      w.x += w.vx * dt / W; w.y += w.vy * dt / H; w.rot += dt * 0.15;
+      w.x += w.vx * dt / W; w.y += w.vy * dt / H; w.rot += dt * w.spin;
       const cx = ((w.x % 1) + 1) % 1 * (W + 80) - 40, cy = ((((w.y * H - sc * 0.15) % (H + 80)) + H + 80) % (H + 80)) - 40;
       for (const m of w.m) {
         const a = m.a + w.rot, x = cx + Math.cos(a) * m.d, y = cy + Math.sin(a) * m.d * 0.6;
@@ -1983,6 +2040,225 @@ class App {
     });
   }
 
+  /* ---------------- 3D system view ---------------- */
+  get sys3d() { return this.state.view === '3d' && !this.noGL; }
+
+  setView(v) {
+    this.state.view = v; this.save();
+    $('#map').classList.toggle('sys', this.sys3d);
+    const b = $('[data-view3d]');
+    b.setAttribute('aria-pressed', String(this.sys3d));
+    $('[data-view-label]').textContent = this.sys3d ? '🗺️' : '3D';
+    b.setAttribute('aria-label', this.sys3d ? 'กลับไปแผนที่เส้นทาง' : 'มุมมองระบบดาว 3 มิติ');
+    if (this.sys3d) this.enterSystem(); else { this.drawLivePlanets(0); this.drawSpace(0); }
+    this.updateZone();
+  }
+
+  /** Distance from the star in scene units: square-root scaled so the whole system fits on screen. */
+  sysRadius(au) { return 2.8 + 3.1 * Math.sqrt(au); }
+
+  buildSystem() {
+    const S = this.sys = { scene: new THREE.Scene(), holders: {}, t: 0, yaw: 0.7, pitch: 0.55, dist: 34, tdist: 34, vyaw: 0, vpitch: 0 };
+    const scene = S.scene, r = rng(53), TAU = Math.PI * 2;
+    S.cam = new THREE.PerspectiveCamera(45, 1, 0.1, 500);
+    scene.add(new THREE.AmbientLight(0xb8b0ff, 0.35));
+    scene.add(new THREE.PointLight(0xfff0d8, 1.5, 0, 0));
+    const glowTex = (inner, outer) => {
+      const c = document.createElement('canvas'); c.width = c.height = 128;
+      const g = c.getContext('2d'), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+      gr.addColorStop(0, inner); gr.addColorStop(0.25, outer); gr.addColorStop(1, 'rgba(255,140,60,0)');
+      g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+      return new THREE.CanvasTexture(c);
+    };
+    // The star, its glow and a slow pulse.
+    S.sun = new THREE.Mesh(new THREE.SphereGeometry(1.5, 48, 32), new THREE.MeshBasicMaterial({ color: 0xffc657 }));
+    scene.add(S.sun);
+    S.glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex('rgba(255,236,170,1)', 'rgba(255,170,80,.55)'), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
+    S.glow.scale.set(10, 10, 1); scene.add(S.glow);
+    // A far star field and a closer drifting haze of particles.
+    const pts = (n, fill, color, size, opacity) => {
+      const a = new Float32Array(n * 3);
+      for (let i = 0; i < n; i++) fill(a, i * 3);
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(a, 3));
+      return new THREE.Points(g, new THREE.PointsMaterial({ color, size, transparent: true, opacity, depthWrite: false, sizeAttenuation: true }));
+    };
+    const shell = (a, k, r0, r1) => { const u = r() * 2 - 1, ph = r() * TAU, d = r0 + r() * (r1 - r0), q = Math.sqrt(1 - u * u); a[k] = Math.cos(ph) * q * d; a[k + 1] = u * d; a[k + 2] = Math.sin(ph) * q * d; };
+    scene.add(pts(PHONE ? 1400 : 2200, (a, k) => shell(a, k, 120, 200), 0xf4f1ff, 0.7, 0.9));
+    S.haze = pts(PHONE ? 900 : 1500, (a, k) => { const d = 3 + r() * 20, ph = r() * TAU; a[k] = Math.cos(ph) * d; a[k + 1] = (r() - 0.5) * 3.5 * (d / 12); a[k + 2] = Math.sin(ph) * d; }, 0xcfc4ff, 0.07, 0.55);
+    scene.add(S.haze);
+    // Asteroid and Kuiper belts.
+    const ring = (n, a0, a1, thick, color, size, op) => pts(n, (a, k) => { const d = this.sysRadius(a0 + r() * (a1 - a0)), ph = r() * TAU; a[k] = Math.cos(ph) * d; a[k + 1] = (r() - 0.5) * thick; a[k + 2] = Math.sin(ph) * d; }, color, size, op);
+    S.belt = ring(PHONE ? 900 : 1400, 2.2, 3.2, 0.35, 0xdcd0ff, 0.09, 0.85); scene.add(S.belt);
+    S.kuiper = ring(PHONE ? 900 : 1400, 30, 45, 1.2, 0xaad7ff, 0.1, 0.55); scene.add(S.kuiper);
+    // Little swarms of bodies on their own tilted paths.
+    S.swarms = Array.from({ length: 7 }, () => {
+      const g = pts(18 + Math.floor(r() * 20), (a, k) => { a[k] = (r() - 0.5) * 1.2; a[k + 1] = (r() - 0.5) * 0.5; a[k + 2] = (r() - 0.5) * 1.2; }, 0xe6dcff, 0.1, 0.9);
+      const pivot = new THREE.Group(); pivot.rotation.set((r() - 0.5) * 0.9, r() * TAU, (r() - 0.5) * 0.9);
+      g.position.x = 4 + r() * 18; pivot.add(g); scene.add(pivot);
+      return { pivot, w: (0.03 + r() * 0.08) * (r() < 0.5 ? -1 : 1) };
+    });
+    S.orbitMat = new THREE.LineBasicMaterial({ color: 0xece8ff, transparent: true, opacity: 0.22 });
+    S.orbitDone = new THREE.LineBasicMaterial({ color: 0x3fd6c6, transparent: true, opacity: 0.4 });
+    S.orbitSecret = new THREE.LineBasicMaterial({ color: 0x9a6bff, transparent: true, opacity: 0.45 });
+    S.moonGeo = new THREE.SphereGeometry(1, 16, 12);
+    S.moonMat = new THREE.MeshLambertMaterial({ color: 0xcfc8dd });
+    S.ray = new THREE.Raycaster();
+    this.bindSystemInput();
+  }
+
+  /** One orbit plane per planet: its ring, a holder that moves along it, and moons around the holder. */
+  ensureHolders() {
+    const S = this.sys, labels = $('[data-sys-labels]'), TAU = Math.PI * 2;
+    PLANETS.forEach((p, i) => {
+      if (S.holders[p.id]) return;
+      const rr = rng(p.seed * 3 + 1), R = this.sysRadius(p.au);
+      const plane = new THREE.Group();
+      plane.rotation.set(p.secret ? 0.5 : (rr() - 0.5) * 0.08, 0, p.secret ? 0.2 : (rr() - 0.5) * 0.08);
+      const pos = new Float32Array(129 * 3);
+      for (let k = 0; k <= 128; k++) { const a = k / 128 * TAU; pos[k * 3] = Math.cos(a) * R; pos[k * 3 + 2] = Math.sin(a) * R; }
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const line = new THREE.Line(g, p.secret ? S.orbitSecret : S.orbitMat);
+      plane.add(line);
+      const holder = new THREE.Group(); holder.scale.setScalar(BIOMES[p.biome].ring ? 0.5 : 0.62);
+      plane.add(holder);
+      const moons = Array.from({ length: p.moons }, (_, m) => {
+        const mesh = new THREE.Mesh(S.moonGeo, S.moonMat); mesh.scale.setScalar(0.09 + (m % 2) * 0.04);
+        holder.add(mesh); return { mesh, d: 1.7 + m * 0.38, w: 1.1 - m * 0.12, a: rr() * TAU, tilt: (rr() - 0.5) * 0.6 };
+      });
+      S.scene.add(plane);
+      const label = document.createElement('div');
+      label.className = 'sys-label' + (p.secret ? ' secret' : '');
+      label.innerHTML = `<b>${p.name}</b><small>${BIOMES[p.biome].kind}</small>`;
+      labels.appendChild(label);
+      // Orbital speed falls off with distance (Kepler); the rogue planet crawls on its tilted path.
+      S.holders[p.id] = { plane, holder, line, moons, label, R, a: rr() * TAU, w: p.secret ? 0.004 : 0.16 / Math.pow(p.au, 1.5), spin: rr() * TAU };
+    });
+    // A planet hidden again by "reset all" loses its orbit.
+    Object.keys(S.holders).forEach(id => {
+      if (PLANETS.some(p => p.id === id)) return;
+      const h = S.holders[id]; S.scene.remove(h.plane); h.label.remove(); delete S.holders[id];
+    });
+  }
+
+  enterSystem() {
+    if (!this.sys) this.buildSystem();
+    this.ensureHolders();
+    PLANETS.forEach(p => {
+      const body = this.bodies[p.id]; if (!body) return;
+      body.rest();
+      this.sys.holders[p.id].holder.add(body.group);
+      body.group.rotation.set(0.28, 0, 0);
+    });
+    const head = $('.map-head').getBoundingClientRect().bottom - $('#map').getBoundingClientRect().top;
+    $('[data-sys-hit]').style.top = Math.max(0, head - 14) + 'px';
+    this.drawSystem(0);
+  }
+
+  drawSystem(rdt) {
+    const S = this.sys; if (!S || !this.stage) return;
+    const dt = rdt * this.state.speed, map = $('#map'), mr = map.getBoundingClientRect();
+    S.t += dt;
+    // Camera: inertia after a drag, eased zoom, and a very slow drift when left alone.
+    if (!S.drag) {
+      S.yaw += S.vyaw * rdt; S.pitch = clamp(S.pitch + S.vpitch * rdt, 0.06, 1.4);
+      S.vyaw = damp(S.vyaw, 0, 2.2, rdt); S.vpitch = damp(S.vpitch, 0, 2.2, rdt);
+      S.yaw += dt * 0.02;
+    }
+    S.dist = damp(S.dist, S.tdist, 6, rdt);
+    const cam = S.cam, cp = Math.cos(S.pitch);
+    cam.position.set(Math.sin(S.yaw) * cp * S.dist, Math.sin(S.pitch) * S.dist, Math.cos(S.yaw) * cp * S.dist);
+    cam.lookAt(0, 0, 0);
+    cam.aspect = mr.width / Math.max(1, mr.height); cam.updateProjectionMatrix();
+    // Star pulse, belts and swarms.
+    S.glow.scale.setScalar(10 + Math.sin(S.t * 1.3) * 0.6);
+    S.belt.rotation.y += dt * 0.03; S.kuiper.rotation.y += dt * 0.004; S.haze.rotation.y += dt * 0.012;
+    S.swarms.forEach(w => { w.pivot.rotation.y += dt * w.w; });
+    // Planets along their orbits, spinning, with moons.
+    const v = new THREE.Vector3(), clipTop = $('.map-head').getBoundingClientRect().bottom - mr.top - 14;
+    PLANETS.forEach(p => {
+      const h = S.holders[p.id], body = this.bodies[p.id]; if (!h || !body) return;
+      h.a += dt * h.w;
+      h.holder.position.set(Math.cos(h.a) * h.R, 0, Math.sin(h.a) * h.R);
+      if (dt) body.update(dt);
+      h.spin += dt * (2 * Math.PI / (p.dayH * 1.3));
+      body.spin.rotation.y = h.spin; if (body.clouds) body.clouds.rotation.y = h.spin * 1.05;
+      h.moons.forEach(m => { const a = m.a + S.t * m.w; m.mesh.position.set(Math.cos(a) * m.d, Math.sin(a) * m.d * m.tilt, Math.sin(a) * m.d); });
+      h.line.material = p.secret ? S.orbitSecret : this.state.visited.includes(p.id) ? S.orbitDone : S.orbitMat;
+      // Label under the planet.
+      h.holder.getWorldPosition(v); v.project(cam);
+      const x = (v.x + 1) / 2 * mr.width, y = (1 - v.y) / 2 * mr.height;
+      const off = 14 + 260 / S.dist * (body.cur ? body.cur.size : 1);
+      const show = v.z < 1 && y > clipTop && y < mr.height;
+      h.label.style.opacity = show ? '1' : '0';
+      if (show) h.label.style.transform = `translate(${x.toFixed(1)}px,${(y + off).toFixed(1)}px) translateX(-50%)`;
+    });
+    // Render below the header, with each planet lit from the star.
+    this.stage.mapMode(map);
+    const r = this.stage.renderer;
+    r.setScissorTest(false); r.setViewport(0, 0, this.stage.mw, this.stage.mh); r.clear();
+    r.setScissorTest(true); r.setScissor(0, 0, this.stage.mw, Math.max(0, this.stage.mh - clipTop));
+    SUN_FROM = S.sun.position;
+    r.render(S.scene, cam);
+    SUN_FROM = null; SUN.copy(SUN0);
+    r.setScissorTest(false);
+  }
+
+  bindSystemInput() {
+    const el = $('[data-sys-hit]'), S = this.sys, pts = new Map();
+    let tap = null, pinch = 0;
+    el.addEventListener('pointerdown', e => {
+      el.setPointerCapture(e.pointerId);
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      S.drag = true; S.vyaw = S.vpitch = 0;
+      tap = pts.size === 1 ? { x: e.clientX, y: e.clientY, t: performance.now() } : null;
+      if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = Math.hypot(a.x - b.x, a.y - b.y); }
+    });
+    el.addEventListener('pointermove', e => {
+      const p = pts.get(e.pointerId); if (!p) return;
+      const dx = e.clientX - p.x, dy = e.clientY - p.y;
+      p.x = e.clientX; p.y = e.clientY;
+      if (pts.size === 1) {
+        S.yaw -= dx * 0.006; S.pitch = clamp(S.pitch + dy * 0.005, 0.06, 1.4);
+        S.vyaw = -dx * 0.36; S.vpitch = dy * 0.3;
+      } else if (pts.size === 2) {
+        const [a, b] = [...pts.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (pinch) S.tdist = clamp(S.tdist * pinch / d, 9, 90);
+        pinch = d; tap = null;
+      }
+    });
+    const up = e => {
+      pts.delete(e.pointerId);
+      if (tap && e.type === 'pointerup' && Math.hypot(e.clientX - tap.x, e.clientY - tap.y) < 8 && performance.now() - tap.t < 350) this.pickSystem(e);
+      if (!pts.size) { S.drag = false; tap = null; pinch = 0; }
+    };
+    el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+    el.addEventListener('wheel', e => { e.preventDefault(); S.tdist = clamp(S.tdist * (1 + e.deltaY * 0.0012), 9, 90); }, { passive: false });
+  }
+
+  /**
+   * Tap in the 3D view: fly to a planet within reach of the tap on screen (at least 30 px, so small
+   * moving targets are easy to hit) or whose name label was tapped; otherwise poke the star.
+   */
+  pickSystem(e) {
+    const S = this.sys, mr = $('#map').getBoundingClientRect(), v = new THREE.Vector3();
+    const x = e.clientX - mr.left, y = e.clientY - mr.top, f = mr.height / 2 / Math.tan(THREE.MathUtils.degToRad(S.cam.fov / 2));
+    let best = -1, bestZ = Infinity;
+    PLANETS.forEach((p, i) => {
+      const h = S.holders[p.id], body = this.bodies[p.id]; if (!h) return;
+      const lr = h.label.getBoundingClientRect();
+      const onLabel = h.label.style.opacity === '1' && e.clientX >= lr.left && e.clientX <= lr.right && e.clientY >= lr.top && e.clientY <= lr.bottom;
+      h.holder.getWorldPosition(v);
+      const depth = v.distanceTo(S.cam.position);
+      v.project(S.cam); if (v.z > 1) return;
+      const px = (v.x + 1) / 2 * mr.width, py = (1 - v.y) / 2 * mr.height;
+      const radius = h.holder.scale.x * (body && body.cur ? body.cur.size : 1) * f / depth;
+      if ((onLabel || Math.hypot(px - x, py - y) < Math.max(30, radius * 1.5)) && depth < bestZ) { bestZ = depth; best = i; }
+    });
+    if (best >= 0) { this.travel(best); return; }
+    v.set(0, 0, 0).project(S.cam);
+    if (Math.hypot((v.x + 1) / 2 * mr.width - x, (1 - v.y) / 2 * mr.height - y) < 1.8 * f / S.dist) this.pokeSun(null);
+  }
+
   /* ---------------- Settings ---------------- */
   applyBg() {
     document.documentElement.dataset.bg = this.state.bg;
@@ -2010,6 +2286,14 @@ class App {
 
   /** Tint the map and name the region at the middle of the screen, from its distance to the star. */
   updateZone() {
+    if (this.sys3d) {
+      const m = $('#map'); m.style.setProperty('--warm', '0.6'); m.style.setProperty('--cold', '0.4');
+      this.zone = null;
+      $('[data-zone-name]').textContent = '🪐 ระบบดาว 3 มิติ';
+      $('[data-zone-note]').textContent = 'ลากเพื่อหมุน · บีบหรือเลื่อนเพื่อซูม · แตะดาวเพื่อบินไป';
+      $('[data-zone]').classList.remove('swap');
+      return;
+    }
     const sc = $('#mapScroll'), jr = $('#journey');
     if (!this.nodes || !sc.clientHeight) return;
     // The reading point slides down the screen as the player scrolls, so both ends of the journey are reachable.
@@ -2094,7 +2378,7 @@ class App {
     const from = this.state.at;
     const p = PLANETS[i];
     if (!this.noGL && from !== i) {
-      await this.animateRocket(from, i);
+      if (!this.sys3d) await this.animateRocket(from, i);
       await this.launch(from, i);
     }
     this.state.at = i;
@@ -2146,7 +2430,7 @@ class App {
     $$('.node.go').forEach(n => n.classList.remove('go'));
     $('#map').classList.remove('is-active');
     const d = $('#detail');
-    d.classList.remove('leaving');
+    d.classList.remove('leaving', 'collapsed', 'collapsing', 'expanding');
     d.classList.add('is-active');
     if (!REDUCED) { d.classList.remove('entering'); void d.offsetWidth; d.classList.add('entering'); clearTimeout(this.enterT); this.enterT = setTimeout(() => d.classList.remove('entering'), 700); }
     if (!this.noGL) {
@@ -2179,8 +2463,25 @@ class App {
     this.current = -1;
     this.refreshMap();
     this.updateZone();
-    this.drawLivePlanets(0);
+    if (this.sys3d) this.enterSystem(); else this.drawLivePlanets(0);
     this.startMapLoop();
+  }
+
+  /** Fold the controls into a small button so the planet gets the whole screen. */
+  collapsePanel() {
+    const d = $('#detail');
+    if (d.classList.contains('collapsed') || d.classList.contains('collapsing')) return;
+    if (REDUCED) { d.classList.add('collapsed'); return; }
+    d.classList.add('collapsing');
+    clearTimeout(this.foldT);
+    this.foldT = setTimeout(() => { d.classList.remove('collapsing'); d.classList.add('collapsed'); }, 220);
+  }
+  expandPanel() {
+    const d = $('#detail');
+    d.classList.remove('collapsed', 'collapsing');
+    if (!REDUCED) { d.classList.remove('expanding'); void d.offsetWidth; d.classList.add('expanding'); }
+    clearTimeout(this.foldT); this.foldT = setTimeout(() => d.classList.remove('expanding'), 650);
+    Sound.tap();
   }
 
   /** Back to the map: the planet bounces, shrinks away, and pops back into its place on the map. */
@@ -2470,6 +2771,10 @@ class App {
     $$('[data-open-menu]').forEach(b => b.addEventListener('click', () => this.openMenu()));
     $('[data-back]').addEventListener('click', () => this.leaveDetail());
     $('[data-speed]').addEventListener('click', () => this.cycleSpeed());
+    $('[data-view3d]').addEventListener('click', () => this.setView(this.sys3d ? 'map' : '3d'));
+    $('[data-expand]').addEventListener('click', () => this.expandPanel());
+    // The planet view resizes when the controls fold or unfold.
+    if (window.ResizeObserver) new ResizeObserver(() => { if (this.stage && this.stage.mode === 'detail') this.stage.resize(); }).observe($('#stage'));
     $('[data-fuel-toggle]').addEventListener('click', e => { e.stopPropagation(); this.toggleFuel(); });
     $('#map').addEventListener('click', e => { if (!e.target.closest('.map-dock')) this.toggleFuel(false); });
     $$('.tab').forEach(t => t.addEventListener('click', () => this.setTab(t.dataset.tab)));
@@ -2517,7 +2822,7 @@ class App {
     const end = () => { this.drag.active = false; };
     stage.addEventListener('pointerup', e => {
       const d = this.drag;
-      if (d.active && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 8 && performance.now() - d.t0 < 350) this.tapPlanet(e);
+      if (d.active && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 8 && performance.now() - d.t0 < 350) { this.tapPlanet(e); this.collapsePanel(); }
       end();
     });
     stage.addEventListener('pointercancel', end);
@@ -2542,6 +2847,7 @@ class App {
       clearTimeout(rt);
       rt = setTimeout(() => {
         drawSky(); Dust.resize(); this.resizeSpace();
+        if (this.sys3d && this.current < 0) this.enterSystem();
         if (this.stage && this.current >= 0) this.stage.resize();
         if (this.nodes) { const top = $('#mapScroll').scrollTop; this.buildMap(); $('#mapScroll').scrollTop = top; }
       }, 150);
@@ -2600,7 +2906,7 @@ class App {
     if (!page) { main.hidden = false; pg.hidden = true; return; }
     main.hidden = true; pg.hidden = false;
     const back = '<button class="btn ghost" type="button" data-menu-back style="width:100%;margin-top:10px">กลับ</button>';
-    if (page === 'howto') pg.innerHTML = `<h3>วิธีเล่น</h3><p>1. แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงและปรับความมืดของพื้นหลังได้ในเมนู<br>ปุ่ม 1× มุมขวาล่างของแผนที่ใช้ปรับความเร็วของอวกาศ ส่วนวงกลม % แสดงความคืบหน้า<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`;
+    if (page === 'howto') pg.innerHTML = `<h3>วิธีเล่น</h3><p>1. แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงและปรับความมืดของพื้นหลังได้ในเมนู<br>ปุ่ม 3D มุมขวาล่างสลับเป็นมุมมองระบบดาว 3 มิติ (ลากเพื่อหมุน บีบนิ้วเพื่อซูม) ปุ่ม 1× ใช้ปรับความเร็วของอวกาศ ส่วนวงกลม % แสดงความคืบหน้า<br>แตะดาวหรือพื้นหลังในหน้าดาวเพื่อพับแผงปรับแต่ง แล้วกดปุ่มด้านล่างเพื่อเปิดกลับ<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`;
     if (page === 'model') pg.innerHTML = `<h3>ตัวเลขมาจากไหน</h3><p>ระยะห่างของดาวใช้หน่วยดาราศาสตร์ (1 หน่วย ≈ 149.6 ล้าน กม.) และคิดตอนดาวเรียงอยู่ด้านเดียวกันของดาวฤกษ์ เวลาเดินทางคิดจากยานความเร็ว ${nf.format(CONFIG.rocketKmh)} กม./ชม. ใกล้เคียงยานนิวฮอไรซันส์<br><br>อุณหภูมิ ออกซิเจน และจำนวนประชากรมาจากแบบจำลองอย่างง่ายเพื่อการเล่น ไม่ใช่การคำนวณทางวิทยาศาสตร์จริง สัดส่วนน้ำและดินนับจากจุด 2,400 จุดบนพื้นผิวดาวจริงที่เห็นบนจอ</p>${back}`;
     if (page === 'reset') pg.innerHTML = `<h3>เริ่มต้นใหม่ทั้งหมด?</h3><p>การปรับแต่ง ระบบนิเวศ และความคืบหน้าของทุกดาวจะหายไป</p>
       <button class="btn primary" type="button" data-confirm-reset style="background:linear-gradient(135deg,#ff4f8b,#e8457a)">ล้างข้อมูลทั้งหมด</button>${back}`;
@@ -2609,8 +2915,8 @@ class App {
   resetAll() {
     this.closeMenu();
     if (this.current >= 0) this.closeDetail();
-    const { sound, bg, speed } = this.state;
-    this.state = Store.fresh(); Object.assign(this.state, { sound, bg, speed }); Store.save(this.state);
+    const { sound, bg, speed, view } = this.state;
+    this.state = Store.fresh(); Object.assign(this.state, { sound, bg, speed, view }); Store.save(this.state);
     // The secret planet hides again until it is earned.
     if (PLANETS.includes(SECRET)) PLANETS.splice(PLANETS.indexOf(SECRET), 1);
     if (!this.noGL) {
