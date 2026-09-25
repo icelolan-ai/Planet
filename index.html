@@ -312,7 +312,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     </button>
   </header>
   <div class="stage" id="stage">
-    <div class="stage-hint" data-hint>ลากเพื่อหมุนดาว</div>
+    <div class="stage-hint" data-hint>ลากเพื่อหมุน แตะดาวเพื่อส่งคลื่น</div>
     <div class="stage-actions" data-actions></div>
   </div>
   <div class="dbody">
@@ -338,6 +338,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <div class="grab" aria-hidden="true"></div>
     <div data-menu-main>
       <button class="menu-item" type="button" data-menu="howto"><span class="em">🧭</span><span>วิธีเล่น<small>บิน สำรวจ ปรับแต่ง และสร้างชีวิต</small></span></button>
+      <button class="menu-item" type="button" data-sound-toggle aria-pressed="false"><span class="em" data-sound-ic>🔈</span><span>เสียง<small data-sound-label>ปิดอยู่ แตะเพื่อเปิด</small></span></button>
       <button class="menu-item" type="button" data-menu="model"><span class="em">📐</span><span>ตัวเลขมาจากไหน<small>ระยะทาง เวลาเดินทาง และการคำนวณ</small></span></button>
       <button class="menu-item" type="button" data-menu="reset"><span class="em">🧹</span><span>เริ่มต้นใหม่ทั้งหมด<small>ล้างการปรับแต่งของทุกดาว</small></span></button>
     </div>
@@ -457,7 +458,8 @@ const CONFIG = {
   storeKey: 'suan-dao-v1',
   segments: MOBILE ? 96 : 128,
   samples: 2400,
-  floraMax: MOBILE ? 380 : 620
+  floraMax: MOBILE ? 380 : 620,
+  idleMs: 7000               // untouched this long, the planet starts drifting on its own
 };
 
 const CONTROLS = {
@@ -786,14 +788,28 @@ float snoise(vec3 v){
   return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
 }`;
 
+/* A wave spreading over the sphere from the point the player tapped. uRipT < 0 means idle. */
+const RIPPLE = `
+uniform vec3 uRip; uniform float uRipT;
+float ripple(vec3 p){
+  if (uRipT < 0.0) return 0.0;
+  float d = acos(clamp(dot(p, uRip), -1.0, 1.0)), front = uRipT * 1.1;
+  // Bright crest with a darker trough behind it, a smaller echo, and a splash at the tap point.
+  float w = exp(-pow((d - front) * 10.0, 2.0)) - 0.6 * exp(-pow((d - front + 0.13) * 10.0, 2.0));
+  w += 0.5 * exp(-pow((d - front * 0.62) * 13.0, 2.0));
+  w += exp(-d * d * 400.0) * max(0.0, 1.0 - uRipT * 2.0);
+  return w * max(0.0, 1.0 - uRipT / 2.4) * smoothstep(0.0, 0.08, uRipT);
+}`;
+
 const SURF_VERT = `
 attribute float aH;
 uniform float uSea, uRelief;
 varying float vH; varying vec3 vP; varying vec3 vWN; varying vec3 vWorld;
+${RIPPLE}
 void main(){
   vH = aH; vP = position;
   float land = max(aH - uSea, 0.0);
-  vec3 pos = position * (1.0 + land * uRelief);
+  vec3 pos = position * (1.0 + land * uRelief + ripple(normalize(position)) * 0.012);
   vWN = normalize(mat3(modelMatrix) * normal);
   vec4 w = modelMatrix * vec4(pos, 1.0); vWorld = w.xyz;
   gl_Position = projectionMatrix * viewMatrix * w;
@@ -804,6 +820,7 @@ uniform float uType, uSea, uVeg, uHumid, uHeat, uIce, uGlow, uStorm, uTime, uLav
 uniform vec3 cDeep, cShallow, cLow, cHigh, cVeg, cDry, cIce, cHot, uSun;
 varying float vH; varying vec3 vP; varying vec3 vWN; varying vec3 vWorld;
 ${NOISE}
+${RIPPLE}
 void main(){
   vec3 p = normalize(vP), N = normalize(vWN), V = normalize(cameraPosition - vWorld);
   float dif = max(dot(N, uSun), 0.0);
@@ -853,6 +870,8 @@ void main(){
   }
   vec3 lit = col * (0.16 + 1.0 * dif) + spec * dif;
   lit += cHot * emis * (1.0 + uFlash) + cVeg * glowE * (0.35 + 0.65 * (1.0 - dif));
+  float rp = ripple(p);
+  lit = lit * (1.0 + min(rp, 0.0) * 0.45) + mix(vec3(1.0), cShallow, 0.4) * max(rp, 0.0) * 0.7 * (0.5 + 0.5 * dif);
   gl_FragColor = vec4(lit, 1.0);
 }`;
 
@@ -932,6 +951,7 @@ class PlanetBody {
     this.group.add(this.spin);
     this.disposables = [];
     this.t = 0; this.flash = 0; this.stormPulse = 0;
+    this.idle = 0; this.ripT = -1;
 
     const seg = CONFIG.segments;
     this.geo = new THREE.SphereGeometry(1, seg, Math.round(seg * 0.75));
@@ -941,13 +961,15 @@ class PlanetBody {
       uType: { value: gas ? 1 : 0 }, uSea: { value: 0.5 }, uRelief: { value: this.b.relief }, uVeg: { value: 0 },
       uHumid: { value: 0.5 }, uHeat: { value: 0 }, uIce: { value: 0 }, uGlow: { value: 0 }, uStorm: { value: 0 },
       uTime: { value: 0 }, uLavaSea: { value: this.b.lavaSea ? 1 : 0 }, uErupt: { value: 0 }, uFlash: { value: 0 },
+      uRip: { value: new THREE.Vector3(0, 1, 0) }, uRipT: { value: -1 },
       cDeep: { value: hex(pal.deep) }, cShallow: { value: hex(pal.shallow) }, cLow: { value: hex(pal.low) }, cHigh: { value: hex(pal.high) },
       cVeg: { value: hex(pal.veg) }, cDry: { value: hex(pal.dry) }, cIce: { value: hex(pal.ice) }, cHot: { value: hex(pal.hot) },
       uSun: { value: SUN }
     };
     this.mat = new THREE.ShaderMaterial({ uniforms: this.u, vertexShader: SURF_VERT, fragmentShader: SURF_FRAG });
     this.disposables.push(this.mat);
-    this.spin.add(new THREE.Mesh(this.geo, this.mat));
+    this.surface = new THREE.Mesh(this.geo, this.mat);
+    this.spin.add(this.surface);
 
     if (!gas) {
       const cg = new THREE.SphereGeometry(1.03, 64, 48);
@@ -1061,6 +1083,28 @@ class PlanetBody {
 
   burst() { if (!this.sparks) return; this.spawn(170, 1.35); this.flash = 1; }
   stormBurst() { this.stormPulse = 1; }
+  /** Start a wave from a point on the unit sphere, in the surface's local space. */
+  ripple(dir) { this.u.uRip.value.copy(dir).normalize(); this.ripT = 0; }
+  /** Drop idle drift and ripples, e.g. before taking a map thumbnail. */
+  rest() { this.idle = 0; this.ripT = -1; this.snap(); }
+
+  /** What the player set, plus a slow drift while nobody touches the planet. Visual only: the model never sees it. */
+  livingView(c) {
+    const w = this.idle; if (w < 0.001) return c;
+    const v = Object.assign(this._view || (this._view = {}), c), t = this.t;
+    // Incommensurate frequencies, so the drift never visibly repeats.
+    const a = Math.sin(t * 0.21) * 0.6 + Math.sin(t * 0.083 + 1.7) * 0.4;
+    const b = Math.sin(t * 0.137 + 0.4) * 0.5 + Math.sin(t * 0.051 + 2.9) * 0.5;
+    const drift = (k, amt) => { if (this.b.controls.includes(k)) v[k] = clamp(c[k] + w * amt, 0, 1); };
+    drift('veg', 0.12 * (0.5 + 0.5 * b));
+    drift('humidity', 0.08 * a);
+    drift('heat', 0.06 * b);
+    drift('ice', 0.05 * a);
+    drift('glow', 0.15 * (0.5 + 0.5 * a));
+    drift('storm', 0.2 * (0.5 + 0.5 * b));
+    if (this.clouds) v.cloud = clamp(c.cloud + w * 0.18 * a * this.b.cloud, 0, 1);
+    return v;
+  }
 
   update(dt, force) {
     if (!this.cur) return;
@@ -1069,18 +1113,20 @@ class PlanetBody {
     this.t += dt;
     this.flash = damp(this.flash, 0, 2.2, dt);
     this.stormPulse = damp(this.stormPulse, 0, 0.6, dt);
-    const u = this.u;
-    u.uTime.value = this.t; u.uSea.value = c.sea; u.uVeg.value = c.veg; u.uHumid.value = c.humidity; u.uHeat.value = c.heat;
-    u.uIce.value = c.ice; u.uGlow.value = c.glow; u.uStorm.value = clamp(c.storm + this.stormPulse * 0.6, 0, 1.4); u.uErupt.value = c.eruption; u.uFlash.value = this.flash;
-    if (this.clouds) { this.cloudU.uTime.value = this.t; this.cloudU.uCloud.value = c.cloud; this.clouds.rotation.y += dt * 0.02; }
-    this.atmoU.uAtmo.value = this.b.atmo * (0.55 + c.humidity * 0.6);
+    if (this.ripT >= 0) { this.ripT += dt; if (this.ripT > 2.4) this.ripT = -1; }
+    const v = this.livingView(c), u = this.u;
+    u.uTime.value = this.t; u.uSea.value = c.sea; u.uVeg.value = v.veg; u.uHumid.value = v.humidity; u.uHeat.value = v.heat;
+    u.uIce.value = v.ice; u.uGlow.value = v.glow; u.uStorm.value = clamp(v.storm + this.stormPulse * 0.6, 0, 1.4); u.uErupt.value = c.eruption; u.uFlash.value = this.flash;
+    u.uRipT.value = this.ripT;
+    if (this.clouds) { this.cloudU.uTime.value = this.t; this.cloudU.uCloud.value = v.cloud; this.clouds.rotation.y += dt * 0.02; }
+    this.atmoU.uAtmo.value = this.b.atmo * (0.55 + v.humidity * 0.6) * (1 + this.idle * 0.08 * Math.sin(this.t * 0.6));
     if (this.ring) { this.ringU.uRing.value = c.ring; this.ring.scale.setScalar(0.85 + c.ring * 0.25); this.ring.visible = c.ring > 0.02; this.ring.rotation.z += dt * 0.02; }
     this.group.scale.setScalar(c.size);
 
     if (this.flora) {
       const m = this._m, q = this._q, v = this._v, s = this._s, up = this._up;
       const band = c.sea + (1 - c.sea) * 0.62;
-      const vegEff = this.b.flora === 'crystal' ? c.veg : c.veg * smooth(0.05, 0.5, c.humidity);
+      const vegEff = this.b.flora === 'crystal' ? v.veg : v.veg * smooth(0.05, 0.5, v.humidity);
       this.sites.forEach((site, i) => {
         const S = site.s;
         const alive = S.h > c.sea + 0.012 && S.h < band && Math.abs(S.y) < c.capLine - 0.03 && S.r < vegEff * 0.95;
@@ -1095,7 +1141,7 @@ class PlanetBody {
         this.flora.setMatrixAt(i, m);
       });
       this.flora.instanceMatrix.needsUpdate = true;
-      if (this.b.flora === 'crystal') this.floraMat.emissive.copy(hex(this.b.palette.veg)).multiplyScalar(0.15 + c.glow * 0.85);
+      if (this.b.flora === 'crystal') this.floraMat.emissive.copy(hex(this.b.palette.veg)).multiplyScalar(0.15 + v.glow * 0.85);
     }
 
     if (this.sparks) {
@@ -1185,6 +1231,62 @@ class Stage {
 }
 
 /* ================================================================
+   Sound: short synthesized cues, no audio files. Off until the
+   player turns it on, which also satisfies autoplay rules.
+================================================================ */
+const Sound = {
+  on: false, ctx: null, out: null, buf: null, lastTick: 0,
+  ensure() {
+    if (!this.on) return null;
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
+      this.ctx = new AC();
+      this.out = this.ctx.createGain(); this.out.gain.value = 0.22; this.out.connect(this.ctx.destination);
+    }
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    return this.ctx;
+  },
+  env(g, t, peak, dur, attack = 0.012) {
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(peak, t + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  },
+  tone(freq, dur, { type = 'sine', gain = 0.5, at = 0, slide = 0 } = {}) {
+    const c = this.ensure(); if (!c) return;
+    const t = c.currentTime + at, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, freq * slide), t + dur);
+    this.env(g, t, gain, dur);
+    o.connect(g); g.connect(this.out);
+    o.start(t); o.stop(t + dur + 0.05);
+  },
+  noise(dur, { from = 800, to = 200, gain = 0.4, q = 0.8, at = 0 } = {}) {
+    const c = this.ensure(); if (!c) return;
+    if (!this.buf) {
+      this.buf = c.createBuffer(1, c.sampleRate, c.sampleRate);
+      const d = this.buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const t = c.currentTime + at, src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    src.buffer = this.buf; src.loop = true;
+    f.type = 'bandpass'; f.Q.value = q;
+    f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(to, t + dur);
+    this.env(g, t, gain, dur, Math.min(0.15, dur * 0.3));
+    src.connect(f); f.connect(g); g.connect(this.out);
+    src.start(t); src.stop(t + dur + 0.05);
+  },
+  /** Slider tick; pitch follows the slider position (0..1). */
+  tick(x) {
+    const now = performance.now(); if (now - this.lastTick < 55) return;
+    this.lastTick = now; this.tone(420 + x * 520, 0.05, { type: 'triangle', gain: 0.16 });
+  },
+  tap() { this.tone(520, 0.35, { gain: 0.35, slide: 0.55 }); this.tone(780, 0.25, { gain: 0.12, slide: 0.6, at: 0.03 }); },
+  launch() { this.noise(1.6, { from: 300, to: 2400, gain: 0.35 }); this.tone(110, 1.5, { type: 'sawtooth', gain: 0.05, slide: 3 }); },
+  life() { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => this.tone(f, 0.6, { gain: 0.2, at: i * 0.09 })); },
+  erupt() { this.noise(1.1, { from: 180, to: 60, gain: 0.6, q: 0.6 }); this.tone(70, 0.8, { type: 'triangle', gain: 0.3, slide: 0.6 }); },
+  storm() { this.noise(1.4, { from: 500, to: 1600, gain: 0.3, q: 1.2 }); }
+};
+
+/* ================================================================
    Persistence
 ================================================================ */
 const Store = {
@@ -1194,6 +1296,7 @@ const Store = {
     const base = Store.fresh();
     if (!s || s.v !== 1) return base;
     base.at = typeof s.at === 'number' ? s.at : -1;
+    base.sound = s.sound === true;
     base.visited = Array.isArray(s.visited) ? s.visited : [];
     PLANETS.forEach(p => {
       const saved = s.planets && s.planets[p.id];
@@ -1205,7 +1308,7 @@ const Store = {
     return base;
   },
   fresh() {
-    return { v: 1, at: -1, visited: [], planets: Object.fromEntries(PLANETS.map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
+    return { v: 1, at: -1, visited: [], sound: false, planets: Object.fromEntries(PLANETS.map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
   },
   save(state) { try { localStorage.setItem(CONFIG.storeKey, JSON.stringify(state)); } catch (e) { /* storage may be unavailable; progress stays in memory */ } }
 };
@@ -1249,6 +1352,7 @@ class App {
     this.raf = null;
     this.drag = { active: false, x: 0, y: 0, vx: 0, vy: 0 };
     this.rotX = 0.3; this.rotY = 0; this.velY = 0.12; this.velX = 0;
+    this.lastPoke = 0; this.touched = false; this.idleShown = false;
     this.loop = this.loop.bind(this);
   }
 
@@ -1257,6 +1361,7 @@ class App {
     const bar = $('[data-boot-bar]'), status = $('[data-boot-status]');
     const step = (p, text) => { bar.style.width = Math.round(p * 100) + '%'; if (text) status.textContent = text; };
     this.bindUI();
+    Sound.on = this.state.sound; this.syncSound();
     if (typeof THREE === 'undefined' || !this.webgl()) {
       step(1, 'อุปกรณ์นี้ไม่รองรับกราฟิก 3 มิติ จึงแสดงแผนที่แบบภาพนิ่ง');
       this.noGL = true;
@@ -1446,6 +1551,7 @@ class App {
       sky.innerHTML = puffs + `<div class="rocket">${ROCKET_SVG}</div>`;
       sky.style.height = Math.min(360, innerHeight * 0.42) + 'px';
       el.hidden = false;
+      Sound.launch();
       requestAnimationFrame(() => el.classList.add('is-on'));
       let done = false;
       const finish = () => {
@@ -1466,6 +1572,7 @@ class App {
     const p = PLANETS[i], b = BIOMES[p.biome];
     $('[data-d-kicker]').textContent = `ดาวดวงที่ ${i + 1}, ${b.kind}`;
     $('[data-d-name]').textContent = p.name;
+    this.poke();
     $('#map').classList.remove('is-active');
     $('#detail').classList.add('is-active');
     if (!this.noGL) {
@@ -1488,6 +1595,7 @@ class App {
     this.stopLoop();
     if (p && !this.noGL) {
       const body = this.bodies[p.id];
+      body.rest();
       this.thumbs[p.id] = this.stage.snapshot(body);
     }
     $('#detail').classList.remove('is-active');
@@ -1634,6 +1742,7 @@ class App {
     const p = PLANETS[this.current], st = this.state.planets[p.id];
     st.params[key] = v;
     input.style.setProperty('--p', ((v - c.min) / (c.max - c.min) * 100) + '%');
+    Sound.tick((v - c.min) / (c.max - c.min));
     const out = $(`[data-out="${key}"]`); if (out) out.textContent = c.fmt(v);
     if (!this.noGL) this.bodies[p.id].apply(effective(p, st.params));
     this.refresh();
@@ -1644,6 +1753,7 @@ class App {
     const p = PLANETS[this.current], st = this.state.planets[p.id];
     if (what === 'eco') {
       st.eco = true; this.save();
+      Sound.life();
       this.toast('สร้างระบบนิเวศแล้ว สิ่งมีชีวิตเริ่มอาศัยอยู่');
       this.setTab('eco');
       if (!this.noGL) { const b = this.bodies[p.id]; b.flash = 0.4; }
@@ -1669,6 +1779,9 @@ class App {
     const dt = Math.min(0.05, (now - this.last) / 1000 || 0.016); this.last = now;
     const p = PLANETS[this.current]; if (!p) return;
     const body = this.bodies[p.id], cam = this.stage.camera;
+    const idleOn = !REDUCED && !this.drag.active && now - this.lastPoke > CONFIG.idleMs;
+    body.idle = damp(body.idle, idleOn ? 1 : 0, idleOn ? 0.35 : 4, dt);
+    this.idleHint(body.idle > 0.5);
     body.update(dt);
     if (body.sparkU) body.sparkU.uPixelRatio.value = this.stage.pixelRatio;
     if (!this.drag.active) {
@@ -1701,17 +1814,22 @@ class App {
       const a = e.target.closest('[data-act]'); if (!a || this.noGL) return;
       const body = this.bodies[PLANETS[this.current].id];
       if (a.dataset.act === 'erupt') {
-        body.burst();
+        body.burst(); Sound.erupt();
         const s = $('#stage'); s.classList.remove('shake'); void s.offsetWidth; if (!REDUCED) s.classList.add('shake');
-      } else body.stormBurst();
+      } else { body.stormBurst(); Sound.storm(); }
     });
 
-    // Drag to rotate, with inertia.
+    // Any touch on the planet view resets the idle timer.
+    ['pointerdown', 'input', 'keydown'].forEach(t => $('#detail').addEventListener(t, () => this.poke(), true));
+
+    // Drag to rotate, with inertia. A short press without movement is a tap.
     const stage = $('#stage');
     stage.addEventListener('pointerdown', e => {
       if (e.target.closest('button')) return;
-      this.drag = { active: true, x: e.clientX, y: e.clientY, t: performance.now() };
+      const now = performance.now();
+      this.drag = { active: true, x: e.clientX, y: e.clientY, t: now, sx: e.clientX, sy: e.clientY, t0: now };
       stage.setPointerCapture(e.pointerId);
+      this.touched = true;
       $('[data-hint]').style.opacity = '0';
     });
     stage.addEventListener('pointermove', e => {
@@ -1723,7 +1841,12 @@ class App {
       this.drag.x = e.clientX; this.drag.y = e.clientY; this.drag.t = now;
     });
     const end = () => { this.drag.active = false; };
-    stage.addEventListener('pointerup', end); stage.addEventListener('pointercancel', end);
+    stage.addEventListener('pointerup', e => {
+      const d = this.drag;
+      if (d.active && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 8 && performance.now() - d.t0 < 350) this.tapPlanet(e);
+      end();
+    });
+    stage.addEventListener('pointercancel', end);
 
     // Menu
     $('#menu').addEventListener('click', e => {
@@ -1731,6 +1854,7 @@ class App {
       const m = e.target.closest('[data-menu]'); if (m) this.menuPage(m.dataset.menu);
       if (e.target.closest('[data-menu-back]')) this.menuPage(null);
       if (e.target.closest('[data-confirm-reset]')) this.resetAll();
+      if (e.target.closest('[data-sound-toggle]')) this.toggleSound();
     });
     addEventListener('keydown', e => {
       if (e.key !== 'Escape') return;
@@ -1753,6 +1877,41 @@ class App {
     addEventListener('pagehide', e => { if (!e.persisted) { Store.save(this.state); this.dispose(); } });
   }
 
+  poke() { this.lastPoke = performance.now(); }
+
+  /** Send a ripple from wherever the player tapped the planet. */
+  tapPlanet(e) {
+    if (this.noGL || this.current < 0) return;
+    const body = this.bodies[PLANETS[this.current].id], r = $('#stage').getBoundingClientRect();
+    this.ray = this.ray || new THREE.Raycaster();
+    this.ray.setFromCamera({ x: (e.clientX - r.left) / r.width * 2 - 1, y: -(e.clientY - r.top) / r.height * 2 + 1 }, this.stage.camera);
+    const hit = this.ray.intersectObject(body.surface, false)[0];
+    if (!hit) return;
+    body.ripple(body.surface.worldToLocal(hit.point.clone()));
+    Sound.tap();
+  }
+
+  /** While the planet drifts on its own, say so; otherwise show the first-use hint until the player touches it. */
+  idleHint(on) {
+    if (on === this.idleShown) return;
+    this.idleShown = on;
+    const h = $('[data-hint]');
+    h.textContent = on ? 'ปล่อยไว้แบบนี้ ดาวจะค่อย ๆ เปลี่ยนไปตามธรรมชาติ' : 'ลากเพื่อหมุน แตะดาวเพื่อส่งคลื่น';
+    h.style.opacity = on || !this.touched ? '1' : '0';
+  }
+
+  toggleSound() {
+    this.state.sound = Sound.on = !this.state.sound;
+    this.syncSound(); this.save();
+    Sound.tap();
+  }
+  syncSound() {
+    const b = $('[data-sound-toggle]'); if (!b) return;
+    b.setAttribute('aria-pressed', String(Sound.on));
+    $('[data-sound-ic]', b).textContent = Sound.on ? '🔊' : '🔈';
+    $('[data-sound-label]', b).textContent = Sound.on ? 'เปิดอยู่ แตะเพื่อปิด' : 'ปิดอยู่ แตะเพื่อเปิด';
+  }
+
   openMenu() {
     const m = $('#menu'); this.menuPage(null); m.hidden = false;
     requestAnimationFrame(() => m.classList.add('is-on'));
@@ -1764,18 +1923,19 @@ class App {
     if (!page) { main.hidden = false; pg.hidden = true; return; }
     main.hidden = true; pg.hidden = false;
     const back = '<button class="btn ghost" type="button" data-menu-back style="width:100%;margin-top:10px">กลับ</button>';
-    if (page === 'howto') pg.innerHTML = `<h3>วิธีเล่น</h3><p>1. แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`;
+    if (page === 'howto') pg.innerHTML = `<h3>วิธีเล่น</h3><p>1. แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงได้ในเมนู<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`;
     if (page === 'model') pg.innerHTML = `<h3>ตัวเลขมาจากไหน</h3><p>ระยะห่างของดาวใช้หน่วยดาราศาสตร์ (1 หน่วย ≈ 149.6 ล้าน กม.) และคิดตอนดาวเรียงอยู่ด้านเดียวกันของดาวฤกษ์ เวลาเดินทางคิดจากยานความเร็ว ${nf.format(CONFIG.rocketKmh)} กม./ชม. ใกล้เคียงยานนิวฮอไรซันส์<br><br>อุณหภูมิ ออกซิเจน และจำนวนประชากรมาจากแบบจำลองอย่างง่ายเพื่อการเล่น ไม่ใช่การคำนวณทางวิทยาศาสตร์จริง สัดส่วนน้ำและดินนับจากจุด 2,400 จุดบนพื้นผิวดาวจริงที่เห็นบนจอ</p>${back}`;
     if (page === 'reset') pg.innerHTML = `<h3>เริ่มต้นใหม่ทั้งหมด?</h3><p>การปรับแต่ง ระบบนิเวศ และความคืบหน้าของทุกดาวจะหายไป</p>
       <button class="btn primary" type="button" data-confirm-reset style="background:linear-gradient(135deg,#ff4f8b,#e8457a)">ล้างข้อมูลทั้งหมด</button>${back}`;
   }
 
   resetAll() {
-    this.state = Store.fresh(); Store.save(this.state);
+    const sound = this.state.sound;
+    this.state = Store.fresh(); this.state.sound = sound; Store.save(this.state);
     if (!this.noGL) {
       PLANETS.forEach(p => {
         const body = this.bodies[p.id];
-        body.reseed(p.seed); body.apply(effective(p, this.state.planets[p.id].params)); body.snap();
+        body.reseed(p.seed); body.apply(effective(p, this.state.planets[p.id].params)); body.rest();
         this.thumbs[p.id] = this.stage.snapshot(body);
       });
     }
