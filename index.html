@@ -2766,9 +2766,9 @@ const REALX = (() => {
       const trunk = '#5a4330';
       parts.push(paint(cyl(V(0, 0, 0), V(0.05, 1.4, 0), 0.13, 0.08, 7), c => c.set(trunk)));
       for (let k = 0; k < 3; k++) { const a = k * 2.1 + r(); parts.push(paint(cyl(V(0.03, 1.1, 0), V(Math.cos(a) * 0.7, 1.9, Math.sin(a) * 0.7), 0.06, 0.03, 5), c => c.set(trunk))); }
-      for (let k = 0; k < 11; k++) {
-        const a = r() * 6.28, rr = Math.sqrt(r()) * 0.85, y = 1.8 + r() * 0.8 - rr * 0.35, rad = 0.38 + r() * 0.22;
-        const g = lump(8, 6, 0.28, 2.4, seed * 20 + k); g.scale(rad, rad * 0.85, rad); g.translate(Math.cos(a) * rr, y, Math.sin(a) * rr);
+      for (let k = 0; k < 8; k++) {
+        const a = r() * 6.28, rr = Math.sqrt(r()) * 0.8, y = 1.8 + r() * 0.8 - rr * 0.35, rad = 0.42 + r() * 0.24;
+        const g = lump(7, 5, 0.28, 2.4, seed * 20 + k); g.scale(rad, rad * 0.85, rad); g.translate(Math.cos(a) * rr, y, Math.sin(a) * rr);
         const tint = 0.85 + r() * 0.25;
         parts.push(paint(g, (c, x, y2, z, nx, ny) => c.copy(col).lerp(light, Math.max(0, ny) * 0.45).multiplyScalar(tint * (0.55 + 0.35 * clamp((y2 - 1.4) / 1.4, 0, 1) + 0.25 * Math.max(0, ny)))));
       }
@@ -2869,7 +2869,9 @@ class ExploreWorld {
     this.cam = new THREE.PerspectiveCamera(PHONE ? 66 : 56, 1, 0.3, 1600);
     this.D = []; this.t = 0; this.pois = []; this.anim = [];
     this.progress = 0; this.target = 0; this.yaw = 0; this.yawT = 0; this.auto = false; this.focus = null;
-    this.S = this.gas ? 520 : 260;
+    this.S = this.gas ? 640 : 560;
+    this.AK = (this.S / 260) ** 2 * 0.5;   // how many more props than on the original, smaller patch
+    this.chunks = [];
     // Realistic (default) or diorama look for rocky worlds; gas giants have no ground either way.
     this.real = !this.gas && app.state.xstyle !== 'diorama';
     this.inst = {};
@@ -2916,7 +2918,7 @@ class ExploreWorld {
     this.keep(sky);
     const dome = new THREE.Mesh(this.keep(new THREE.SphereGeometry(900, 32, 16)), sky);
     dome.renderOrder = -1; this.scene.add(dome); this.dome = dome;
-    this.scene.fog = new THREE.FogExp2(horizon, this.real ? 0.0014 + e.humidity * 0.0022 : (this.gas ? 0.0045 : 0.0028) + e.humidity * 0.0045);
+    this.scene.fog = new THREE.FogExp2(horizon, this.real ? 0.0008 + e.humidity * 0.0012 : (this.gas ? 0.0035 : 0.0016) + e.humidity * 0.0025);
     // Diorama lighting: even the far, dim worlds stay readable (the sky and fog still show how little light arrives).
     const sun = new THREE.DirectionalLight(rogue ? 0x8a7cff : 0xfff0dd, (rogue ? 0.35 : 0.6) + 0.55 * Math.min(1, light));
     sun.position.copy(this.sunDir).multiplyScalar(300); this.scene.add(sun);
@@ -2933,7 +2935,7 @@ class ExploreWorld {
 
   /* ---------- ground: a patch of the real planet, exaggerated ---------- */
   buildGround() {
-    const e = this.e, T = this.terrain, b = this.b, S = this.S, A = 0.5;
+    const e = this.e, T = this.terrain, b = this.b, S = this.S;
     // Land on a coast near the equator if there is one.
     const cand = T.samples.filter(s => s.h > e.sea + 0.02 && s.h < e.sea + 0.16 && Math.abs(s.y) < 0.55);
     const site = cand.length ? cand[Math.floor(cand.length * 0.37)] : T.samples[0];
@@ -2942,7 +2944,7 @@ class ExploreWorld {
     const north = n.clone().cross(east).normalize();
     if (this.real) { this.buildRealWorld(n, east, north); return; }
     // Terraced tiles, like a diorama: square columns snapped to height steps, grass on top, layered earth down the sides.
-    const TN = PHONE ? 56 : 68, TS = S / TN, STEP = 2.2, BASE = -30;
+    const TN = PHONE ? 96 : 124, TS = S / TN, STEP = 2.2, BASE = -30, A = 0.5 * S / 260;
     this.TN = TN; this.TS = TS; this.tileY = new Float32Array(TN * TN); this.tileVeg = new Float32Array(TN * TN);
     const lava = !!b.lavaSea, crystal = b.flora === 'crystal';
     const cLow = this.col('low'), cHigh = this.col('high'), cDry = this.col('dry'), cVeg = this.col('veg'), cIce = this.col('ice'), cHot = this.col('hot');
@@ -2994,6 +2996,7 @@ class ExploreWorld {
       m4.compose(pv.set(cx, (top + BASE) / 2, cz), q0, sv.set(TS, top - BASE, TS));
       tiles.setMatrixAt(i, m4); tiles.setColorAt(i, c);
     }
+    tiles.frustumCulled = false;   // spread over the whole island; the shared box shape sits at the origin
     this.scene.add(tiles);
     this.peak = peakP;
 
@@ -3006,7 +3009,7 @@ class ExploreWorld {
 
   /* ---------- realistic world: painted heightfield, frontier settlement, natural vegetation ---------- */
   buildRealWorld(n, east, north) {
-    const e = this.e, T = this.terrain, S = this.S, A = 0.5, N = PHONE ? 150 : 200, R = N + 1, cnt = R * R;
+    const e = this.e, T = this.terrain, S = this.S, A = 0.5 * S / 260, N = PHONE ? 230 : 300, R = N + 1, cnt = R * R;
     const geo = this.keep(new THREE.PlaneGeometry(S, S, N, N)); geo.rotateX(-Math.PI / 2);
     const pos = geo.attributes.position, d = new THREE.Vector3(), lava = !!this.b.lavaSea;
     this.N = N; this.seg = S / N; this.hgrid = new Float32Array(cnt); this.vgrid = new Float32Array(cnt);
@@ -3033,7 +3036,7 @@ class ExploreWorld {
     mat.onBeforeCompile = sh => {
       sh.uniforms.uGrain = { value: grain };
       sh.fragmentShader = 'uniform sampler2D uGrain;\n' + sh.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
-        diffuseColor.rgb *= 0.72 + 0.56 * texture2D(uGrain, vUv * 64.0).r * 0.5 + 0.28 * texture2D(uGrain, vUv * 11.0).g * 0.5;`);
+        diffuseColor.rgb *= 0.72 + 0.56 * texture2D(uGrain, vUv * 140.0).r * 0.5 + 0.28 * texture2D(uGrain, vUv * 24.0).g * 0.5;`);
     };
     const ground = new THREE.Mesh(geo, mat); ground.receiveShadow = true; this.scene.add(ground);
     this.buildSea(true);
@@ -3051,30 +3054,49 @@ class ExploreWorld {
 
   /** Choose a flat, dry site near the landing area, level it, and lay out streets and lots. */
   planTown() {
-    const r = this.rand, big = this.eco && this.sim.colonists > 1, S = this.S;
-    let best = null, bestScore = 1e9;
-    for (let k = 0; k < 300; k++) {
-      const x = (r() * 2 - 1) * S * 0.26, z = (r() * 2 - 1) * S * 0.26, y = this.groundAt(x, z);
-      if (y < 1.8 || y > 24) continue;
-      let dev = 0, wet = 0;
-      for (let j = 0; j < 12; j++) { const a = j / 12 * 6.283, rr = j % 2 ? 16 : 30, yy = this.groundAt(x + Math.cos(a) * rr, z + Math.sin(a) * rr); dev += Math.abs(yy - y); if (yy < 1) wet++; }
-      const score = dev + wet * 25 + Math.hypot(x, z) * 0.06;
-      if (score < bestScore) { bestScore = score; best = new THREE.Vector3(x, y, z); }
-    }
-    if (!best) { this.town = null; return; }
-    const C = best, R0 = big ? 50 : 22, N = this.N, RR = N + 1;
-    for (let iz = 0; iz < RR; iz++) for (let ix = 0; ix < RR; ix++) {
-      const x = -S / 2 + ix * this.seg, z = -S / 2 + iz * this.seg, dd = Math.hypot(x - C.x, z - C.z);
-      if (dd > R0 * 1.4) continue;
-      const k = 1 - smooth(R0 * 0.8, R0 * 1.4, dd), i = iz * RR + ix;
-      this.hgrid[i] = lerp(this.hgrid[i], C.y + (this.hgrid[i] - C.y) * 0.1, k);
-    }
-    const ang = r() * 6.283, dir = [Math.cos(ang), Math.sin(ang)], perp = [-dir[1], dir[0]];
-    const P = (s, o) => [C.x + dir[0] * s + perp[0] * o, C.z + dir[1] * s + perp[1] * o];
-    const roads = [], lots = [];
+    const r = this.rand, big = this.eco && this.sim.colonists > 1, S = this.S, N = this.N, RR = N + 1;
     const face = (fx, fz) => Math.atan2(fx, fz);
+    /** The flattest dry spot within `spread` of the middle, at least `minD` from the given sites. */
+    const findSite = (avoid, minD, spread) => {
+      let best = null, bestScore = 1e9;
+      for (let k = 0; k < 320; k++) {
+        const x = (r() * 2 - 1) * S * spread, z = (r() * 2 - 1) * S * spread, y = this.groundAt(x, z);
+        if (y < 1.8 || y > 26 || avoid.some(q => Math.hypot(q.x - x, q.z - z) < minD)) continue;
+        let dev = 0, wet = 0;
+        for (let j = 0; j < 12; j++) { const a = j / 12 * 6.283, rr = j % 2 ? 16 : 30, yy = this.groundAt(x + Math.cos(a) * rr, z + Math.sin(a) * rr); dev += Math.abs(yy - y); if (yy < 1) wet++; }
+        const score = dev + wet * 25 + Math.hypot(x, z) * 0.03;
+        if (score < bestScore) { bestScore = score; best = new THREE.Vector3(x, y, z); }
+      }
+      return best;
+    };
+    /** Level the ground under a settlement, keeping a hint of the relief. */
+    const level = (C, R0) => {
+      for (let iz = 0; iz < RR; iz++) for (let ix = 0; ix < RR; ix++) {
+        const x = -S / 2 + ix * this.seg, z = -S / 2 + iz * this.seg, dd = Math.hypot(x - C.x, z - C.z);
+        if (dd > R0 * 1.4) continue;
+        const k = 1 - smooth(R0 * 0.8, R0 * 1.4, dd), i = iz * RR + ix;
+        this.hgrid[i] = lerp(this.hgrid[i], C.y + (this.hgrid[i] - C.y) * 0.1, k);
+      }
+    };
+    const frame = (C, ang) => { const dir = [Math.cos(ang), Math.sin(ang)], perp = [-dir[1], dir[0]]; return { dir, perp, P: (s0, o) => [C.x + dir[0] * s0 + perp[0] * o, C.z + dir[1] * s0 + perp[1] * o] }; };
+    /** A road that wanders from (x, z) towards a heading or a goal, stopping at water or the edge. */
+    const wander = (x, z, a, steps, goal) => {
+      const pts = [[x, z]];
+      for (let k = 0; k < steps; k++) {
+        if (goal) { const ga = Math.atan2(goal.z - z, goal.x - x); let d = ga - a; d = Math.atan2(Math.sin(d), Math.cos(d)); a += d * 0.35; }
+        a += (r() - 0.5) * 0.45; x += Math.cos(a) * 10; z += Math.sin(a) * 10;
+        if (Math.abs(x) > S * 0.48 || Math.abs(z) > S * 0.48 || this.groundAt(x, z) < 0.6) break;
+        pts.push([x, z]);
+        if (goal && Math.hypot(goal.x - x, goal.z - z) < 26) break;
+      }
+      return pts;
+    };
+    const C = findSite([], 0, 0.2);
+    if (!C) { this.town = null; return; }
+    const R0 = big ? 50 : 22; level(C, R0);
+    const roads = [], lots = [], { dir, perp, P } = frame(C, r() * 6.283);
     if (big) {
-      const nLots = clamp(Math.round(10 + Math.log10(this.sim.colonists + 1) * 3), 12, 34), Lm = 70;
+      const nLots = clamp(Math.round(12 + Math.log10(this.sim.colonists + 1) * 3), 14, 36), Lm = 70;
       roads.push({ w: 6, pts: [P(-Lm / 2, 0), P(-Lm / 6, 1.5), P(Lm / 6, -1.5), P(Lm / 2, 0)] });
       const cross = [-Lm * 0.22, Lm * 0.26];
       cross.forEach(s0 => roads.push({ w: 5, pts: [P(s0, -30), P(s0 + 1.5, 0), P(s0, 30)] }));
@@ -3094,20 +3116,32 @@ class ExploreWorld {
     }
     // Roads out of town, wandering towards the island's edge.
     for (const sgn of [1, -1]) {
-      let [x, z] = roads[0].pts[sgn > 0 ? roads[0].pts.length - 1 : 0], a = Math.atan2(dir[1], dir[0]) + (sgn < 0 ? Math.PI : 0);
-      const pts = [[x, z]];
-      for (let k = 0; k < 14; k++) { a += (r() - 0.5) * 0.5; x += Math.cos(a) * 10; z += Math.sin(a) * 10; if (Math.abs(x) > S * 0.47 || Math.abs(z) > S * 0.47) break; if (this.groundAt(x, z) < 0.6) break; pts.push([x, z]); }
+      const [x, z] = roads[0].pts[sgn > 0 ? roads[0].pts.length - 1 : 0], pts = wander(x, z, Math.atan2(dir[1], dir[0]) + (sgn < 0 ? Math.PI : 0), 24);
       if (pts.length > 1) roads.push({ w: 4.5, pts });
+    }
+    // Hamlets further out (farms, cabins, a camp), each joined to the town by a track.
+    const sites = [C];
+    for (let h = 0; h < (big ? 3 : 1); h++) {
+      const H = findSite(sites, 130, 0.42); if (!H) break;
+      sites.push(H); level(H, 20);
+      const f = frame(H, r() * 6.283), kinds = big ? ['barn', 'cabin', 'house', 'cabin', 'tent', 'cabin'] : ['tent', 'cabin', 'tent'];
+      roads.push({ w: 4, pts: [f.P(-18, 0), f.P(0, 0), f.P(18, 0)] });
+      kinds.slice(0, big ? 4 + Math.floor(r() * 3) : 3).forEach((kind, i) => {
+        const side = i % 2 ? 1 : -1, [x, z] = f.P(-10 + Math.floor(i / 2) * 10, side * 9);
+        lots.push({ x, z, kind, rot: face(-f.perp[0] * side, -f.perp[1] * side) });
+      });
+      const [hx, hz] = f.P(18, 0), track = wander(hx, hz, Math.atan2(C.z - hz, C.x - hx), 40, C);
+      if (track.length > 1) roads.push({ w: 3.5, pts: track });
     }
     lots.forEach(l => { l.y = this.groundAt(l.x, l.z); });
     roads.forEach(rd => rd.pts.forEach(([x, z], i) => { if (i) { const [px, pz] = rd.pts[i - 1], L = Math.hypot(x - px, z - pz); for (let u = 0; u <= L; u += 2) this.occMark(lerp(px, x, u / L), lerp(pz, z, u / L), rd.w * 0.6); } }));
     lots.forEach(l => this.occMark(l.x, l.z, 7));
-    this.town = { C, big, roads, lots, R0 };
+    this.town = { C, big, roads, lots, R0, sites };
   }
 
   /** Paint the ground texture: soil, grass, sand, rock and snow from the terrain, then roads and yards. */
   paintGround(info) {
-    const S = this.S, N = this.N, R = N + 1, TEX = PHONE ? 1024 : 2048, biome = this.p.biome, e = this.e, lava = !!this.b.lavaSea;
+    const S = this.S, N = this.N, R = N + 1, TEX = 2048, biome = this.p.biome, e = this.e, lava = !!this.b.lavaSea;
     const RP = ({
       jungle: ['#56762d', '#7a8c3a', '#86664a', '#7a716a', '#cdb88c', '#6d6a5c', '#9a7e5c'],
       ocean: ['#62853a', '#8c9a48', '#8f7050', '#7c7470', '#dccb9c', '#77736a', '#a88c68'],
@@ -3190,7 +3224,10 @@ class ExploreWorld {
 
   /** Queue an instance: set `key` draws `geo` with material `mat`; flushInst() turns each set into one instanced mesh. */
   put(key, geo, mat, x, y, z, sx, sy, sz, rot, color, cast = true) {
-    const set = this.inst[key] || (this.inst[key] = { geo, mat, cast, v: [], c: [] });
+    // Instances are grouped into square regions so off-screen (and, for small things, far-off) regions can be skipped.
+    const CH = 80, nc = Math.ceil(this.S / CH), ci = clamp(Math.floor((x + this.S / 2) / CH), 0, nc - 1) + clamp(Math.floor((z + this.S / 2) / CH), 0, nc - 1) * nc;
+    const id = key + '#' + ci;
+    const set = this.inst[id] || (this.inst[id] = { key, geo, mat, cast, v: [], c: [], cx: -this.S / 2 + (ci % nc + 0.5) * CH, cz: -this.S / 2 + (Math.floor(ci / nc) + 0.5) * CH });
     set.v.push(x, y, z, sx, sy, sz, rot); set.c.push(color == null ? 0xffffff : color);
   }
   flushInst() {
@@ -3203,9 +3240,23 @@ class ExploreWorld {
         mesh.setMatrixAt(i, m4.compose(p, q, s)); mesh.setColorAt(i, c.set(set.c[i]));
       }
       mesh.castShadow = set.cast; mesh.receiveShadow = true;
+      mesh.frustumCulled = false;   // three.js would test the shared shape at the origin; regions are culled in cullChunks()
       this.scene.add(mesh);
+      const near = { grass: 170, crate: 300, barrel: 300, sack: 300, log: 300, post: 340, rail: 340, win: 420, door: 420, shard: 360, shrub: 420, sage: 420 }[set.key] || Infinity;
+      this.chunks.push({ mesh, c: new THREE.Vector3(set.cx, Math.max(0, this.groundAt(set.cx, set.cz)) + 6, set.cz), r: 62, near });
     }
     this.inst = {};
+  }
+  /** Show only the prop regions in view, and small props only near the camera. */
+  cullChunks() {
+    if (!this.chunks.length) return;
+    const cam = this.cam; cam.updateMatrixWorld();
+    const f = this._fr || (this._fr = new THREE.Frustum()), m = this._fm || (this._fm = new THREE.Matrix4()), sp = this._fs || (this._fs = new THREE.Sphere());
+    f.setFromProjectionMatrix(m.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse));
+    for (const ch of this.chunks) {
+      sp.center.copy(ch.c); sp.radius = ch.r;
+      ch.mesh.visible = cam.position.distanceTo(ch.c) - ch.r < ch.near && f.intersectsSphere(sp);
+    }
   }
 
   /** The settlement: wooden houses, shops with false fronts, a church, tents, barns, yard clutter, wagons and people. */
@@ -3285,17 +3336,17 @@ class ExploreWorld {
     });
     // Covered wagons parked along the roads.
     const wagonGeo = X.wagon(), hoodGeo = X.hood();
-    T.roads.slice(0, 3).forEach(rd => rd.pts.forEach(([x, z], i) => {
-      if (!i || r() > (T.big ? 0.7 : 0.5)) return;
+    T.roads.forEach((rd, ri) => rd.pts.forEach(([x, z], i) => {
+      if (!i || r() > (ri < 3 ? (T.big ? 0.7 : 0.5) : 0.12)) return;
       const [px, pz] = rd.pts[i - 1], a = Math.atan2(x - px, z - pz), ox = Math.cos(a) * rd.w * 0.8, oz = -Math.sin(a) * rd.w * 0.8, wx = lerp(px, x, 0.5) + ox, wz = lerp(pz, z, 0.5) + oz;
       this.put('wagon', wagonGeo, M.vc, wx, this.groundAt(wx, wz), wz, 1.4, 1.4, 1.4, a);
       this.put('hood', hoodGeo, M.cloth, wx, this.groundAt(wx, wz), wz, 1.4, 1.4, 1.4, a, '#efe9dc');
     }));
     // People walking the streets.
-    const n = T.big ? (PHONE ? 40 : 70) : 8, base = new THREE.InstancedMesh(X.personBase(), M.vc, n), body = new THREE.InstancedMesh(X.personBody(), M.plain, n), c = new THREE.Color();
-    base.castShadow = body.castShadow = true;
+    const n = T.big ? (PHONE ? 60 : 110) : 12, base = new THREE.InstancedMesh(X.personBase(), M.vc, n), body = new THREE.InstancedMesh(X.personBody(), M.plain, n), c = new THREE.Color();
+    base.castShadow = body.castShadow = true; base.frustumCulled = body.frustumCulled = false;
     this.people = { base, body, list: Array.from({ length: n }, (_, i) => {
-      const rd = T.roads[i % Math.min(T.roads.length, 3)];
+      const rd = T.roads[i % 3 === 0 ? i % T.roads.length : i % Math.min(T.roads.length, 3)];
       body.setColorAt(i, c.set(pick(['#8a3a3a', '#3a5a8a', '#6a6a3a', '#e8e0d0', '#5a3a6a', '#3a6a5a', '#9a7a4a'])));
       return { rd, u: r(), sp: (0.8 + r() * 0.8) * (r() < 0.5 ? -1 : 1), off: (r() - 0.5) * rd.w * 0.8, ph: r() * 6 };
     }) };
@@ -3313,7 +3364,7 @@ class ExploreWorld {
     const veg = clamp(this.sim.vegEff * 1.15, 0, 1), dens = PHONE ? 0.6 : 1;
     const greens = pal.flora || [pal.veg];
     const scatter = (key, geo, mat, n, sc, ok, o = {}) => {
-      n = Math.floor(n * dens);
+      n = Math.floor(n * dens * this.AK);
       for (let k = 0, placed = 0; k < n * 6 && placed < n; k++) {
         const x = (r() * 2 - 1) * S * 0.49, z = (r() * 2 - 1) * S * 0.49, y = this.groundAt(x, z);
         if (this.occupied(x, z) || !ok(x, y, z)) continue;
@@ -3519,7 +3570,7 @@ class ExploreWorld {
     this.floraMat = mats.glow;
     const mat4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sv = new THREE.Vector3(), v = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0), tint = new THREE.Color();
     for (const sp of specs) {
-      const want = Math.floor(sp.n * dens);
+      const want = Math.floor(sp.n * dens * this.AK);
       if (want < 3) continue;
       this.keep(sp.geo);
       const mesh = new THREE.InstancedMesh(sp.geo, mats[sp.mat || 'flat'], want);
@@ -3536,7 +3587,7 @@ class ExploreWorld {
         n++;
       }
       if (!n) continue;
-      mesh.count = n; this.scene.add(mesh);
+      mesh.count = n; mesh.frustumCulled = false; this.scene.add(mesh);
       if (sp.tall) this.floraMeshes.push(mesh);
     }
     this.flora = this.floraMeshes[0] || null;
@@ -3852,16 +3903,16 @@ class ExploreWorld {
 
   /** Top-down camera like a strategy game: a point on the ground, a distance, a heading. */
   initRts() {
-    const p0 = this.pois[0].pos, d0 = this.gas ? 95 : 72;
+    const p0 = this.pois[0].pos, d0 = this.gas ? 110 : 95;
     this.rts = { x: p0.x, z: p0.z, tx: p0.x, tz: p0.z, dist: d0 * 1.7, tdist: d0, yaw: 0.7, tyaw: 0.7, gy: Math.max(0, this.groundAt(p0.x, p0.z)), vx: 0, vz: 0,
-      min: 14, max: this.gas ? 260 : 190 };
+      min: 14, max: this.gas ? 420 : 380 };
     this.pathSamples = this.path.getSpacedPoints(200);
   }
   rtsPose(pos, look, useTarget) {
     const R = this.rts, x = useTarget ? R.tx : R.x, z = useTarget ? R.tz : R.z, dist = useTarget ? R.tdist : R.dist, yaw = useTarget ? R.tyaw : R.yaw;
     const gy = useTarget ? Math.max(0, this.groundAt(x, z)) : R.gy;
     // Closer in, the view tilts towards the horizon; further out it looks straight down on the map.
-    const pitch = lerp(0.5, 1.12, clamp((dist - 18) / 150, 0, 1));
+    const pitch = lerp(0.5, 1.15, clamp((dist - 18) / 170, 0, 1));
     look.set(x, gy, z);
     pos.set(x + Math.sin(yaw) * Math.cos(pitch) * dist, gy + Math.sin(pitch) * dist, z + Math.cos(yaw) * Math.cos(pitch) * dist);
     pos.y = Math.max(pos.y, this.groundAt(pos.x, pos.z) + 5);
@@ -3891,11 +3942,11 @@ class ExploreWorld {
     } else {
       const R = this.rts;
       if (this.auto) {   // auto tour: glide along the loop through the points of interest
-        this.target += dt * 0.008;
+        this.target += dt * 6 / Math.max(300, this.length);
         const q = this.path.getPointAt(((this.target % 1) + 1) % 1); R.tx = q.x; R.tz = q.z; R.tyaw += dt * 0.05;
       }
       R.tx += R.vx * dt; R.tz += R.vz * dt; R.vx = damp(R.vx, 0, 3.5, dt); R.vz = damp(R.vz, 0, 3.5, dt);
-      const lim = this.S * (this.gas ? 0.3 : 0.47); R.tx = clamp(R.tx, -lim, lim); R.tz = clamp(R.tz, -lim, lim);
+      const lim = this.S * (this.gas ? 0.4 : 0.47); R.tx = clamp(R.tx, -lim, lim); R.tz = clamp(R.tz, -lim, lim);
       R.tdist = clamp(R.tdist, R.min, R.max);
       R.x = damp(R.x, R.tx, 7, dt); R.z = damp(R.z, R.tz, 7, dt); R.dist = damp(R.dist, R.tdist, 5, dt); R.yaw = damp(R.yaw, R.tyaw, 7, dt);
       R.gy = damp(R.gy, Math.max(0, this.groundAt(R.x, R.z)), 4, dt);
@@ -3934,9 +3985,14 @@ class ExploreWorld {
     this.yaw = 0;
     this.placeCamera(dt);
     if (this.seaMat) this.seaMat.uniforms.uTime.value = this.t;
+    this.cullChunks();
+    // Haze thins as the camera pulls back, so the whole map stays readable from high up.
+    if (this.scene.fog && this.rts) { this.fog0 = this.fog0 || this.scene.fog.density; this.scene.fog.density = this.fog0 * clamp(110 / this.rts.dist, 0.25, 1); }
     if (this.real) {
-      // Shadows cover the area under the camera; snap to the shadow texel grid so edges don't crawl.
-      const R = this.rts, step = 160 / this.sun.shadow.mapSize.x, fx = Math.round(R.x / step) * step, fz = Math.round(R.z / step) * step;
+      // Shadows cover the area under the camera (wider when zoomed out); snap to the texel grid so edges don't crawl.
+      const R = this.rts, ext = Math.round(clamp(R.dist * 1.1, 70, 260) / 10) * 10, sc = this.sun.shadow.camera;
+      if (sc.right !== ext) { sc.left = sc.bottom = -ext; sc.right = sc.top = ext; sc.updateProjectionMatrix(); }
+      const step = 2 * ext / this.sun.shadow.mapSize.x, fx = Math.round(R.x / step) * step, fz = Math.round(R.z / step) * step;
       this.sun.target.position.set(fx, R.gy, fz); this.sun.position.copy(this.sunDir).multiplyScalar(250).add(this.sun.target.position);
       this.sun.target.updateMatrixWorld();
     }
@@ -4649,7 +4705,7 @@ class App {
     rockGeo.computeVertexNormals();
     const rockMat = new THREE.MeshMatcapMaterial({ color: 0xb8b0cc, matcap: S.clay, flatShading: true });
     const rocks = (n, a0, a1, thick, s0, s1) => {
-      const m = new THREE.InstancedMesh(rockGeo, rockMat, n), o = new THREE.Object3D();
+      const m = new THREE.InstancedMesh(rockGeo, rockMat, n), o = new THREE.Object3D(); m.frustumCulled = false;
       for (let k = 0; k < n; k++) {
         const d = this.sysRadius(a0 + r() * (a1 - a0)), ph = r() * TAU;
         o.position.set(Math.cos(ph) * d, (r() - 0.5) * thick, Math.sin(ph) * d);
@@ -4671,7 +4727,7 @@ class App {
         o.scale.setScalar(0.12 + r() * 0.36); o.updateMatrix(); S.balls.setMatrixAt(k, o.matrix);
         S.balls.setColorAt(k, col.setHex(tones[k % tones.length]));
       } }
-    scene.add(S.balls);
+    S.balls.frustumCulled = false; scene.add(S.balls);
     // Coloured dots, sparkles and five-point stars scattered through space: they wander, twinkle and turn.
     {
       const atlas = document.createElement('canvas'); atlas.width = 192; atlas.height = 64;
