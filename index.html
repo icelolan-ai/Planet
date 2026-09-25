@@ -184,7 +184,7 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 .skip{margin-top:12px;font-size:12.5px;color:var(--ink-3)}
 
 /* ------------------------------------------------------------------ Detail */
-#detail{display:grid;grid-template-rows:auto minmax(240px,40dvh) 1fr;grid-template-areas:"bar" "stage" "body"}
+#detail,#station{display:grid;grid-template-rows:auto minmax(240px,40dvh) 1fr;grid-template-areas:"bar" "stage" "body"}
 .dbar{grid-area:bar}
 .dtitle{flex:1;text-align:center;min-width:0}
 .dtitle small{display:block;font-size:12.5px;color:var(--ink-3)}
@@ -218,6 +218,38 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 #detail.collapsing .dbody{transform:translateY(50px);opacity:0;transition:transform .22s ease-in,opacity .2s}
 #detail.expanding .dbody{animation:springup .6s cubic-bezier(.3,1.45,.5,1) both}
 @keyframes springup{from{transform:translateY(70%);opacity:0}}
+/* Space station */
+.node.station .pl{border-radius:30%}
+.node.station .st-icon{font-size:48px;line-height:1}
+.part-card{position:absolute;left:14px;top:12px;z-index:4;max-width:min(300px,calc(100% - 28px));padding:12px 14px;border-radius:16px;
+  background:rgba(var(--head),.88);border:1px solid rgba(63,214,198,.45);box-shadow:0 0 0 1px rgba(63,214,198,.08),0 12px 30px rgba(0,0,0,.4);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);animation:holo .35s var(--ease)}
+@keyframes holo{from{clip-path:inset(0 0 100% 0);opacity:.2}to{clip-path:inset(0 0 0 0);opacity:1}}
+.part-card h3{font-size:15px;display:flex;gap:8px;align-items:center}
+.part-card p{margin:6px 0 8px;font-size:12.5px;color:var(--ink-2);line-height:1.5}
+.part-card .btn{min-height:36px;font-size:13px;margin-top:8px;padding:6px 12px}
+.mod{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:12px;border-radius:16px;background:var(--card);margin-bottom:8px;transition:box-shadow .3s}
+.mod.flash{box-shadow:0 0 0 2px var(--teal)}
+.mod .em{font-size:24px;text-align:center}
+.mod strong{display:block;font-weight:500;font-size:14.5px}
+.mod small{display:block;color:var(--ink-3);font-size:12px;line-height:1.45}
+.mod-stats,.card-stats{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.mod-stats span,.card-stats span{font-size:11px;padding:1px 7px;border-radius:9px;background:var(--card-2);color:var(--ink-2);white-space:nowrap}
+.mod-stats .neg{color:#ff9bb8}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper button{width:34px;height:34px;border-radius:12px;background:var(--card-2);font-size:18px;line-height:1}
+.stepper button:disabled{opacity:.35}
+.stepper b{min-width:18px;text-align:center;font-family:var(--f-head);font-weight:500}
+.eng-row{display:flex;justify-content:space-between;font-size:13.5px}
+.eng-row span{color:var(--ink-2)}
+.meter.bad i{background:linear-gradient(90deg,#ff7a3d,#ff4f8b)}
+.warn-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.warn-list li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px}
+.warn-list small{display:block;color:var(--ink-3);font-size:12px}
+.swatches{display:flex;flex-wrap:wrap;gap:12px}
+.swatch{display:grid;justify-items:center;gap:6px;font-size:12px;color:var(--ink-2)}
+.swatch i{width:46px;height:46px;border-radius:50%;box-shadow:inset 0 0 0 3px rgba(255,255,255,.15)}
+.swatch[aria-pressed="true"] i{box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--ink)}
 .dbody{grid-area:body;display:flex;flex-direction:column;min-height:0;background:var(--panel);border-radius:26px 26px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.25)}
 .chips{flex:none;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 16px 4px}
 .chip{background:var(--card);border-radius:16px;padding:9px 6px;text-align:center;min-width:0}
@@ -329,7 +361,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 
 /* ------------------------------------------------------------------ Wide screens */
 @media (min-width:900px){
-  #detail{grid-template-columns:1fr minmax(380px,440px);grid-template-rows:auto 1fr;grid-template-areas:"stage bar" "stage body"}
+  #detail,#station{grid-template-columns:1fr minmax(380px,440px);grid-template-rows:auto 1fr;grid-template-areas:"stage bar" "stage body"}
   .dbar{background:var(--panel)}
   .dbody{border-radius:0;box-shadow:none}
   .stage-hint{bottom:24px}
@@ -429,6 +461,32 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <div class="panel" id="panel" role="tabpanel"></div>
   </div>
   <button class="panel-pill" type="button" data-expand aria-label="แสดงแผงปรับแต่ง">🎛️ <span>แผงปรับแต่ง</span><small><b class="num" data-b="temp">–</b> · O₂ <b class="num" data-b="o2">–</b></small><span aria-hidden="true">▴</span></button>
+</section>
+
+<!-- Space station -->
+<section class="screen" id="station" aria-label="สถานีอวกาศ">
+  <header class="bar dbar">
+    <button class="icon-btn" type="button" data-station-back aria-label="กลับไปที่แผนที่">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="dtitle"><small>จุดเทียบท่าของยานสำรวจ</small><h1>สถานีอวกาศ</h1></div>
+    <button class="icon-btn" type="button" data-open-menu aria-label="เปิดเมนู">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </header>
+  <div class="stage" id="stationStage">
+    <div class="stage-hint">ลากเพื่อหมุน · บีบหรือเลื่อนเพื่อซูม · แตะชิ้นส่วนเพื่อดูข้อมูล</div>
+    <div class="part-card" data-part-card hidden></div>
+  </div>
+  <div class="dbody">
+    <div class="chips" data-st-chips></div>
+    <nav class="tabs" role="tablist" aria-label="หัวข้อของสถานี" style="grid-template-columns:repeat(3,1fr)">
+      <button class="tab" role="tab" type="button" data-stab="mods" aria-selected="true">โมดูล</button>
+      <button class="tab" role="tab" type="button" data-stab="eng" aria-selected="false">วิศวกรรม</button>
+      <button class="tab" role="tab" type="button" data-stab="paint" aria-selected="false">สีสถานี</button>
+    </nav>
+    <div class="panel" id="stPanel" role="tabpanel"></div>
+  </div>
 </section>
 
 <!-- Menu -->
@@ -1330,6 +1388,205 @@ class PlanetBody {
 }
 
 /* ================================================================
+   Space station: the ship's home port, built from modules the player
+   chooses. Its engineering numbers set the ship's cruising speed.
+================================================================ */
+const ROCKET_BASE = CONFIG.rocketKmh;
+const MODULES = {
+  solar:     { icon: '☀️', name: 'แผงโซลาร์', desc: 'ผลิตไฟจากแสงดาวฤกษ์ ไม่ร้อน แต่ได้ไฟไม่มาก', max: 6, power: 14, mass: 2 },
+  reactor:   { icon: '⚛️', name: 'เครื่องปฏิกรณ์ฟิวชัน', desc: 'ไฟมหาศาล แต่ร้อนและหนัก ต้องมีแผงระบายความร้อนช่วย', max: 2, power: 40, heat: 18, mass: 9 },
+  habitat:   { icon: '🛏️', name: 'โมดูลที่พัก', desc: 'ห้องนอนและห้องครัวสำหรับลูกเรือ 4 คน', max: 4, power: -5, crew: 4, mass: 4 },
+  ring:      { icon: '🎡', name: 'วงแหวนแรงโน้มถ่วง', desc: 'หมุนรอบตัวเองเพื่อสร้างแรงโน้มถ่วงเทียม ลูกเรืออยู่ได้นานขึ้น', max: 1, power: -10, crew: 8, mass: 8 },
+  lab:       { icon: '🧪', name: 'ห้องแล็บวิจัย', desc: 'ศึกษาตัวอย่างหินและสิ่งมีชีวิตจากดาวต่าง ๆ ต้องมีนักวิจัย 2 คน', max: 3, power: -7, research: 10, crewNeed: 2, heat: 3, mass: 4 },
+  telescope: { icon: '🔭', name: 'กล้องโทรทรรศน์', desc: 'ส่องดาวที่อยู่ไกล เพิ่มงานวิจัยโดยไม่ต้องใช้คน', max: 1, power: -4, research: 6, mass: 3 },
+  dish:      { icon: '📡', name: 'จานสื่อสาร', desc: 'ส่งข้อมูลกลับบ้านและคุยกับยานสำรวจ', max: 2, power: -3, research: 2, mass: 2 },
+  fuel:      { icon: '🛢️', name: 'ถังเชื้อเพลิง', desc: 'ยิ่งมาก ยานยิ่งบินไกลได้โดยไม่ต้องแวะเติม', max: 4, fuel: 25, mass: 3 },
+  engine:    { icon: '🚀', name: 'เครื่องยนต์ไอออน', desc: 'เร่งยานสำรวจให้เร็วขึ้น 18% ต่อเครื่อง แต่กินไฟและร้อน', max: 3, power: -8, thrust: 0.18, heat: 6, mass: 3 },
+  radiator:  { icon: '❄️', name: 'แผงระบายความร้อน', desc: 'แผ่ความร้อนทิ้งออกสู่อวกาศ', max: 4, heat: -12, mass: 1 },
+  dock:      { icon: '⚓', name: 'ท่าเทียบยาน', desc: 'จุดจอดยานสำรวจ ต้องมีอย่างน้อย 1 ท่า', min: 1, max: 2, power: -1, mass: 2 }
+};
+const STATION_CORE = { icon: '🛰️', name: 'โมดูลแกนกลาง', desc: 'ห้องควบคุมและระบบช่วยชีวิตหลัก เชื่อมทุกโมดูลเข้าด้วยกัน มีไฟสำรอง ที่พัก 2 คน และถังเชื้อเพลิงในตัว' };
+const STATION_DEFAULT = { solar: 2, reactor: 0, habitat: 1, ring: 0, lab: 1, telescope: 0, dish: 1, fuel: 1, engine: 1, radiator: 1, dock: 1 };
+const PAINTS = { teal: ['#3fd6c6', 'ฟ้าอมเขียว'], gold: ['#ffc94a', 'ทอง'], violet: ['#9a6bff', 'ม่วง'], coral: ['#ff6f7d', 'ปะการัง'], white: ['#eeeaf8', 'ขาว'] };
+
+function cleanStation(st) {
+  const out = { mods: { ...STATION_DEFAULT }, paint: 'teal' };
+  if (st && st.mods) for (const k in MODULES) {
+    const v = st.mods[k];
+    if (Number.isInteger(v)) out.mods[k] = clamp(v, MODULES[k].min || 0, MODULES[k].max);
+  }
+  if (st && PAINTS[st.paint]) out.paint = st.paint;
+  return out;
+}
+
+/** Power, heat, crew and the rest, from the installed modules. Shortfalls lower efficiency. */
+function stationStats(mods) {
+  const s = { gen: 6, use: 4, heat: 4, cool: 8, crew: 2, need: 2, research: 0, fuel: 20, thrust: 0, mass: 12 };  // the core itself
+  for (const k in MODULES) {
+    const M = MODULES[k], n = mods[k] || 0;
+    if (M.power > 0) s.gen += M.power * n; else if (M.power < 0) s.use -= M.power * n;
+    if (M.heat > 0) s.heat += M.heat * n; else if (M.heat < 0) s.cool -= M.heat * n;
+    s.crew += (M.crew || 0) * n; s.need += (M.crewNeed || 0) * n;
+    s.research += (M.research || 0) * n; s.fuel += (M.fuel || 0) * n; s.thrust += (M.thrust || 0) * n; s.mass += M.mass * n;
+  }
+  s.powerEff = Math.min(1, s.gen / Math.max(1, s.use));
+  s.heatEff = Math.min(1, s.cool / Math.max(1, s.heat));
+  s.crewEff = Math.min(1, s.crew / Math.max(1, s.need));
+  const eff = s.powerEff * s.heatEff;
+  s.researchRate = s.research * eff * s.crewEff;
+  // Engines push the ship; a heavy station slows every launch.
+  s.speed = (1 + s.thrust * eff) / (1 + Math.max(0, s.mass - 30) * 0.012);
+  s.range = s.fuel * 0.16;   // AU on one load of fuel
+  s.warnings = [];
+  if (s.powerEff < 1) s.warnings.push(['⚡', 'ไฟไม่พอ', `ใช้ ${s.use} หน่วย แต่ผลิตได้ ${s.gen} ระบบทำงานได้ ${pct(s.powerEff * 100)} เพิ่มแผงโซลาร์หรือเครื่องปฏิกรณ์`]);
+  if (s.heatEff < 1) s.warnings.push(['🔥', 'ร้อนเกิน', `เกิดความร้อน ${s.heat} หน่วย แต่ระบายได้ ${s.cool} เพิ่มแผงระบายความร้อน`]);
+  if (s.crewEff < 1) s.warnings.push(['👥', 'ลูกเรือไม่พอ', `แล็บต้องการคน ${s.need} คน แต่มีที่พัก ${s.crew} คน`]);
+  return s;
+}
+
+let _solarTex = null;
+function solarTex() {
+  if (_solarTex) return _solarTex;
+  const c = document.createElement('canvas'); c.width = 64; c.height = 128;
+  const g = c.getContext('2d');
+  g.fillStyle = '#1a2f6e'; g.fillRect(0, 0, 64, 128);
+  g.strokeStyle = 'rgba(160,200,255,.55)'; g.lineWidth = 2;
+  for (let x = 0; x <= 64; x += 16) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 128); g.stroke(); }
+  for (let y = 0; y <= 128; y += 16) { g.beginPath(); g.moveTo(0, y); g.lineTo(64, y); g.stroke(); }
+  return (_solarTex = new THREE.CanvasTexture(c));
+}
+
+/** The station's 3D model. Shares PlanetBody's shape (group, spin, cur) so the map and 3D view can draw it. */
+class StationBody {
+  constructor() {
+    this.group = new THREE.Group(); this.spin = new THREE.Group(); this.group.add(this.spin);
+    this.clouds = null; this.ring = null; this.cur = { size: 1, ring: 0 }; this.target = this.cur;
+    this.t = 0; this.parts = []; this.lights = []; this.disposables = [];
+  }
+  apply() {} snap() {} rest() {}
+
+  build(mods, paint) {
+    this.disposeParts();
+    const D = this.disposables, root = this.root = new THREE.Group();
+    this.spin.add(root);
+    const n = k => mods[k] || 0, TAU = Math.PI * 2;
+    const std = (color, o = {}) => { const m = new THREE.MeshStandardMaterial({ color, metalness: 0.35, roughness: 0.55, ...o }); D.push(m); return m; };
+    const basic = color => { const m = new THREE.MeshBasicMaterial({ color }); D.push(m); return m; };
+    const G = g => { D.push(g); return g; };
+    const hull = std('#d9d5e8'), dark = std('#3a3850', { metalness: 0.55, roughness: 0.4 }), white = std('#f4f3fb', { metalness: 0.1, roughness: 0.85 });
+    const accent = std(PAINTS[paint][0], { emissive: new THREE.Color(PAINTS[paint][0]).multiplyScalar(0.22) });
+    const panel = std('#ffffff', { map: solarTex(), metalness: 0.6, roughness: 0.3, emissive: new THREE.Color('#081433') });
+    const M = (geo, mat, x = 0, y = 0, z = 0) => { const o = new THREE.Mesh(geo, mat); o.position.set(x, y, z); return o; };
+    const part = (key, ...objs) => { const g = new THREE.Group(); g.userData.mod = key; objs.forEach(o => g.add(o)); root.add(g); this.parts.push(g); return g; };
+    const light = (color, x, y, z) => { const o = M(G(new THREE.SphereGeometry(0.035, 8, 6)), basic(color), x, y, z); this.lights.push(o); return o; };
+    const alongX = g => g.rotateZ(Math.PI / 2);
+
+    // Layout along the x axis: habitats forward of the core, then engines; labs and reactors aft.
+    const fwdEnd = 0.75 + n('habitat') * 1.0, aftEnd = -0.75 - n('lab') * 0.8 - n('reactor') * 0.9;
+    const span = fwdEnd - aftEnd;
+    // Core and truss.
+    part('core',
+      M(alongX(G(new THREE.CylinderGeometry(0.34, 0.34, 1.3, 24))), hull),
+      M(alongX(G(new THREE.CylinderGeometry(0.36, 0.36, 0.1, 24))), accent, 0.45), M(alongX(G(new THREE.CylinderGeometry(0.36, 0.36, 0.1, 24))), accent, -0.45),
+      M(G(new THREE.BoxGeometry(span + 0.4, 0.07, 0.07)), dark, (fwdEnd + aftEnd) / 2),
+      light('#ff4f6d', aftEnd - 0.2, 0.1, 0), light('#4fff9b', fwdEnd + 0.2, 0.1, 0));
+    // Habitats: cylinders with a row of lit windows.
+    for (let i = 0; i < n('habitat'); i++) {
+      const x = 1.2 + i * 1.0, win = G(new THREE.BoxGeometry(0.07, 0.05, 0.02));
+      const wins = Array.from({ length: 6 }, (_, k) => M(win, basic('#ffe3a0'), x - 0.3 + k * 0.12, 0.12, 0.3));
+      part('habitat', M(alongX(G(new THREE.CylinderGeometry(0.3, 0.3, 0.85, 24))), hull, x), M(alongX(G(new THREE.TorusGeometry(0.3, 0.035, 8, 24))), accent, x + 0.42), ...wins);
+    }
+    // Labs: spheres with a band.
+    for (let i = 0; i < n('lab'); i++) {
+      const x = -1.15 - i * 0.8, band = G(new THREE.TorusGeometry(0.34, 0.03, 8, 32)); band.rotateY(Math.PI / 2);
+      part('lab', M(G(new THREE.SphereGeometry(0.33, 24, 16)), hull, x), M(band, accent, x), M(G(new THREE.BoxGeometry(0.16, 0.1, 0.02)), basic('#8ff5ff'), x, 0.05, 0.33));
+    }
+    // Reactors: dark drums with a glowing core ring.
+    for (let i = 0; i < n('reactor'); i++) {
+      const x = -1.15 - n('lab') * 0.8 - 0.1 - i * 0.9, glow = G(new THREE.TorusGeometry(0.27, 0.05, 10, 32)); glow.rotateY(Math.PI / 2);
+      part('reactor', M(alongX(G(new THREE.CylinderGeometry(0.26, 0.3, 0.7, 20))), dark, x), M(glow, basic('#ff9a3d'), x));
+    }
+    // Engines at the forward end, clustered round the axis.
+    this.flames = [];
+    for (let i = 0; i < n('engine'); i++) {
+      const a = i / Math.max(1, n('engine')) * TAU, off = n('engine') > 1 ? 0.24 : 0;
+      const y = Math.cos(a) * off, z = Math.sin(a) * off;
+      const flame = M(G(new THREE.SphereGeometry(0.1, 12, 8)), basic('#7fd8ff'), fwdEnd + 0.62, y, z);
+      this.flames.push(flame);
+      part('engine', M(G(new THREE.ConeGeometry(0.17, 0.42, 16).rotateZ(-Math.PI / 2)), dark, fwdEnd + 0.35, y, z), flame);
+    }
+    // Solar wings along the truss.
+    for (let i = 0; i < n('solar'); i++) {
+      const x = aftEnd + span * (i + 0.5) / n('solar');
+      const wing = G(new THREE.BoxGeometry(0.5, 0.02, 1.0)), arm = G(new THREE.BoxGeometry(0.04, 0.04, 0.5));
+      part('solar', M(arm, dark, x, 0, 0.45), M(arm, dark, x, 0, -0.45), M(wing, panel, x, 0, 0.98), M(wing, panel, x, 0, -0.98),
+        light('#ff4f6d', x, 0, 1.5), light('#4fff9b', x, 0, -1.5));
+    }
+    // Radiators: white fins above and below.
+    for (let i = 0; i < n('radiator'); i++) {
+      const x = aftEnd + span * (i + 0.3) / Math.max(1, n('radiator')), up = i % 2 ? -1 : 1;
+      part('radiator', M(G(new THREE.BoxGeometry(0.45, 0.8, 0.02)), white, x, up * 0.62, 0), M(G(new THREE.BoxGeometry(0.03, 0.3, 0.03)), dark, x, up * 0.2, 0));
+    }
+    // Fuel tanks wrapped round the core.
+    for (let i = 0; i < n('fuel'); i++) {
+      const a = Math.PI / 4 + i * Math.PI / 2, y = Math.cos(a) * 0.5, z = Math.sin(a) * 0.5;
+      part('fuel', M(alongX(G(new THREE.CylinderGeometry(0.14, 0.14, 0.5, 16))), accent, 0, y, z),
+        M(G(new THREE.SphereGeometry(0.14, 16, 10)), accent, 0.25, y, z), M(G(new THREE.SphereGeometry(0.14, 16, 10)), accent, -0.25, y, z));
+    }
+    // Dishes on masts.
+    this.dishes = [];
+    for (let i = 0; i < n('dish'); i++) {
+      const up = i ? -1 : 1, x = 0.15, head = new THREE.Group();
+      head.position.set(x, up * 0.85, 0);
+      const bowl = M(G(new THREE.SphereGeometry(0.3, 24, 10, 0, TAU, 0, 0.95)), white); bowl.rotation.x = up > 0 ? Math.PI : 0;
+      head.add(bowl, M(G(new THREE.CylinderGeometry(0.015, 0.015, 0.3, 6)), dark, 0, up * -0.05, 0));
+      this.dishes.push(head);
+      part('dish', M(G(new THREE.CylinderGeometry(0.03, 0.03, 0.55, 8)), dark, x, up * 0.55, 0), head);
+    }
+    // Telescope below the truss.
+    if (n('telescope')) {
+      const tube = alongX(G(new THREE.CylinderGeometry(0.13, 0.15, 1.1, 20)));
+      const lens = G(new THREE.CircleGeometry(0.12, 20)); lens.rotateY(Math.PI / 2);
+      part('telescope', M(tube, hull, -0.3, -0.5, 0), M(lens, basic('#8fd3ff'), 0.26, -0.5, 0), M(G(new THREE.BoxGeometry(0.05, 0.25, 0.05)), dark, -0.3, -0.3, 0));
+    }
+    // Docking ports on the core's sides.
+    for (let i = 0; i < n('dock'); i++) {
+      const side = i ? -1 : 1, port = G(new THREE.CylinderGeometry(0.12, 0.12, 0.26, 16)); port.rotateX(Math.PI / 2);
+      part('dock', M(port, accent, 0.1, 0, side * 0.45), light('#ffd34f', 0.1, 0.14, side * 0.6));
+    }
+    // Gravity ring round the core, turning on its spokes.
+    this.ringPart = null;
+    if (n('ring')) {
+      const hub = new THREE.Group(); hub.position.x = -0.1;
+      const torus = G(new THREE.TorusGeometry(1.3, 0.09, 12, 64)); torus.rotateY(Math.PI / 2);
+      hub.add(M(torus, hull));
+      for (let k = 0; k < 4; k++) { const sp = M(G(new THREE.BoxGeometry(0.04, 1.25, 0.04)), dark); sp.rotation.x = k * Math.PI / 4; hub.add(sp); }
+      this.ringPart = hub;
+      part('ring', hub);
+    }
+    // Centre and scale so the whole station sits inside a radius of about 1.15.
+    const sphere = new THREE.Box3().setFromObject(root).getBoundingSphere(new THREE.Sphere());
+    const k = 1.15 / Math.max(0.5, sphere.radius);
+    root.scale.setScalar(k); root.position.copy(sphere.center).multiplyScalar(-k);
+  }
+
+  update(dt) {
+    this.t += dt;
+    if (this.ringPart) this.ringPart.rotation.x += dt * 0.7;
+    this.dishes.forEach((d, i) => { d.rotation.y = Math.sin(this.t * 0.4 + i * 2) * 0.8; });
+    this.lights.forEach((l, i) => { l.visible = Math.sin(this.t * 3 + i * 1.7) > -0.2; });
+    this.flames.forEach((f, i) => f.scale.setScalar(0.85 + 0.25 * Math.sin(this.t * 14 + i)));
+  }
+
+  disposeParts() {
+    if (this.root) this.spin.remove(this.root);
+    this.disposables.forEach(d => d.dispose());
+    this.disposables = []; this.parts = []; this.lights = []; this.flames = []; this.dishes = []; this.root = null;
+  }
+  dispose() { this.disposeParts(); }
+}
+
+/* ================================================================
    Renderer: one WebGL context serves the live view and the map
    thumbnails.
 ================================================================ */
@@ -1363,7 +1620,8 @@ class Stage {
     }
   }
   /** Back to the planet view. */
-  detailMode() {
+  detailMode(host) {
+    if (host) this.host = host;
     const c = this.renderer.domElement;
     if (c.parentNode !== this.host) { this.host.prepend(c); c.classList.remove('planets-layer'); }
     this.mode = 'detail';
@@ -1504,6 +1762,7 @@ const Store = {
     if (BG_MODES.includes(s.bg)) base.bg = s.bg;
     if (SPEEDS.includes(s.speed)) base.speed = s.speed;
     if (s.view === '3d') base.view = '3d';
+    base.station = cleanStation(s.station);
     base.visited = Array.isArray(s.visited) ? s.visited : [];
     allPlanets().forEach(p => {
       const saved = s.planets && s.planets[p.id];
@@ -1515,7 +1774,7 @@ const Store = {
     return base;
   },
   fresh() {
-    return { v: 1, at: -1, visited: [], sound: false, secret: false, bg: 'dark', speed: REDUCED ? 0 : 1, view: 'map', planets: Object.fromEntries(allPlanets().map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
+    return { v: 1, at: -1, visited: [], sound: false, secret: false, bg: 'dark', speed: REDUCED ? 0 : 1, view: 'map', station: cleanStation(null), planets: Object.fromEntries(allPlanets().map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
   },
   save(state) { try { localStorage.setItem(CONFIG.storeKey, JSON.stringify(state)); } catch (e) { /* storage may be unavailable; progress stays in memory */ } }
 };
@@ -1628,6 +1887,9 @@ class App {
     this.spaceT = 0; this.gFrame = 0; this.mraf = null;
     this.loop = this.loop.bind(this);
     this.mapFrame = this.mapFrame.bind(this);
+    this.stationFrame = this.stationFrame.bind(this);
+    this.sraf = null; this.stTab = 'mods'; this.inStation = false;
+    this.applyStationSpeed();
   }
 
   async init() {
@@ -1650,6 +1912,8 @@ class App {
         await frame();
         this.makeBody(p);
       }
+      this.station = new StationBody();
+      this.station.build(this.state.station.mods, this.state.station.paint);
     }
     step(1, 'พร้อมออกเดินทาง');
     this.buildMap();
@@ -1772,6 +2036,19 @@ class App {
       return { btn, no, size, pl: btn.querySelector('.pl'), spin: i * 1.3 };
     });
 
+    // The space station, where the ship docks, beside the star.
+    const sn = this.nodes[0];
+    this.stationPos = { x: clamp(sn.x - 150, 58, W - 58), y: sn.y + 24 };
+    const sb = document.createElement('button');
+    sb.type = 'button'; sb.className = 'node station';
+    sb.style.left = this.stationPos.x + 'px'; sb.style.top = this.stationPos.y + 'px';
+    sb.setAttribute('aria-label', 'สถานีอวกาศ จุดเทียบท่าของยาน');
+    sb.innerHTML = (this.noGL ? '<span class="st-icon" aria-hidden="true">🛰️</span>' : '<span class="pl" style="width:84px;height:84px;--d:-3s"></span>') +
+      '<span class="node-name">สถานีอวกาศ</span><span class="node-kind">จุดเทียบท่า</span>';
+    sb.addEventListener('click', () => this.goStation());
+    j.appendChild(sb);
+    this.stationEl = { btn: sb, pl: sb.querySelector('.pl'), spin: 0 };
+
     const finish = document.createElement('div');
     finish.className = 'stepno'; finish.style.left = (W * 0.5) + 'px'; finish.style.top = (H - 50) + 'px';
     finish.innerHTML = '<i></i>ขอบระบบดาว';
@@ -1844,6 +2121,15 @@ class App {
       el.spin += dt * (0.05 + 2 * Math.PI / (p.dayH * 1.3));
       this.stage.drawAt(body, el.spin, r.left - mr.left, r.top - mr.top, r.width, clipTop);
     });
+    const se = this.stationEl;
+    if (se && se.pl && this.station) {
+      const r = se.pl.getBoundingClientRect();
+      if (r.bottom >= mr.top && r.top <= mr.bottom) {
+        if (dt) this.station.update(dt);
+        se.spin += dt * 0.25;
+        this.stage.drawAt(this.station, se.spin, r.left - mr.left, r.top - mr.top, r.width, clipTop);
+      }
+    }
     this.stage.endMap();
   }
 
@@ -2134,6 +2420,19 @@ class App {
       // Orbital speed falls off with distance (Kepler); the rogue planet crawls on its tilted path.
       S.holders[p.id] = { plane, holder, line, moons, label, R, a: rr() * TAU, w: p.secret ? 0.004 : 0.16 / Math.pow(p.au, 1.5), spin: rr() * TAU };
     });
+    if (!S.station && this.station) {
+      const plane = new THREE.Group(), R = 3.6, TAU = Math.PI * 2;
+      const pos = new Float32Array(129 * 3);
+      for (let k = 0; k <= 128; k++) { const a = k / 128 * TAU; pos[k * 3] = Math.cos(a) * R; pos[k * 3 + 2] = Math.sin(a) * R; }
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      plane.add(new THREE.Line(g, S.orbitDone));
+      const holder = new THREE.Group(); holder.scale.setScalar(0.4); plane.add(holder);
+      S.scene.add(plane);
+      const label = document.createElement('div');
+      label.className = 'sys-label'; label.innerHTML = '<b>🛰️ สถานีอวกาศ</b><small>จุดเทียบท่า</small>';
+      labels.appendChild(label);
+      S.station = { plane, holder, label, R, a: 1.2, w: 0.25, spin: 0 };
+    }
     // A planet hidden again by "reset all" loses its orbit.
     Object.keys(S.holders).forEach(id => {
       if (PLANETS.some(p => p.id === id)) return;
@@ -2150,6 +2449,7 @@ class App {
       this.sys.holders[p.id].holder.add(body.group);
       body.group.rotation.set(0.28, 0, 0);
     });
+    if (this.sys.station) { this.sys.station.holder.add(this.station.group); this.station.group.rotation.set(0.35, 0, 0); }
     $('[data-sys-hit]').style.top = '0px';   // the header's buttons sit above it
     this.drawSystem(0);
   }
@@ -2192,6 +2492,17 @@ class App {
       h.label.style.opacity = show ? '1' : '0';
       if (show) h.label.style.transform = `translate(${x.toFixed(1)}px,${(y + off).toFixed(1)}px) translateX(-50%)`;
     });
+    if (S.station) {
+      const h = S.station;
+      h.a += dt * h.w; h.spin += dt * 0.3;
+      h.holder.position.set(Math.cos(h.a) * h.R, 0, Math.sin(h.a) * h.R);
+      this.station.update(dt); this.station.spin.rotation.y = h.spin;
+      h.holder.getWorldPosition(v); v.project(cam);
+      const x = (v.x + 1) / 2 * mr.width, y = (1 - v.y) / 2 * mr.height;
+      const show = v.z < 1 && y < mr.height;
+      h.label.style.opacity = show ? '1' : '0';
+      if (show) h.label.style.transform = `translate(${x.toFixed(1)}px,${(y + 12 + 160 / S.dist).toFixed(1)}px) translateX(-50%)`;
+    }
     // Render below the header, with each planet lit from the star.
     this.stage.mapMode(map);
     const r = this.stage.renderer;
@@ -2255,8 +2566,220 @@ class App {
       if ((onLabel || Math.hypot(px - x, py - y) < Math.max(30, radius * 1.5)) && depth < bestZ) { bestZ = depth; best = i; }
     });
     if (best >= 0) { this.travel(best); return; }
+    if (S.station) {
+      const h = S.station, lr = h.label.getBoundingClientRect();
+      h.holder.getWorldPosition(v); v.project(S.cam);
+      const onLabel = e.clientX >= lr.left && e.clientX <= lr.right && e.clientY >= lr.top && e.clientY <= lr.bottom;
+      if (onLabel || (v.z < 1 && Math.hypot((v.x + 1) / 2 * mr.width - x, (1 - v.y) / 2 * mr.height - y) < 34)) { this.goStation(); return; }
+    }
     v.set(0, 0, 0).project(S.cam);
     if (Math.hypot((v.x + 1) / 2 * mr.width - x, (1 - v.y) / 2 * mr.height - y) < 1.8 * f / S.dist) this.pokeSun(null);
+  }
+
+  /* ---------------- Space station ---------------- */
+  applyStationSpeed() {
+    this.stStats = stationStats(this.state.station.mods);
+    CONFIG.rocketKmh = Math.round(ROCKET_BASE * this.stStats.speed);
+  }
+
+  /** Fly back to the station (if the ship is elsewhere), then open it. */
+  async goStation() {
+    if (this.busy) return;
+    this.busy = true;
+    this.toggleFuel(false);
+    const from = this.state.at;
+    if (!this.noGL && from !== -1) { if (!this.sys3d) await this.animateRocket(from, -1); await this.launch(from, -1); }
+    this.state.at = -1; this.save();
+    this.openStation();
+    this.busy = false;
+  }
+
+  openStation() {
+    this.inStation = true;
+    this.stopMapLoop();
+    $('#map').classList.remove('is-active');
+    $('#station').classList.add('is-active');
+    if (!this.noGL) {
+      this.stage.scene.children.filter(o => o.isGroup).forEach(o => this.stage.scene.remove(o));
+      this.stage.scene.add(this.station.group);
+      this.stage.detailMode($('#stationStage'));
+      this.stRot = { x: 0.35, y: -0.7, vx: 0, vy: 0.15, zoom: 1 };
+      this.stage.camera.position.set(0, 0, this.stage.fitDistance(this.station, this.stage.camera, 1.15) * 1.8);
+      this.startStationLoop();
+    }
+    this.renderStation();
+  }
+
+  closeStation() {
+    this.stopStationLoop();
+    this.clearPart();
+    this.inStation = false;
+    $('#station').classList.remove('is-active');
+    $('#map').classList.add('is-active');
+    // Travel times depend on the station's engines, so the map's labels are rebuilt.
+    const top = $('#mapScroll').scrollTop; this.buildMap(); $('#mapScroll').scrollTop = top;
+    this.updateZone();
+    if (this.sys3d) this.enterSystem(); else this.drawLivePlanets(0);
+    this.startMapLoop();
+  }
+
+  startStationLoop() { if (this.sraf) return; this.slast = performance.now(); this.sraf = requestAnimationFrame(this.stationFrame); }
+  stopStationLoop() { cancelAnimationFrame(this.sraf); this.sraf = null; }
+  stationFrame(now) {
+    this.sraf = requestAnimationFrame(this.stationFrame);
+    const dt = Math.min(0.05, (now - this.slast) / 1000 || 0.016); this.slast = now;
+    const st = this.station, R = this.stRot, cam = this.stage.camera;
+    st.update(dt);
+    if (!this.sdrag) { R.vy = damp(R.vy, REDUCED ? 0.03 : 0.15, 1.2, dt); R.vx = damp(R.vx, 0, 2, dt); }
+    R.y += R.vy * dt; R.x = clamp(R.x + R.vx * dt, -1.2, 1.2);
+    st.group.rotation.set(R.x, 0, 0); st.spin.rotation.y = R.y;
+    const target = this.stage.fitDistance(st, cam, 1.15) * R.zoom;
+    cam.position.set(0, 0, damp(cam.position.z, target, 3, dt)); cam.lookAt(0, 0, 0);
+    if (this.hl) this.hl.update();
+    this.stage.render();
+  }
+
+  bindStation() {
+    $('[data-station-back]').addEventListener('click', () => this.closeStation());
+    $$('.tab[data-stab]').forEach(t => t.addEventListener('click', () => { this.stTab = t.dataset.stab; this.renderStation(); }));
+    const panel = $('#stPanel');
+    panel.addEventListener('click', e => {
+      const inc = e.target.closest('[data-inc]'), dec = e.target.closest('[data-dec]'), paint = e.target.closest('[data-paint]');
+      if (inc) this.changeModule(inc.dataset.inc, 1);
+      if (dec) this.changeModule(dec.dataset.dec, -1);
+      if (paint) this.setPaint(paint.dataset.paint);
+    });
+    // Drag to turn the station, pinch or scroll to zoom, tap a part to inspect it.
+    const el = $('#stationStage'), pts = new Map();
+    let tap = null, pinch = 0;
+    el.addEventListener('pointerdown', e => {
+      if (e.target.closest('button,.part-card')) return;
+      el.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      this.sdrag = true;
+      tap = pts.size === 1 ? { x: e.clientX, y: e.clientY, t: performance.now() } : null;
+      if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = Math.hypot(a.x - b.x, a.y - b.y); }
+    });
+    el.addEventListener('pointermove', e => {
+      const p = pts.get(e.pointerId); if (!p || !this.stRot) return;
+      const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
+      const R = this.stRot;
+      if (pts.size === 1) { R.y += dx * 0.008; R.x = clamp(R.x + dy * 0.006, -1.2, 1.2); R.vy = dx * 0.5; R.vx = dy * 0.36; }
+      else if (pts.size === 2) { const [a, b] = [...pts.values()], d = Math.hypot(a.x - b.x, a.y - b.y); if (pinch) R.zoom = clamp(R.zoom * pinch / d, 0.45, 1.8); pinch = d; tap = null; }
+    });
+    const up = e => {
+      pts.delete(e.pointerId);
+      if (tap && e.type === 'pointerup' && Math.hypot(e.clientX - tap.x, e.clientY - tap.y) < 8 && performance.now() - tap.t < 350) this.pickPart(e);
+      if (!pts.size) { this.sdrag = false; tap = null; pinch = 0; }
+    };
+    el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+    el.addEventListener('wheel', e => { if (!this.stRot) return; e.preventDefault(); this.stRot.zoom = clamp(this.stRot.zoom * (1 + e.deltaY * 0.0012), 0.45, 1.8); }, { passive: false });
+    $('[data-part-card]').addEventListener('click', e => {
+      const b = e.target.closest('[data-goto-mod]'); if (!b) return;
+      this.stTab = 'mods'; this.renderStation();
+      const row = $(`.mod[data-mod="${b.dataset.gotoMod}"]`);
+      if (row) { row.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' }); row.classList.add('flash'); setTimeout(() => row.classList.remove('flash'), 1200); }
+    });
+  }
+
+  pickPart(e) {
+    if (this.noGL) return;
+    const r = $('#stationStage').getBoundingClientRect();
+    this.ray = this.ray || new THREE.Raycaster();
+    this.ray.setFromCamera({ x: (e.clientX - r.left) / r.width * 2 - 1, y: -(e.clientY - r.top) / r.height * 2 + 1 }, this.stage.camera);
+    const hit = this.ray.intersectObjects(this.station.parts, true)[0];
+    if (!hit) { this.clearPart(); return; }
+    let o = hit.object; while (o && !o.userData.mod) o = o.parent;
+    if (o) this.showPart(o);
+  }
+
+  showPart(group) {
+    this.clearPart();
+    this.hl = new THREE.BoxHelper(group, 0x3fd6c6);
+    this.stage.scene.add(this.hl);
+    const key = group.userData.mod, M = MODULES[key] || STATION_CORE, n = this.state.station.mods[key];
+    const card = $('[data-part-card]');
+    card.innerHTML = `<h3><span>${M.icon}</span>${M.name}</h3><p>${M.desc}</p><div class="card-stats">${key === 'core' ? '<span>⚡ +6</span><span>👥 2 คน</span><span>⛽ +20</span>' : this.modChips(M)}</div>` +
+      (key === 'core' ? '' : `<button class="btn ghost" type="button" data-goto-mod="${key}">ติดตั้งอยู่ ${n} ชิ้น · ปรับจำนวน</button>`);
+    card.hidden = false;
+    Sound.tap();
+  }
+  clearPart() {
+    if (this.hl) { this.stage.scene.remove(this.hl); this.hl.geometry.dispose(); this.hl.material.dispose(); this.hl = null; }
+    $('[data-part-card]').hidden = true;
+  }
+
+  modChips(M) {
+    const c = [];
+    if (M.power) c.push(`<span class="${M.power < 0 ? 'neg' : ''}">⚡ ${M.power > 0 ? '+' : ''}${M.power}</span>`);
+    if (M.heat > 0) c.push(`<span class="neg">🔥 +${M.heat}</span>`);
+    if (M.heat < 0) c.push(`<span>❄️ ${M.heat}</span>`);
+    if (M.crew) c.push(`<span>👥 +${M.crew} คน</span>`);
+    if (M.crewNeed) c.push(`<span class="neg">👷 ใช้ ${M.crewNeed} คน</span>`);
+    if (M.research) c.push(`<span>🔬 +${M.research}</span>`);
+    if (M.fuel) c.push(`<span>⛽ +${M.fuel}</span>`);
+    if (M.thrust) c.push(`<span>🚀 +${Math.round(M.thrust * 100)}%</span>`);
+    c.push(`<span>⚖️ ${M.mass} ตัน</span>`);
+    return c.join('');
+  }
+
+  changeModule(key, d) {
+    const M = MODULES[key], mods = this.state.station.mods, v = clamp((mods[key] || 0) + d, M.min || 0, M.max);
+    if (v === mods[key]) return;
+    mods[key] = v;
+    this.save();
+    this.applyStationSpeed();
+    if (this.station) { this.clearPart(); this.station.build(mods, this.state.station.paint); }
+    Sound.tick(v / M.max);
+    const panel = $('#stPanel'), top = panel.scrollTop;
+    this.renderStation(); panel.scrollTop = top;
+  }
+
+  setPaint(key) {
+    if (!PAINTS[key]) return;
+    this.state.station.paint = key; this.save();
+    if (this.station) { this.clearPart(); this.station.build(this.state.station.mods, key); }
+    Sound.tap();
+    this.renderStation();
+  }
+
+  renderStation() {
+    const s = this.stStats, mods = this.state.station.mods, tab = this.stTab;
+    $$('.tab[data-stab]').forEach(t => t.setAttribute('aria-selected', String(t.dataset.stab === tab)));
+    const net = s.gen - s.use;
+    $('[data-st-chips]').innerHTML = [
+      ['พลังงาน', `${net >= 0 ? '+' : ''}${net}`], ['ความร้อน', pct(s.heat / s.cool * 100)],
+      ['ลูกเรือ', `${s.crew} คน`], ['ความเร็วยาน', `×${s.speed.toFixed(2)}`]
+    ].map(([k, v]) => `<div class="chip"><small>${k}</small><b class="num">${v}</b></div>`).join('');
+    let html = '';
+    if (tab === 'mods') {
+      html = `<p class="lead">เพิ่มหรือลดโมดูลเพื่อออกแบบสถานี แต่ละชิ้นมีผลต่อพลังงาน ความร้อน ลูกเรือ และความเร็วของยานสำรวจ</p>` +
+        Object.entries(MODULES).map(([k, M]) => `<div class="mod" data-mod="${k}"><span class="em" aria-hidden="true">${M.icon}</span>
+          <div><strong>${M.name}</strong><small>${M.desc}</small><div class="mod-stats">${this.modChips(M)}</div></div>
+          <div class="stepper"><button type="button" data-dec="${k}" aria-label="ลด${M.name}" ${mods[k] <= (M.min || 0) ? 'disabled' : ''}>−</button>
+          <b class="num">${mods[k]}</b><button type="button" data-inc="${k}" aria-label="เพิ่ม${M.name}" ${mods[k] >= M.max ? 'disabled' : ''}>+</button></div></div>`).join('');
+    } else if (tab === 'eng') {
+      const far = PLANETS.filter(p => !p.secret).slice(-1)[0], farKm = far.au * CONFIG.auKm;
+      const bar = (label, a, b, text, bad) => `<div class="card"><div class="eng-row"><span>${label}</span><b class="num">${text}</b></div>
+        <div class="meter${bad ? ' bad' : ''}"><i style="width:${clamp(a / Math.max(1, b) * 100, 0, 100).toFixed(1)}%"></i></div></div>`;
+      html = bar('⚡ พลังงาน: ใช้ / ผลิต', s.use, s.gen, `${s.use} / ${s.gen}`, s.use > s.gen) +
+        bar('🔥 ความร้อน: เกิด / ระบายได้', s.heat, s.cool, `${s.heat} / ${s.cool}`, s.heat > s.cool) +
+        bar('👥 ลูกเรือ: ต้องการ / ที่พัก', s.need, s.crew, `${s.need} / ${s.crew} คน`, s.need > s.crew) +
+        `<div class="grid2">
+          <div class="card stat"><small>ความเร็วยานสำรวจ</small><b class="num">${nf.format(CONFIG.rocketKmh)}</b><em>กม./ชม. (×${s.speed.toFixed(2)})</em></div>
+          <div class="card stat"><small>บินไปดาว${far.name}</small><b class="num">${fmtTravel(farKm)}</b><em>จากสถานี</em></div>
+          <div class="card stat"><small>งานวิจัย</small><b class="num">${s.researchRate.toFixed(1)}</b><em>หน่วยต่อวัน</em></div>
+          <div class="card stat"><small>บินได้ต่อการเติม 1 ครั้ง</small><b class="num">${s.range.toFixed(1)}</b><em>หน่วยดาราศาสตร์</em></div>
+          <div class="card stat"><small>มวลรวม</small><b class="num">${s.mass}</b><em>ตัน ยิ่งหนักยิ่งช้า</em></div>
+          <div class="card stat"><small>ประสิทธิภาพระบบ</small><b class="num">${pct(s.powerEff * s.heatEff * 100)}</b><em>จากไฟและความร้อน</em></div>
+        </div>
+        <h3>สถานะระบบ</h3><div class="card"><ul class="warn-list">${s.warnings.length ? s.warnings.map(([i, t, d]) => `<li><span>${i}</span><div><b>${t}</b><small>${d}</small></div></li>`).join('') : '<li><span>✅</span><div><b>ทุกระบบปกติ</b><small>ไฟพอ ระบายความร้อนทัน และลูกเรือพอ</small></div></li>'}</ul></div>
+        <p class="note">ความเร็วยานมาจากเครื่องยนต์ไอออน หักด้วยมวลของสถานีที่เกิน 30 ตัน ถ้าไฟไม่พอหรือร้อนเกิน เครื่องยนต์จะทำงานได้ไม่เต็มที่</p>`;
+    } else {
+      html = `<p class="lead">เลือกสีประจำสถานี ใช้กับแถบลำตัว ถังเชื้อเพลิง และท่าเทียบยาน</p><div class="card"><div class="swatches">` +
+        Object.entries(PAINTS).map(([k, [c, n]]) => `<button class="swatch" type="button" data-paint="${k}" aria-pressed="${this.state.station.paint === k}"><i style="background:${c}"></i>${n}</button>`).join('') +
+        `</div></div>`;
+    }
+    $('#stPanel').innerHTML = html;
   }
 
   /* ---------------- Settings ---------------- */
@@ -2321,7 +2844,7 @@ class App {
     clearTimeout(this.zoneT); this.zoneT = setTimeout(show, 200);
   }
 
-  rocketSpot(i) { if (i < 0) { const n = this.nodes[0]; return { x: n.x - 92, y: n.y + 6, a: 30 }; } const n = this.nodes[i + 1]; const W = Math.min(480, innerWidth); const side = n.x < W / 2 ? 1 : -1; return { x: n.x + side * 70, y: n.y + 30, a: side > 0 ? 20 : -20 }; }
+  rocketSpot(i) { if (i < 0) { const s = this.stationPos; return { x: s.x + 56, y: s.y - 30, a: 30 }; } const n = this.nodes[i + 1]; const W = Math.min(480, innerWidth); const side = n.x < W / 2 ? 1 : -1; return { x: n.x + side * 70, y: n.y + 30, a: side > 0 ? 20 : -20 }; }
   placeRocket(i) { const s = this.rocketSpot(i); this.rocketEl.style.transform = `translate(${s.x - 23}px,${s.y - 23}px) rotate(${s.a}deg)`; }
 
   /** Fly the map rocket along the dashed route between two stops. */
@@ -2393,10 +2916,10 @@ class App {
   launch(from, to) {
     return new Promise(resolve => {
       const el = $('#launch'), sky = $('[data-launch-sky]');
-      const a = from < 0 ? 0 : PLANETS[from].au, b = PLANETS[to].au;
-      const km = Math.abs(b - a) * CONFIG.auKm;
-      $('[data-trip]').innerHTML = `จาก <b>${from < 0 ? 'ดาวฤกษ์' + STAR.name : 'ดาว' + PLANETS[from].name}</b> ไป <b>ดาว${PLANETS[to].name}</b>
-        <span class="big">${fmtKm(km)}</span>ใช้เวลาเดินทาง ${fmtTravel(km)}`;
+      const au = i => i < 0 ? 0 : PLANETS[i].au, name = i => i < 0 ? 'สถานีอวกาศ' : 'ดาว' + PLANETS[i].name;
+      const d = Math.abs(au(to) - au(from)), km = d * CONFIG.auKm, stops = Math.floor(d / this.stStats.range);
+      $('[data-trip]').innerHTML = `จาก <b>${name(from)}</b> ไป <b>${name(to)}</b>
+        <span class="big">${fmtKm(km)}</span>ใช้เวลาเดินทาง ${fmtTravel(km)}${stops ? `<br>ต้องแวะเติมเชื้อเพลิงระหว่างทาง ${stops} ครั้ง` : ''}`;
       let puffs = '';
       const r = rng(to + 5);
       for (let k = 0; k < 16; k++) {
@@ -2441,7 +2964,7 @@ class App {
       this.stage.scene.add(body.group);
       body.group.rotation.set(0, 0, 0);
       this.rotX = 0.3; this.rotY = -0.4; this.velY = 0.12;
-      this.stage.detailMode();
+      this.stage.detailMode($('#stage'));
       this.stage.camZ = this.stage.fitDistance(body, this.stage.camera, 1.12);
       this.stage.camera.position.set(0, 0, this.stage.camZ * 1.35);
       this.arrive = REDUCED ? 1 : 0;
@@ -2513,7 +3036,7 @@ class App {
 
   setTab(tab) {
     this.tab = tab;
-    $$('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === tab)));
+    $$('.tab[data-tab]').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === tab)));
     const p = PLANETS[this.current], st = this.state.planets[p.id];
     const panel = $('#panel');
     panel.innerHTML = this['tab_' + tab](p, st);
@@ -2777,10 +3300,14 @@ class App {
     $('[data-view3d]').addEventListener('click', () => this.setView(this.sys3d ? 'map' : '3d'));
     $('[data-expand]').addEventListener('click', () => this.expandPanel());
     // The planet view resizes when the controls fold or unfold.
-    if (window.ResizeObserver) new ResizeObserver(() => { if (this.stage && this.stage.mode === 'detail') this.stage.resize(); }).observe($('#stage'));
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => { if (this.stage && this.stage.mode === 'detail') this.stage.resize(); });
+      ro.observe($('#stage')); ro.observe($('#stationStage'));
+    }
     $('[data-fuel-toggle]').addEventListener('click', e => { e.stopPropagation(); this.toggleFuel(); });
     $('#map').addEventListener('click', e => { if (!e.target.closest('.map-dock')) this.toggleFuel(false); });
-    $$('.tab').forEach(t => t.addEventListener('click', () => this.setTab(t.dataset.tab)));
+    $$('.tab[data-tab]').forEach(t => t.addEventListener('click', () => this.setTab(t.dataset.tab)));
+    this.bindStation();
     $('#panel').addEventListener('input', e => { if (e.target.matches('[data-ctl]')) this.onSlider(e.target); });
     $('#panel').addEventListener('click', e => {
       const d = e.target.closest('[data-do]'); if (d) this.doAction(d.dataset.do);
@@ -2841,6 +3368,7 @@ class App {
     addEventListener('keydown', e => {
       if (e.key !== 'Escape') return;
       if (!$('#menu').hidden) this.closeMenu();
+      else if (this.inStation) this.closeStation();
       else if (this.current >= 0) this.leaveDetail();
     });
 
@@ -2855,7 +3383,8 @@ class App {
       }, 150);
     });
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) { this.stopLoop(); this.stopMapLoop(); }
+      if (document.hidden) { this.stopLoop(); this.stopMapLoop(); this.stopStationLoop(); }
+      else if (this.inStation) { if (!this.noGL) this.startStationLoop(); }
       else if (this.current >= 0) { if (!this.noGL) this.startLoop(); }
       else if ($('#map').classList.contains('is-active')) this.startMapLoop();
     });
@@ -2908,7 +3437,7 @@ class App {
     if (!page) { main.hidden = false; pg.hidden = true; return; }
     main.hidden = true; pg.hidden = false;
     const back = '<button class="btn ghost" type="button" data-menu-back style="width:100%;margin-top:10px">กลับ</button>';
-    if (page === 'howto') pg.innerHTML = `<h3>วิธีเล่น</h3><p>1. แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงได้ในเมนู<br>ปุ่มมุมขวาล่าง: 🪐 3D สลับเป็นมุมมองระบบดาว 3 มิติ (ลากเพื่อหมุน บีบนิ้วเพื่อซูม), 1× ปรับความเร็วของอวกาศ, 🌘 ปรับความมืดของพื้นหลัง, วงกลม % แสดงความคืบหน้า<br>แตะดาวหรือพื้นหลังในหน้าดาวเพื่อพับแผงปรับแต่ง แล้วกดปุ่มด้านล่างเพื่อเปิดกลับ<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`;
+    if (page === 'howto') pg.innerHTML = `<h3>วิธีเล่น</h3><p>1. เริ่มจากสถานีอวกาศข้างดาวฤกษ์ แตะสถานีเพื่อสำรวจและปรับแต่งโมดูล ซึ่งมีผลต่อความเร็วยาน<br>แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงได้ในเมนู<br>ปุ่มมุมขวาล่าง: 🪐 3D สลับเป็นมุมมองระบบดาว 3 มิติ (ลากเพื่อหมุน บีบนิ้วเพื่อซูม), 1× ปรับความเร็วของอวกาศ, 🌘 ปรับความมืดของพื้นหลัง, วงกลม % แสดงความคืบหน้า<br>แตะดาวหรือพื้นหลังในหน้าดาวเพื่อพับแผงปรับแต่ง แล้วกดปุ่มด้านล่างเพื่อเปิดกลับ<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`;
     if (page === 'model') pg.innerHTML = `<h3>ตัวเลขมาจากไหน</h3><p>ระยะห่างของดาวใช้หน่วยดาราศาสตร์ (1 หน่วย ≈ 149.6 ล้าน กม.) และคิดตอนดาวเรียงอยู่ด้านเดียวกันของดาวฤกษ์ เวลาเดินทางคิดจากยานความเร็ว ${nf.format(CONFIG.rocketKmh)} กม./ชม. ใกล้เคียงยานนิวฮอไรซันส์<br><br>อุณหภูมิ ออกซิเจน และจำนวนประชากรมาจากแบบจำลองอย่างง่ายเพื่อการเล่น ไม่ใช่การคำนวณทางวิทยาศาสตร์จริง สัดส่วนน้ำและดินนับจากจุด 2,400 จุดบนพื้นผิวดาวจริงที่เห็นบนจอ</p>${back}`;
     if (page === 'reset') pg.innerHTML = `<h3>เริ่มต้นใหม่ทั้งหมด?</h3><p>การปรับแต่ง ระบบนิเวศ และความคืบหน้าของทุกดาวจะหายไป</p>
       <button class="btn primary" type="button" data-confirm-reset style="background:linear-gradient(135deg,#ff4f8b,#e8457a)">ล้างข้อมูลทั้งหมด</button>${back}`;
@@ -2917,8 +3446,8 @@ class App {
   resetAll() {
     this.closeMenu();
     if (this.current >= 0) this.closeDetail();
-    const { sound, bg, speed, view } = this.state;
-    this.state = Store.fresh(); Object.assign(this.state, { sound, bg, speed, view }); Store.save(this.state);
+    const { sound, bg, speed, view, station } = this.state;
+    this.state = Store.fresh(); Object.assign(this.state, { sound, bg, speed, view, station }); Store.save(this.state);
     // The secret planet hides again until it is earned.
     if (PLANETS.includes(SECRET)) PLANETS.splice(PLANETS.indexOf(SECRET), 1);
     if (!this.noGL) {
@@ -2935,6 +3464,7 @@ class App {
 
   dispose() {
     this.stopLoop();
+    if (this.station) this.station.dispose();
     Object.values(this.bodies).forEach(b => b.dispose());
     if (this.stage) this.stage.dispose();
   }
