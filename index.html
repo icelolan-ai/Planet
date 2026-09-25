@@ -607,9 +607,10 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <div class="x-ctrl">
       <button type="button" data-x-prev aria-label="จุดก่อนหน้า">‹</button>
       <button type="button" data-x-auto aria-pressed="false">▶ ทัวร์อัตโนมัติ</button>
+      <button type="button" data-x-style>🌄 แบบสมจริง</button>
       <button type="button" data-x-next aria-label="จุดถัดไป">›</button>
     </div>
-    <p class="x-hint">เลื่อนหรือปัดขึ้นลงเพื่อเดินทาง · ลากซ้ายขวาเพื่อมองรอบ · แตะโฮโลแกรมเพื่อดูข้อมูล</p>
+    <p class="x-hint">ลากเพื่อเลื่อนดู · บีบหรือหมุนล้อเมาส์เพื่อซูม · สองนิ้วหมุนเพื่อหมุนมุมมอง · แตะโฮโลแกรมเพื่อดูข้อมูล</p>
   </div>
   <aside class="x-panel" data-x-panel hidden>
     <button class="x-close" type="button" data-x-close aria-label="ปิด">×</button>
@@ -698,7 +699,7 @@ const LANG = (() => { try { return JSON.parse(localStorage.getItem('suan-dao-v1'
 const tr = (th, en) => LANG === 'en' ? en : th;
 document.documentElement.lang = LANG;
 /** English for the static page text; applied once at start when the language is English. */
-const STATIC_EN = { "กำลังเตรียมยานสำรวจ": "Preparing the explorer ship", "แนะนำสวนดาว": "Welcome to Star Garden", "ข้าม": "Skip", "ออกสำรวจ": "Explore", "ระบบดาวของคุณเอง": "a star system of your own", "บินจากสถานีอวกาศไปยังดาว 7 ดวง ดูระยะทางและเวลาเดินทาง หรือเปิดมุมมอง 3 มิติเพื่อหมุนดูทั้งระบบ": "Fly from the space station to 7 planets, see distances and travel times, or switch to the 3D view and spin the whole system.", "ปั้นดาว": "Shape worlds", "ในแบบที่คุณชอบ": "just the way you like", "ปรับความร้อน น้ำ พืช น้ำแข็ง และพายุ แล้วดูดาวเปลี่ยนไปต่อหน้า ซูมเข้าไปดูรายละเอียดได้ใกล้ ๆ": "Adjust heat, water, plants, ice and storms and watch the planet change in front of you. Zoom right in to see the detail.", "สร้างชีวิต": "Create life", "แล้วลงไปเดินดู": "then walk among it", "สร้างระบบนิเวศ ดูแลเศรษฐกิจให้ยั่งยืน และกดลงสำรวจเพื่อเดินชมพื้นผิว นิคม และสัตว์บนดาว": "Build ecosystems, keep each economy sustainable, and land to walk the surface among settlements and wildlife.", "ถัดไป": "Next", "แผนที่ระบบดาว": "Star system map", "สวน": "Star ", "ดาว": "Garden", "เปิดเมนู": "Open menu", "มุมมองระบบดาว 3 มิติ": "3D system view", "ความเร็วของอวกาศ": "Space speed", "ความเร็วยานอวกาศ": "Ship speed", "ปกติ": "Normal", "โทนพื้นหลัง": "Background tone", "ปริมาณอนุภาคและเอฟเฟกต์": "Particles and effects", "ความคืบหน้าการสำรวจ": "Exploration progress", "ออกเดินทาง!": "Lift-off!", "แตะเพื่อข้าม": "Tap to skip", "รายละเอียดดาว": "Planet details", "กลับไปที่แผนที่": "Back to the map", "ลากเพื่อหมุน · บีบนิ้วเพื่อซูม · แตะดาวเพื่อส่งคลื่น": "Drag to spin · pinch to zoom · tap to send a ripple", "อุณหภูมิ": "Temperature", "ออกซิเจน": "Oxygen", "น้ำ": "Water", "สิ่งมีชีวิต": "Life", "หัวข้อของดาว": "Planet topics", "ปรับแต่ง": "Shape", "ระบบนิเวศ": "Ecosystem", "เศรษฐกิจ": "Economy", "ข้อมูล": "Info", "แสดงแผงปรับแต่ง": "Show controls", "แผงปรับแต่ง": "Controls", "สำรวจพื้นผิวดาว": "Surface exploration", "กลับขึ้นยาน": "Back to the ship", "ภารกิจสำรวจพื้นผิว": "Surface mission", "จุดก่อนหน้า": "Previous point", "▶ ทัวร์อัตโนมัติ": "▶ Auto tour", "จุดถัดไป": "Next point", "เลื่อนหรือปัดขึ้นลงเพื่อเดินทาง · ลากซ้ายขวาเพื่อมองรอบ · แตะโฮโลแกรมเพื่อดูข้อมูล": "Scroll or swipe to travel · drag sideways to look around · tap a hologram for details", "ปิด": "Close", "‹ ก่อนหน้า": "‹ Previous", "ถัดไป ›": "Next ›", "กำลังลงจอด…": "Landing…", "สถานีอวกาศ": "Space station", "จุดเทียบท่าของยานสำรวจ": "The explorer ship's home port", "ลากเพื่อหมุน · บีบหรือเลื่อนเพื่อซูม · แตะชิ้นส่วนเพื่อดูข้อมูล": "Drag to spin · pinch or scroll to zoom · tap a part for details", "หัวข้อของสถานี": "Station topics", "โมดูล": "Modules", "วิศวกรรม": "Engineering", "สีสถานี": "Paint", "เมนู": "Menu", "ดูหน้าแนะนำอีกครั้ง": "Replay the introduction", "สามขั้นตอนเริ่มต้น": "Three steps to get started", "วิธีเล่น": "How to play", "บิน สำรวจ ปรับแต่ง และสร้างชีวิต": "Fly, explore, shape worlds and create life", "เสียง": "Sound", "ปิดอยู่ แตะเพื่อเปิด": "Off · tap to turn on", "ตัวเลขมาจากไหน": "Where the numbers come from", "ระยะทาง เวลาเดินทาง และการคำนวณ": "Distances, travel times and the maths", "เริ่มต้นใหม่ทั้งหมด": "Start over", "ล้างการปรับแต่งของทุกดาว": "Clear every planet's changes" };
+const STATIC_EN = { "กำลังเตรียมยานสำรวจ": "Preparing the explorer ship", "แนะนำสวนดาว": "Welcome to Star Garden", "ข้าม": "Skip", "ออกสำรวจ": "Explore", "ระบบดาวของคุณเอง": "a star system of your own", "บินจากสถานีอวกาศไปยังดาว 7 ดวง ดูระยะทางและเวลาเดินทาง หรือเปิดมุมมอง 3 มิติเพื่อหมุนดูทั้งระบบ": "Fly from the space station to 7 planets, see distances and travel times, or switch to the 3D view and spin the whole system.", "ปั้นดาว": "Shape worlds", "ในแบบที่คุณชอบ": "just the way you like", "ปรับความร้อน น้ำ พืช น้ำแข็ง และพายุ แล้วดูดาวเปลี่ยนไปต่อหน้า ซูมเข้าไปดูรายละเอียดได้ใกล้ ๆ": "Adjust heat, water, plants, ice and storms and watch the planet change in front of you. Zoom right in to see the detail.", "สร้างชีวิต": "Create life", "แล้วลงไปเดินดู": "then walk among it", "สร้างระบบนิเวศ ดูแลเศรษฐกิจให้ยั่งยืน และกดลงสำรวจเพื่อเดินชมพื้นผิว นิคม และสัตว์บนดาว": "Build ecosystems, keep each economy sustainable, and land to walk the surface among settlements and wildlife.", "ถัดไป": "Next", "แผนที่ระบบดาว": "Star system map", "สวน": "Star ", "ดาว": "Garden", "เปิดเมนู": "Open menu", "มุมมองระบบดาว 3 มิติ": "3D system view", "ความเร็วของอวกาศ": "Space speed", "ความเร็วยานอวกาศ": "Ship speed", "ปกติ": "Normal", "โทนพื้นหลัง": "Background tone", "ปริมาณอนุภาคและเอฟเฟกต์": "Particles and effects", "ความคืบหน้าการสำรวจ": "Exploration progress", "ออกเดินทาง!": "Lift-off!", "แตะเพื่อข้าม": "Tap to skip", "รายละเอียดดาว": "Planet details", "กลับไปที่แผนที่": "Back to the map", "ลากเพื่อหมุน · บีบนิ้วเพื่อซูม · แตะดาวเพื่อส่งคลื่น": "Drag to spin · pinch to zoom · tap to send a ripple", "อุณหภูมิ": "Temperature", "ออกซิเจน": "Oxygen", "น้ำ": "Water", "สิ่งมีชีวิต": "Life", "หัวข้อของดาว": "Planet topics", "ปรับแต่ง": "Shape", "ระบบนิเวศ": "Ecosystem", "เศรษฐกิจ": "Economy", "ข้อมูล": "Info", "แสดงแผงปรับแต่ง": "Show controls", "แผงปรับแต่ง": "Controls", "สำรวจพื้นผิวดาว": "Surface exploration", "กลับขึ้นยาน": "Back to the ship", "ภารกิจสำรวจพื้นผิว": "Surface mission", "จุดก่อนหน้า": "Previous point", "▶ ทัวร์อัตโนมัติ": "▶ Auto tour", "จุดถัดไป": "Next point", "ลากเพื่อเลื่อนดู · บีบหรือหมุนล้อเมาส์เพื่อซูม · สองนิ้วหมุนเพื่อหมุนมุมมอง · แตะโฮโลแกรมเพื่อดูข้อมูล": "Drag to pan · pinch or scroll to zoom · twist with two fingers to rotate · tap a hologram for details", "ปิด": "Close", "‹ ก่อนหน้า": "‹ Previous", "ถัดไป ›": "Next ›", "กำลังลงจอด…": "Landing…", "สถานีอวกาศ": "Space station", "จุดเทียบท่าของยานสำรวจ": "The explorer ship's home port", "ลากเพื่อหมุน · บีบหรือเลื่อนเพื่อซูม · แตะชิ้นส่วนเพื่อดูข้อมูล": "Drag to spin · pinch or scroll to zoom · tap a part for details", "หัวข้อของสถานี": "Station topics", "โมดูล": "Modules", "วิศวกรรม": "Engineering", "สีสถานี": "Paint", "เมนู": "Menu", "ดูหน้าแนะนำอีกครั้ง": "Replay the introduction", "สามขั้นตอนเริ่มต้น": "Three steps to get started", "วิธีเล่น": "How to play", "บิน สำรวจ ปรับแต่ง และสร้างชีวิต": "Fly, explore, shape worlds and create life", "เสียง": "Sound", "ปิดอยู่ แตะเพื่อเปิด": "Off · tap to turn on", "ตัวเลขมาจากไหน": "Where the numbers come from", "ระยะทาง เวลาเดินทาง และการคำนวณ": "Distances, travel times and the maths", "เริ่มต้นใหม่ทั้งหมด": "Start over", "ล้างการปรับแต่งของทุกดาว": "Clear every planet's changes" };
 function translateStatic() {
   if (LANG !== 'en') return;
   document.title = 'Star Garden — build and care for your own star system';
@@ -1984,6 +1985,7 @@ class Stage {
   constructor(host) {
     this.host = host;
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;   // shadows are switched on only for the realistic landing view
     this.renderer.setClearColor(0x000000, 0);
     host.prepend(this.renderer.domElement);
     this.scene = new THREE.Scene();
@@ -2160,6 +2162,7 @@ const Store = {
     // Slow flight became the default in theme 3; older saves switch to it once.
     if (FLIGHTS[s.flight] && s.theme >= 3) base.flight = s.flight;
     if (FX_LEVELS[s.fx]) base.fx = s.fx;
+    if (s.xstyle === 'diorama') base.xstyle = 'diorama';
     base.lang = s.lang === 'en' ? 'en' : 'th';
     base.station = cleanStation(s.station);
     base.visited = Array.isArray(s.visited) ? s.visited : [];
@@ -2173,7 +2176,7 @@ const Store = {
     return base;
   },
   fresh() {
-    return { v: 1, at: -1, visited: [], sound: false, secret: false, intro: false, bg: 'normal', theme: 3, speed: REDUCED ? 0 : 1, view: 'map', flight: 'slow', fx: 'normal', lang: LANG, station: cleanStation(null), planets: Object.fromEntries(allPlanets().map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
+    return { v: 1, at: -1, visited: [], sound: false, secret: false, intro: false, bg: 'normal', theme: 3, speed: REDUCED ? 0 : 1, view: 'map', flight: 'slow', fx: 'normal', xstyle: 'real', lang: LANG, station: cleanStation(null), planets: Object.fromEntries(allPlanets().map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
   },
   save(state) { try { localStorage.setItem(CONFIG.storeKey, JSON.stringify(state)); } catch (e) { /* storage may be unavailable; progress stays in memory */ } }
 };
@@ -2616,6 +2619,205 @@ const PROPS = (() => {
   };
 })();
 
+/* ---------------- Realistic landing: textures and shapes ----------------
+   Canvas textures (weathered planks, shingles, tent canvas, corrugated metal, stone, grass blades,
+   a fine ground grain) and vertex-coloured shapes (conifers, leafy trees, shrubs, boulders, people),
+   built once and shared by every visit. Textures are light and neutral so per-instance colour tints them. */
+const REALX = (() => {
+  const cache = {}, once = (k, f) => cache[k] || (cache[k] = f());
+  const tex = (w, h, draw) => {
+    const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
+    const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; return t;
+  };
+  const noise = makeNoise(311), C = h => new THREE.Color(h);
+  function paint(g, fn) {
+    // Normals are taken from the indexed shape first, so curved surfaces stay smooth after splitting.
+    if (!g.attributes.normal) g.computeVertexNormals();
+    if (g.index) { const ng = g.toNonIndexed(); g.dispose(); g = ng; }
+    const p = g.attributes.position, n = g.attributes.normal, a = new Float32Array(p.count * 3), c = new THREE.Color();
+    for (let i = 0; i < p.count; i++) { fn(c, p.getX(i), p.getY(i), p.getZ(i), n.getX(i), n.getY(i), n.getZ(i)); a[i * 3] = c.r; a[i * 3 + 1] = c.g; a[i * 3 + 2] = c.b; }
+    g.setAttribute('color', new THREE.BufferAttribute(a, 3));
+    return g;
+  }
+  function merge(list) {
+    let n = 0; list.forEach(g => { n += g.attributes.position.count; });
+    const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), col = new Float32Array(n * 3); let o = 0;
+    list.forEach(g => { pos.set(g.attributes.position.array, o * 3); nor.set(g.attributes.normal.array, o * 3); col.set(g.attributes.color.array, o * 3); o += g.attributes.position.count; g.dispose(); });
+    const out = new THREE.BufferGeometry();
+    out.setAttribute('position', new THREE.BufferAttribute(pos, 3)); out.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); out.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    return out;
+  }
+  /** Smooth lumpy sphere (indexed, so normals stay smooth before painting). */
+  function lump(ws, hs, amt, f, seed) {
+    const g = new THREE.SphereGeometry(1, ws, hs), p = g.attributes.position;
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
+      const d = 1 + amt * (noise(x * f + seed * 7.3, y * f, z * f) + 0.5 * noise(x * f * 2.3, y * f * 2.3 + seed, z * f * 2.3));
+      p.setXYZ(i, x * d, y * d, z * d);
+    }
+    g.computeVertexNormals();
+    return g;
+  }
+  const cyl = (a, b, r0, r1, seg = 6) => {
+    const d = b.clone().sub(a), L = d.length(), g = new THREE.CylinderGeometry(r1, r0, L, seg);
+    g.translate(0, L / 2, 0);
+    g.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize())));
+    g.translate(a.x, a.y, a.z); return g;
+  };
+  const V = (x, y, z) => new THREE.Vector3(x, y, z);
+  /** Triangular prism, base 1 x 1 on y = 0, ridge along z at y = 1: roofs and tents. */
+  function prism() {
+    const A = [-0.5, 0, -0.5], B = [0.5, 0, -0.5], Cc = [0, 1, -0.5], A2 = [-0.5, 0, 0.5], B2 = [0.5, 0, 0.5], C2 = [0, 1, 0.5];
+    const tris = [[A, Cc, B, [0, 0], [0.5, 1], [1, 0]], [A2, B2, C2, [0, 0], [1, 0], [0.5, 1]],
+      [A, A2, C2, [0, 0], [1, 0], [1, 1]], [A, C2, Cc, [0, 0], [1, 1], [0, 1]], [B, Cc, C2, [0, 0], [0, 1], [1, 1]], [B, C2, B2, [0, 0], [1, 1], [1, 0]]];
+    const pos = [], uv = [];
+    for (const [p1, p2, p3, u1, u2, u3] of tris) {
+      // Make every face point outwards from the prism's centre.
+      const e1 = V(p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]), e2 = V(p3[0] - p1[0], p3[1] - p1[1], p3[2] - p1[2]), nrm = e1.cross(e2);
+      const cen = V((p1[0] + p2[0] + p3[0]) / 3, (p1[1] + p2[1] + p3[1]) / 3 - 0.33, (p1[2] + p2[2] + p3[2]) / 3);
+      if (nrm.dot(cen) < 0) { pos.push(...p1, ...p3, ...p2); uv.push(...u1, ...u3, ...u2); } else { pos.push(...p1, ...p2, ...p3); uv.push(...u1, ...u2, ...u3); }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    g.computeVertexNormals(); return g;
+  }
+  return {
+    planks: () => once('planks', () => tex(128, 128, (g, w, h) => {
+      const r = rng(5);
+      for (let x = 0; x < w; x += 16) {
+        const v = 200 + Math.floor(r() * 40); g.fillStyle = `rgb(${v},${v - 6},${v - 14})`; g.fillRect(x, 0, 16, h);
+        for (let k = 0; k < 10; k++) { g.fillStyle = `rgba(90,70,50,${0.05 + r() * 0.1})`; g.fillRect(x + 2 + r() * 12, r() * h, 1, 10 + r() * 40); }
+        g.fillStyle = 'rgba(40,30,20,.55)'; g.fillRect(x, 0, 1.5, h);
+        const cut = r() * h; g.fillRect(x, cut, 16, 1);
+      }
+    })),
+    shingles: () => once('shingles', () => tex(128, 128, (g, w, h) => {
+      const r = rng(9);
+      for (let y = 0; y < h; y += 12) for (let x = -((y / 12) % 2) * 8; x < w; x += 16) {
+        const v = 190 + Math.floor(r() * 50); g.fillStyle = `rgb(${v},${v - 4},${v - 10})`; g.fillRect(x, y, 15, 12);
+        g.fillStyle = 'rgba(30,25,20,.45)'; g.fillRect(x, y + 10, 15, 2);
+      }
+    })),
+    canvasCloth: () => once('cloth', () => tex(64, 64, (g, w, h) => {
+      g.fillStyle = '#eeeae0'; g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 400; i++) { g.fillStyle = `rgba(120,110,90,${Math.random() * 0.08})`; g.fillRect(Math.random() * w, Math.random() * h, 2, 1); }
+      g.fillStyle = 'rgba(90,80,60,.25)'; g.fillRect(0, 31, w, 2);
+    })),
+    metal: () => once('metal', () => tex(64, 64, (g, w, h) => {
+      for (let x = 0; x < w; x += 4) { const v = x % 8 ? 215 : 170; g.fillStyle = `rgb(${v},${v},${v + 4})`; g.fillRect(x, 0, 4, h); }
+      for (let i = 0; i < 60; i++) { g.fillStyle = `rgba(150,80,40,${Math.random() * 0.25})`; g.fillRect(Math.random() * w, Math.random() * h, 3, 5); }
+    })),
+    stone: () => once('stone', () => tex(64, 64, (g, w, h) => {
+      g.fillStyle = '#6e6660'; g.fillRect(0, 0, w, h);
+      for (let y = 0; y < h; y += 8) for (let x = -((y / 8) % 2) * 6; x < w; x += 12) { const v = 150 + Math.floor(Math.random() * 60); g.fillStyle = `rgb(${v},${v - 6},${v - 12})`; g.fillRect(x + 1, y + 1, 10, 6); }
+    })),
+    grassBlades: () => once('grass', () => {
+      const t = tex(128, 128, (g, w, h) => {
+        g.clearRect(0, 0, w, h);
+        const r = rng(13);
+        for (let i = 0; i < 46; i++) {
+          const x = 8 + r() * (w - 16), bh = h * (0.45 + r() * 0.55), lean = (r() - 0.5) * 26, v = 150 + Math.floor(r() * 90);
+          g.fillStyle = `rgb(${v},${v},${v})`;
+          g.beginPath(); g.moveTo(x - 2.5, h); g.quadraticCurveTo(x + lean * 0.3, h - bh * 0.6, x + lean, h - bh); g.quadraticCurveTo(x + lean * 0.3 + 1, h - bh * 0.6, x + 2.5, h); g.fill();
+        }
+      });
+      t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; return t;
+    }),
+    /** Fine tileable grain that roughens the ground up close. */
+    grain: () => once('grain', () => tex(256, 256, (g, w, h) => {
+      const img = g.createImageData(w, h), d = img.data;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const u = x / w * 6.283, v = y / h * 6.283;
+        const n = noise(Math.cos(u) * 3, Math.sin(u) * 3, Math.cos(v) * 3 + Math.sin(v) * 2) * 0.5 + noise(Math.cos(u) * 9, Math.sin(v) * 9, Math.sin(u) * 9 + Math.cos(v) * 9) * 0.35 + (Math.random() - 0.5) * 0.25;
+        const k = Math.round(clamp(160 + n * 110, 0, 255)); d[(y * w + x) * 4] = d[(y * w + x) * 4 + 1] = d[(y * w + x) * 4 + 2] = k; d[(y * w + x) * 4 + 3] = 255;
+      }
+      g.putImageData(img, 0, 0);
+    })),
+    prism: () => once('prism', prism),
+    box: () => once('box', () => new THREE.BoxGeometry(1, 1, 1).translate(0, 0.5, 0)),
+    cylinder: () => once('cyl', () => new THREE.CylinderGeometry(0.5, 0.5, 1, 12).translate(0, 0.5, 0)),
+    pyramid: () => once('pyr', () => new THREE.ConeGeometry(0.71, 1, 4).rotateY(Math.PI / 4).translate(0, 0.5, 0)),
+    sack: () => once('sack', () => new THREE.SphereGeometry(0.5, 9, 7).scale(1, 0.7, 0.8).translate(0, 0.33, 0)),
+    log: () => once('log', () => new THREE.CylinderGeometry(0.5, 0.5, 1, 8).rotateZ(Math.PI / 2)),
+    grassCard: () => once('card', () => {
+      const a = new THREE.PlaneGeometry(1, 0.8).translate(0, 0.4, 0), b = a.clone().rotateY(Math.PI / 2), c = a.clone().rotateY(Math.PI / 4);
+      const parts = [a, b, c].map(g => g.toNonIndexed()), n = parts.reduce((k, g) => k + g.attributes.position.count, 0);
+      const pos = new Float32Array(n * 3), uv = new Float32Array(n * 2), nor = new Float32Array(n * 3); let o = 0;
+      parts.forEach(g => { pos.set(g.attributes.position.array, o * 3); uv.set(g.attributes.uv.array, o * 2); o += g.attributes.position.count; });
+      for (let i = 0; i < n; i++) nor[i * 3 + 1] = 1;   // lit like the ground beneath
+      const out = new THREE.BufferGeometry();
+      out.setAttribute('position', new THREE.BufferAttribute(pos, 3)); out.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); out.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+      return out;
+    }),
+    /** Conifer: trunk and seven ragged tiers of needles, darker underneath, optionally snow-laden. */
+    conifer: (hex, snow, seed = 1) => once('con' + hex + snow + seed, () => {
+      const r = rng(seed * 7 + 3), col = C(hex), sn = C('#f2f5f8'), parts = [paint(cyl(V(0, 0, 0), V(0, 1.2, 0), 0.1, 0.05, 6), c => c.set('#4e3a2a'))];
+      for (let k = 0; k < 7; k++) {
+        const t = k / 6, rad = 0.95 - t * 0.72, h = 0.85 - t * 0.25, y = 0.45 + t * 2.55, g = new THREE.ConeGeometry(rad, h, 10, 2, true), p = g.attributes.position;
+        for (let i = 0; i < p.count; i++) { const x = p.getX(i), z = p.getZ(i), a = Math.atan2(z, x), j = 1 + 0.18 * noise(Math.cos(a) * 2 + k, Math.sin(a) * 2, seed + k); if (p.getY(i) < 0) p.setXYZ(i, x * j, p.getY(i) - 0.1 * r(), z * j); }
+        g.rotateY(r() * 6); g.translate(0, y + h / 2, 0);
+        parts.push(paint(g, (c, x, y2, z, nx, ny) => { c.copy(col).multiplyScalar(0.55 + 0.55 * clamp((y2 - y) / h, 0, 1) + 0.1 * noise(x * 4, y2 * 4, z * 4)); if (snow) c.lerp(sn, clamp((ny - 0.55) * 2.2, 0, 0.75)); }));
+      }
+      return merge(parts);
+    }),
+    /** Leafy tree: forked trunk carrying a crown of many small foliage clumps, lit from above. */
+    leafy: (hex, seed = 1) => once('leafy' + hex + seed, () => {
+      const r = rng(seed * 11 + 5), col = C(hex), light = col.clone().lerp(C('#e8f0a0'), 0.25), parts = [];
+      const trunk = '#5a4330';
+      parts.push(paint(cyl(V(0, 0, 0), V(0.05, 1.4, 0), 0.13, 0.08, 7), c => c.set(trunk)));
+      for (let k = 0; k < 3; k++) { const a = k * 2.1 + r(); parts.push(paint(cyl(V(0.03, 1.1, 0), V(Math.cos(a) * 0.7, 1.9, Math.sin(a) * 0.7), 0.06, 0.03, 5), c => c.set(trunk))); }
+      for (let k = 0; k < 11; k++) {
+        const a = r() * 6.28, rr = Math.sqrt(r()) * 0.85, y = 1.8 + r() * 0.8 - rr * 0.35, rad = 0.38 + r() * 0.22;
+        const g = lump(8, 6, 0.28, 2.4, seed * 20 + k); g.scale(rad, rad * 0.85, rad); g.translate(Math.cos(a) * rr, y, Math.sin(a) * rr);
+        const tint = 0.85 + r() * 0.25;
+        parts.push(paint(g, (c, x, y2, z, nx, ny) => c.copy(col).lerp(light, Math.max(0, ny) * 0.45).multiplyScalar(tint * (0.55 + 0.35 * clamp((y2 - 1.4) / 1.4, 0, 1) + 0.25 * Math.max(0, ny)))));
+      }
+      return merge(parts);
+    }),
+    shrub: (hex, seed = 1) => once('shrub' + hex + seed, () => {
+      const r = rng(seed * 5 + 1), col = C(hex), parts = [];
+      for (let k = 0; k < 5; k++) {
+        const g = lump(7, 5, 0.35, 3, seed * 9 + k), rad = 0.22 + r() * 0.18; g.scale(rad, rad * 0.8, rad); g.translate((r() - 0.5) * 0.6, rad * 0.6, (r() - 0.5) * 0.6);
+        parts.push(paint(g, (c, x, y, z, nx, ny) => c.copy(col).multiplyScalar(0.6 + 0.4 * Math.max(0, ny) + 0.12 * noise(x * 7, y * 7, z * 7))));
+      }
+      return merge(parts);
+    }),
+    yucca: (hex) => once('yucca' + hex, () => {
+      const col = C(hex), parts = [], r = rng(4);
+      for (let k = 0; k < 16; k++) {
+        const g = new THREE.ConeGeometry(0.035, 0.9 + r() * 0.3, 3); g.translate(0, 0.45, 0); g.rotateZ(0.25 + r() * 0.7); g.rotateY(k / 16 * 6.28 + r() * 0.3);
+        parts.push(paint(g, (c, x, y) => c.copy(col).multiplyScalar(0.6 + y * 0.5)));
+      }
+      return merge(parts);
+    }),
+    deadTree: () => once('dead', () => {
+      const r = rng(17), parts = [paint(cyl(V(0, 0, 0), V(0.1, 2.2, 0.05), 0.12, 0.05, 6), c => c.set('#5d5048'))];
+      for (let k = 0; k < 5; k++) { const y = 0.9 + k * 0.28, a = r() * 6.28, L = 0.5 + r() * 0.5; parts.push(paint(cyl(V(0.05, y, 0), V(Math.cos(a) * L, y + 0.4 + r() * 0.3, Math.sin(a) * L), 0.04, 0.015, 4), c => c.set('#5d5048'))); }
+      return merge(parts);
+    }),
+    /** Weathered boulder; `bands` adds horizontal strata (desert rock). */
+    boulder: (hex, seed = 1, bands = false) => once('bould' + hex + seed + bands, () => {
+      const g = lump(16, 11, 0.32, 1.3, seed * 3 + 1); g.scale(1, 0.68, 1);
+      const col = C(hex);
+      return paint(g, (c, x, y, z, nx, ny) => { c.copy(col).multiplyScalar((0.68 + 0.3 * (ny * 0.5 + 0.5)) * (1 + 0.14 * noise(x * 4, y * 4, z * 4) + 0.07 * noise(x * 14, y * 14, z * 14)) * (bands ? 0.9 + 0.1 * Math.sin(y * 18) : 1)); });
+    }),
+    /** A person: legs and head in fixed colours; the body is white so the instance colour dresses it. */
+    personBase: () => once('pbase', () => {
+      const legs = new THREE.CylinderGeometry(0.1, 0.12, 0.8, 6).translate(0, 0.4, 0), head = new THREE.SphereGeometry(0.15, 8, 6).translate(0, 1.55, 0), hat = new THREE.CylinderGeometry(0.2, 0.2, 0.05, 8).translate(0, 1.68, 0);
+      return merge([paint(legs, c => c.set('#3a3440')), paint(head, c => c.set('#d8a57a')), paint(hat, c => c.set('#5a4a3a'))]);
+    }),
+    personBody: () => once('pbody', () => new THREE.CylinderGeometry(0.17, 0.2, 0.62, 7).translate(0, 1.1, 0)),
+    /** Covered wagon: body and wheels, plus a canvas hood as a separate shape. */
+    wagon: () => once('wagon', () => {
+      const body = new THREE.BoxGeometry(1.2, 0.5, 2.4).translate(0, 0.75, 0), parts = [paint(body, c => c.set('#7a5a3a'))];
+      for (const [x, z] of [[-0.66, -0.8], [0.66, -0.8], [-0.66, 0.8], [0.66, 0.8]]) parts.push(paint(new THREE.CylinderGeometry(0.42, 0.42, 0.08, 12).rotateZ(Math.PI / 2).translate(x, 0.42, z), c => c.set('#4a3a2a')));
+      parts.push(paint(new THREE.BoxGeometry(0.08, 0.08, 1.3).translate(0, 0.6, 1.8), c => c.set('#5a4a3a')));
+      return merge(parts);
+    }),
+    hood: () => once('hood', () => new THREE.CylinderGeometry(0.62, 0.62, 2.2, 12, 1, true, -Math.PI / 2, Math.PI).rotateX(-Math.PI / 2).translate(0, 1.0, 0))
+  };
+})();
+
 const MARK = { land: '#19f0ff', peak: '#ff7a3d', shore: '#4fb7ff', forest: '#6dffb0', species: '#ff2bd6', resource: '#ffc94a', colony: '#b78bff', storm: '#ff9ad0' };
 const FOG_VERT = `
 #include <fog_pars_vertex>
@@ -2668,11 +2870,15 @@ class ExploreWorld {
     this.D = []; this.t = 0; this.pois = []; this.anim = [];
     this.progress = 0; this.target = 0; this.yaw = 0; this.yawT = 0; this.auto = false; this.focus = null;
     this.S = this.gas ? 520 : 260;
+    // Realistic (default) or diorama look for rocky worlds; gas giants have no ground either way.
+    this.real = !this.gas && app.state.xstyle !== 'diorama';
+    this.inst = {};
     this.setupSky();
     if (this.gas) this.buildGas(); else this.buildGround();
     this.buildWeather();
     this.buildMarkers();
     this.buildPath();
+    this.initRts();
     this.placeCamera(0, true);
   }
 
@@ -2688,7 +2894,8 @@ class ExploreWorld {
     const horizon = rogue ? new THREE.Color('#1c1233') : atmo.clone().lerp(new THREE.Color('#ffffff'), 0.2).multiplyScalar(0.35 + 0.55 * bright);
     const top = rogue ? new THREE.Color('#020108') : atmo.clone().multiplyScalar(0.12 + 0.2 * bright).lerp(new THREE.Color('#05040c'), 0.45);
     this.horizon = horizon;
-    this.sunDir = new THREE.Vector3(Math.cos(0.8) * Math.cos(0.32), Math.sin(0.32), Math.sin(0.8) * Math.cos(0.32)).normalize();
+    const el = this.real ? 0.95 : 0.32;   // a high sun for the realistic view, so shadows stay short and crisp
+    this.sunDir = new THREE.Vector3(Math.cos(0.8) * Math.cos(el), Math.sin(el), Math.sin(0.8) * Math.cos(el)).normalize();
     const sky = new THREE.ShaderMaterial({
       side: THREE.BackSide, depthWrite: false,
       uniforms: { cTop: { value: top }, cHor: { value: horizon }, cSun: { value: new THREE.Color(rogue ? '#8a7cff' : '#fff1cc') }, uSun: { value: this.sunDir },
@@ -2709,10 +2916,18 @@ class ExploreWorld {
     this.keep(sky);
     const dome = new THREE.Mesh(this.keep(new THREE.SphereGeometry(900, 32, 16)), sky);
     dome.renderOrder = -1; this.scene.add(dome); this.dome = dome;
-    this.scene.fog = new THREE.FogExp2(horizon, (this.gas ? 0.0045 : 0.0028) + e.humidity * 0.0045);
+    this.scene.fog = new THREE.FogExp2(horizon, this.real ? 0.0014 + e.humidity * 0.0022 : (this.gas ? 0.0045 : 0.0028) + e.humidity * 0.0045);
     // Diorama lighting: even the far, dim worlds stay readable (the sky and fog still show how little light arrives).
     const sun = new THREE.DirectionalLight(rogue ? 0x8a7cff : 0xfff0dd, (rogue ? 0.35 : 0.6) + 0.55 * Math.min(1, light));
     sun.position.copy(this.sunDir).multiplyScalar(300); this.scene.add(sun);
+    this.sun = sun;
+    if (this.real) {
+      sun.intensity *= 1.25;
+      sun.castShadow = true;
+      const sh = sun.shadow; sh.mapSize.set(PHONE ? 1024 : 2048, PHONE ? 1024 : 2048); sh.bias = -0.0005; sh.normalBias = 0.3;
+      Object.assign(sh.camera, { left: -80, right: 80, top: 80, bottom: -80, near: 1, far: 600 }); sh.camera.updateProjectionMatrix();
+      this.scene.add(sun.target);
+    }
     this.scene.add(new THREE.HemisphereLight(horizon.clone().lerp(new THREE.Color('#ffffff'), 0.45), new THREE.Color('#3a3060'), rogue ? 0.5 : 0.8));
   }
 
@@ -2725,6 +2940,7 @@ class ExploreWorld {
     const n = new THREE.Vector3(site.x, site.y, site.z).normalize();
     const east = new THREE.Vector3(0, 1, 0).cross(n); if (east.lengthSq() < 1e-4) east.set(1, 0, 0); east.normalize();
     const north = n.clone().cross(east).normalize();
+    if (this.real) { this.buildRealWorld(n, east, north); return; }
     // Terraced tiles, like a diorama: square columns snapped to height steps, grass on top, layered earth down the sides.
     const TN = PHONE ? 56 : 68, TS = S / TN, STEP = 2.2, BASE = -30;
     this.TN = TN; this.TS = TS; this.tileY = new Float32Array(TN * TN); this.tileVeg = new Float32Array(TN * TN);
@@ -2781,6 +2997,374 @@ class ExploreWorld {
     this.scene.add(tiles);
     this.peak = peakP;
 
+    this.buildSea(false);
+
+    this.buildFlora();
+    if (lava || e.eruption > 0.3) this.buildVolcano();
+    if (this.eco && this.sim.colonists > 1) this.buildColony();
+  }
+
+  /* ---------- realistic world: painted heightfield, frontier settlement, natural vegetation ---------- */
+  buildRealWorld(n, east, north) {
+    const e = this.e, T = this.terrain, S = this.S, A = 0.5, N = PHONE ? 150 : 200, R = N + 1, cnt = R * R;
+    const geo = this.keep(new THREE.PlaneGeometry(S, S, N, N)); geo.rotateX(-Math.PI / 2);
+    const pos = geo.attributes.position, d = new THREE.Vector3(), lava = !!this.b.lavaSea;
+    this.N = N; this.seg = S / N; this.hgrid = new Float32Array(cnt); this.vgrid = new Float32Array(cnt);
+    const info = { t: new Float32Array(cnt), cap: new Uint8Array(cnt), crack: new Float32Array(cnt) };
+    for (let i = 0; i < cnt; i++) {
+      d.copy(n).addScaledVector(east, pos.getX(i) / (S / 2) * A).addScaledVector(north, pos.getZ(i) / (S / 2) * A).normalize();
+      const h = T.height(d.x, d.y, d.z) + T.noise(d.x * 38, d.y * 38, d.z * 38) * 0.008;
+      this.hgrid[i] = h >= e.sea ? (h - e.sea) * 58 : (h - e.sea) * 36;   // gentler relief than the diorama: open plains and rolling hills
+      const t = clamp((h - e.sea) / Math.max(1 - e.sea, 0.05), 0, 1); info.t[i] = t;
+      const vm = smooth(0.35, 0.7, T.noise(d.x * 3.2 + 7, d.y * 3.2 + 7, d.z * 3.2 + 7) * 0.5 + 0.5 + e.veg * 0.45);
+      this.vgrid[i] = h < e.sea ? 0 : clamp(e.veg * 1.2, 0, 1) * vm * (1 - smooth(0.55, 0.95, t)) * smooth(0.05, 0.4, e.humidity + e.glow);
+      info.cap[i] = Math.abs(d.y) > e.capLine - 0.04 ? 1 : 0;
+      info.crack[i] = (lava || e.heat > 0.55) ? 1 - smooth(0, 0.05, Math.abs(T.noise(d.x * 5.5, d.y * 5.5, d.z * 5.5))) : 0;
+    }
+    this.occ = new Uint8Array(Math.ceil(S / 3) ** 2);
+    this.planTown();   // may level the ground where the settlement stands
+    let peakI = 0;
+    for (let i = 0; i < cnt; i++) { pos.setY(i, this.hgrid[i]); if (this.hgrid[i] > this.hgrid[peakI]) peakI = i; }
+    geo.computeVertexNormals();
+    this.peak = new THREE.Vector3(pos.getX(peakI), this.hgrid[peakI], pos.getZ(peakI));
+    const mat = this.keep(new THREE.MeshStandardMaterial({ map: this.keep(this.paintGround(info)), roughness: 0.96, metalness: 0 }));
+    const grain = REALX.grain();
+    // A fine tiled grain on top of the painted ground, so it stays textured up close.
+    mat.onBeforeCompile = sh => {
+      sh.uniforms.uGrain = { value: grain };
+      sh.fragmentShader = 'uniform sampler2D uGrain;\n' + sh.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
+        diffuseColor.rgb *= 0.72 + 0.56 * texture2D(uGrain, vUv * 64.0).r * 0.5 + 0.28 * texture2D(uGrain, vUv * 11.0).g * 0.5;`);
+    };
+    const ground = new THREE.Mesh(geo, mat); ground.receiveShadow = true; this.scene.add(ground);
+    this.buildSea(true);
+    this.mats = this.realMaterials();
+    this.buildTown();
+    this.buildNature();
+    if (lava || e.eruption > 0.3) this.buildVolcano();
+    this.flushInst();
+  }
+
+  /** Occupancy grid (3-unit cells) so trees keep off roads and building lots. */
+  occIdx(x, z) { const n = Math.ceil(this.S / 3), ix = Math.floor((x + this.S / 2) / 3), iz = Math.floor((z + this.S / 2) / 3); return ix < 0 || iz < 0 || ix >= n || iz >= n ? -1 : iz * n + ix; }
+  occMark(x, z, r) { for (let dz = -r; dz <= r; dz += 1.5) for (let dx = -r; dx <= r; dx += 1.5) { const i = this.occIdx(x + dx, z + dz); if (i >= 0) this.occ[i] = 1; } }
+  occupied(x, z) { const i = this.occIdx(x, z); return i < 0 || this.occ[i] === 1; }
+
+  /** Choose a flat, dry site near the landing area, level it, and lay out streets and lots. */
+  planTown() {
+    const r = this.rand, big = this.eco && this.sim.colonists > 1, S = this.S;
+    let best = null, bestScore = 1e9;
+    for (let k = 0; k < 300; k++) {
+      const x = (r() * 2 - 1) * S * 0.26, z = (r() * 2 - 1) * S * 0.26, y = this.groundAt(x, z);
+      if (y < 1.8 || y > 24) continue;
+      let dev = 0, wet = 0;
+      for (let j = 0; j < 12; j++) { const a = j / 12 * 6.283, rr = j % 2 ? 16 : 30, yy = this.groundAt(x + Math.cos(a) * rr, z + Math.sin(a) * rr); dev += Math.abs(yy - y); if (yy < 1) wet++; }
+      const score = dev + wet * 25 + Math.hypot(x, z) * 0.06;
+      if (score < bestScore) { bestScore = score; best = new THREE.Vector3(x, y, z); }
+    }
+    if (!best) { this.town = null; return; }
+    const C = best, R0 = big ? 50 : 22, N = this.N, RR = N + 1;
+    for (let iz = 0; iz < RR; iz++) for (let ix = 0; ix < RR; ix++) {
+      const x = -S / 2 + ix * this.seg, z = -S / 2 + iz * this.seg, dd = Math.hypot(x - C.x, z - C.z);
+      if (dd > R0 * 1.4) continue;
+      const k = 1 - smooth(R0 * 0.8, R0 * 1.4, dd), i = iz * RR + ix;
+      this.hgrid[i] = lerp(this.hgrid[i], C.y + (this.hgrid[i] - C.y) * 0.1, k);
+    }
+    const ang = r() * 6.283, dir = [Math.cos(ang), Math.sin(ang)], perp = [-dir[1], dir[0]];
+    const P = (s, o) => [C.x + dir[0] * s + perp[0] * o, C.z + dir[1] * s + perp[1] * o];
+    const roads = [], lots = [];
+    const face = (fx, fz) => Math.atan2(fx, fz);
+    if (big) {
+      const nLots = clamp(Math.round(10 + Math.log10(this.sim.colonists + 1) * 3), 12, 34), Lm = 70;
+      roads.push({ w: 6, pts: [P(-Lm / 2, 0), P(-Lm / 6, 1.5), P(Lm / 6, -1.5), P(Lm / 2, 0)] });
+      const cross = [-Lm * 0.22, Lm * 0.26];
+      cross.forEach(s0 => roads.push({ w: 5, pts: [P(s0, -30), P(s0 + 1.5, 0), P(s0, 30)] }));
+      for (let s0 = -Lm / 2 + 7; s0 <= Lm / 2 - 7; s0 += 11) for (const side of [-1, 1]) {
+        if (cross.some(c => Math.abs(c - s0) < 6)) continue;
+        const [x, z] = P(s0, side * 11); lots.push({ x, z, rot: face(-perp[0] * side, -perp[1] * side) });
+      }
+      cross.forEach(s0 => { for (const o of [-20, -9, 9, 20]) for (const side of [-1, 1]) { const [x, z] = P(s0 + side * 10, o); lots.push({ x, z, rot: face(-dir[0] * side, -dir[1] * side) }); } });
+      lots.sort((a, b) => Math.hypot(a.x - C.x, a.z - C.z) - Math.hypot(b.x - C.x, b.z - C.z));
+      lots.length = Math.min(lots.length, nLots);
+      const kinds = ['cabin', 'cabin', 'cabin', 'house', 'shop', 'shop', 'tent', 'tent', 'barn'];
+      lots.forEach((l, i) => { l.kind = i === 1 ? 'church' : kinds[Math.floor(r() * kinds.length)]; });
+    } else {
+      // An explorers' camp: a hut, tents and supplies round a small square.
+      roads.push({ w: 4, pts: [P(-18, 0), P(0, 0), P(18, 2)] });
+      [[0, -9, 'cabin'], [-9, 8, 'tent'], [0, 9, 'tent'], [9, 8, 'tent'], [-12, -8, 'tent']].forEach(([s0, o, kind]) => { const [x, z] = P(s0, o); lots.push({ x, z, kind, rot: face(-perp[0] * Math.sign(o), -perp[1] * Math.sign(o)) }); });
+    }
+    // Roads out of town, wandering towards the island's edge.
+    for (const sgn of [1, -1]) {
+      let [x, z] = roads[0].pts[sgn > 0 ? roads[0].pts.length - 1 : 0], a = Math.atan2(dir[1], dir[0]) + (sgn < 0 ? Math.PI : 0);
+      const pts = [[x, z]];
+      for (let k = 0; k < 14; k++) { a += (r() - 0.5) * 0.5; x += Math.cos(a) * 10; z += Math.sin(a) * 10; if (Math.abs(x) > S * 0.47 || Math.abs(z) > S * 0.47) break; if (this.groundAt(x, z) < 0.6) break; pts.push([x, z]); }
+      if (pts.length > 1) roads.push({ w: 4.5, pts });
+    }
+    lots.forEach(l => { l.y = this.groundAt(l.x, l.z); });
+    roads.forEach(rd => rd.pts.forEach(([x, z], i) => { if (i) { const [px, pz] = rd.pts[i - 1], L = Math.hypot(x - px, z - pz); for (let u = 0; u <= L; u += 2) this.occMark(lerp(px, x, u / L), lerp(pz, z, u / L), rd.w * 0.6); } }));
+    lots.forEach(l => this.occMark(l.x, l.z, 7));
+    this.town = { C, big, roads, lots, R0 };
+  }
+
+  /** Paint the ground texture: soil, grass, sand, rock and snow from the terrain, then roads and yards. */
+  paintGround(info) {
+    const S = this.S, N = this.N, R = N + 1, TEX = PHONE ? 1024 : 2048, biome = this.p.biome, e = this.e, lava = !!this.b.lavaSea;
+    const RP = ({
+      jungle: ['#56762d', '#7a8c3a', '#86664a', '#7a716a', '#cdb88c', '#6d6a5c', '#9a7e5c'],
+      ocean: ['#62853a', '#8c9a48', '#8f7050', '#7c7470', '#dccb9c', '#77736a', '#a88c68'],
+      desert: ['#8e8250', '#a8925e', '#b8764f', '#9a5a3e', '#c98a60', '#a86a4a', '#c89a72'],
+      ice: ['#d6e2ea', '#eef3f7', '#b8c4cc', '#6e737a', '#c9d6e0', '#f2f6f9', '#c2c8cc'],
+      lava: ['#3a302e', '#4a3a34', '#2e2628', '#231d20', '#3a3030', '#1c1719', '#4a3c38'],
+      crystal: ['#5a4f86', '#6d5fa0', '#4a4064', '#3c3552', '#8a7fb6', '#6e66a0', '#8a80b0'],
+      rogue: ['#1f3a3a', '#285048', '#1e1a2c', '#171424', '#2a2640', '#221e34', '#3a3450']
+    })[biome] || ['#62853a', '#8c9a48', '#8f7050', '#7c7470', '#dccb9c', '#77736a', '#a88c68'];
+    const [grass, grass2, dirt, rock, sand, high, road] = RP.map(h => new THREE.Color(h));
+    const lushBase = ({ jungle: 0.5, ocean: 0.45, desert: 0.02, crystal: 0.2, rogue: 0.25 })[biome] || 0;
+    const snow = new THREE.Color('#eef2f6'), hot = this.col('hot').multiplyScalar(1.6), tint = this.col('low');
+    const ln = makeNoise(this.p.seed * 7 + 1), col = new Float32Array(R * R * 3), c = new THREE.Color(), g2 = new THREE.Color(), H = this.hgrid;
+    for (let iz = 0; iz < R; iz++) for (let ix = 0; ix < R; ix++) {
+      const i = iz * R + ix, y = H[i], x = -S / 2 + ix * this.seg, z = -S / 2 + iz * this.seg;
+      const sl = Math.hypot(H[iz * R + Math.min(N, ix + 1)] - H[iz * R + Math.max(0, ix - 1)], H[Math.min(N, iz + 1) * R + ix] - H[Math.max(0, iz - 1) * R + ix]) / (2 * this.seg);
+      if (y < 0) c.copy(sand).multiplyScalar(0.5 + 0.5 * clamp(1 + y / 12, 0, 1));
+      else if (y < 1.1 && !lava) c.copy(sand);
+      else {
+        const lush = clamp(this.vgrid[i] * 1.6 + lushBase, 0, 1);
+        g2.copy(grass).lerp(grass2, clamp(ln(x * 0.03, z * 0.03, 0) * 0.8 + 0.5, 0, 1));
+        c.copy(dirt).lerp(g2, lush).lerp(high, smooth(0.55, 0.92, info.t[i]));
+        c.lerp(rock, smooth(0.5, 1.0, sl));
+        if (info.cap[i]) c.lerp(snow, 0.9); else if (this.sim.temp < 0 && biome !== 'ice') c.lerp(snow, clamp(-this.sim.temp / 30, 0, 0.8));
+        if (info.crack[i] > 0.05) c.lerp(hot, info.crack[i] * (lava ? 0.9 : 0.35) * e.heat);
+      }
+      c.lerp(tint, 0.08);   // a hint of the planet's own colour
+      col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
+    }
+    const cv = document.createElement('canvas'); cv.width = cv.height = TEX;
+    const ctx = cv.getContext('2d'), img = ctx.createImageData(TEX, TEX), px = img.data;
+    const G = new Float32Array(256 * 256);
+    for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) G[y * 256 + x] = ln(x * 0.09, y * 0.09, 3) * 0.6 + ln(x * 0.35, y * 0.35, 7) * 0.4;
+    const k = N / (TEX - 1);
+    for (let py = 0; py < TEX; py++) {
+      const fz = py * k, iz = Math.min(N - 1, Math.floor(fz)), tz = fz - iz;
+      for (let pxl = 0; pxl < TEX; pxl++) {
+        const fx = pxl * k, ix = Math.min(N - 1, Math.floor(fx)), tx = fx - ix;
+        const a = (iz * R + ix) * 3, b = a + 3, cI = a + R * 3, dI = cI + 3;
+        const n1 = G[(py & 255) * 256 + (pxl & 255)], n2 = G[((py >> 3) & 255) * 256 + ((pxl >> 3) & 255)], m = 1 + n1 * 0.16 + n2 * 0.18;
+        const o = (py * TEX + pxl) * 4;
+        for (let ch = 0; ch < 3; ch++) {
+          const v = (col[a + ch] * (1 - tx) + col[b + ch] * tx) * (1 - tz) + (col[cI + ch] * (1 - tx) + col[dI + ch] * tx) * tz;
+          px[o + ch] = clamp(v * m * 255, 0, 255);
+        }
+        px[o + 3] = 255;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    // Roads and bare-earth yards.
+    if (this.town) {
+      const W = v => v / S * TEX, X = x => (x + S / 2) / S * TEX, rc = '#' + road.getHexString(), dark = '#' + road.clone().multiplyScalar(0.72).getHexString();
+      ctx.lineCap = ctx.lineJoin = 'round';
+      const stroke = (pts, w, style, alpha) => { ctx.globalAlpha = alpha; ctx.strokeStyle = style; ctx.lineWidth = W(w); ctx.beginPath(); pts.forEach(([x, z], i) => i ? ctx.lineTo(X(x), X(z)) : ctx.moveTo(X(x), X(z))); ctx.stroke(); };
+      this.town.lots.forEach(l => {
+        ctx.save(); ctx.translate(X(l.x), X(l.z)); ctx.rotate(-l.rot);
+        ctx.fillStyle = rc; ctx.globalAlpha = 0.35; ctx.fillRect(-W(9), -W(9), W(18), W(18)); ctx.globalAlpha = 0.7; ctx.fillRect(-W(6.5), -W(6.5), W(13), W(13));
+        ctx.restore();
+      });
+      this.town.roads.forEach(rd => { stroke(rd.pts, rd.w * 1.7, rc, 0.35); stroke(rd.pts, rd.w, rc, 0.95); stroke(rd.pts, rd.w * 0.35, dark, 0.35); });
+      ctx.globalAlpha = 1;
+    }
+    const t = new THREE.CanvasTexture(cv); t.anisotropy = 8;
+    return t;
+  }
+
+  realMaterials() {
+    const M = o => this.keep(new THREE.MeshStandardMaterial({ roughness: 0.88, metalness: 0, ...o }));
+    const mats = {
+      plank: M({ map: REALX.planks() }), roof: M({ map: REALX.shingles(), roughness: 0.82 }), metal: M({ map: REALX.metal(), roughness: 0.5, metalness: 0.35 }),
+      cloth: M({ map: REALX.canvasCloth(), roughness: 0.95, side: THREE.DoubleSide }), stone: M({ map: REALX.stone() }), plain: M({}),
+      window: M({ color: '#2a3040', emissive: new THREE.Color('#ffcf7a'), emissiveIntensity: 0.3, roughness: 0.3 }),
+      vc: M({ vertexColors: true, roughness: 0.9 }), vcLeaf: M({ vertexColors: true, roughness: 0.9, side: THREE.DoubleSide }), vcGlow: M({ vertexColors: true, roughness: 0.4, emissive: this.col('veg').multiplyScalar(0.25 + this.e.glow * 0.8) }),
+      grass: M({ map: REALX.grassBlades(), alphaTest: 0.45, side: THREE.DoubleSide, roughness: 1 })
+    };
+    // Grass cards are lit like the ground from both sides (three.js would flip the normal on back faces, turning them black).
+    mats.grass.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <normal_fragment_begin>', '#include <normal_fragment_begin>\n\tnormal = normalize( vNormal );'); };
+    return mats;
+  }
+
+  /** Queue an instance: set `key` draws `geo` with material `mat`; flushInst() turns each set into one instanced mesh. */
+  put(key, geo, mat, x, y, z, sx, sy, sz, rot, color, cast = true) {
+    const set = this.inst[key] || (this.inst[key] = { geo, mat, cast, v: [], c: [] });
+    set.v.push(x, y, z, sx, sy, sz, rot); set.c.push(color == null ? 0xffffff : color);
+  }
+  flushInst() {
+    const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), s = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0), c = new THREE.Color();
+    for (const key in this.inst) {
+      const set = this.inst[key], n = set.v.length / 7; if (!n) continue;
+      const mesh = new THREE.InstancedMesh(set.geo, set.mat, n);
+      for (let i = 0; i < n; i++) {
+        const v = set.v; p.set(v[i * 7], v[i * 7 + 1], v[i * 7 + 2]); s.set(v[i * 7 + 3], v[i * 7 + 4], v[i * 7 + 5]); q.setFromAxisAngle(up, v[i * 7 + 6]);
+        mesh.setMatrixAt(i, m4.compose(p, q, s)); mesh.setColorAt(i, c.set(set.c[i]));
+      }
+      mesh.castShadow = set.cast; mesh.receiveShadow = true;
+      this.scene.add(mesh);
+    }
+    this.inst = {};
+  }
+
+  /** The settlement: wooden houses, shops with false fronts, a church, tents, barns, yard clutter, wagons and people. */
+  buildTown() {
+    const T = this.town; if (!T) return;
+    const r = this.rand, M = this.mats, X = REALX, biome = this.p.biome;
+    const box = X.box(), prism = X.prism();
+    const woods = ['#b3967a', '#9c8064', '#c2a684', '#8a7058'], paints = ['#cfd8e2', '#ece8e0', '#b8604c', '#7f98b2', '#dcc8a0'];
+    const roofs = biome === 'ice' ? ['#eef2f5', '#e4eaee'] : biome === 'desert' ? ['#a88a7a', '#8a7a70', '#b09080'] : ['#77706a', '#5d4e44', '#8a7a6a', '#56606a'];
+    const roofMat = biome === 'desert' ? M.metal : M.roof, roofKey = biome === 'desert' ? 'roofM' : 'roof';
+    const pick = a => a[Math.floor(r() * a.length)];
+    this.chimneys = [];
+    const house = (l, w, d, h, rh, wall, opts = {}) => {
+      const c = Math.cos(l.rot), s = Math.sin(l.rot), at = (lx, lz) => [l.x + lx * c + lz * s, l.z - lx * s + lz * c], y = l.y;
+      const [cx, cz] = at(0, 0);
+      this.put('found', box, M.stone, cx, y - 1.2, cz, w + 0.3, 1.45, d + 0.3, l.rot, '#9a9088');
+      this.put('wall', box, M.plank, cx, y + 0.2, cz, w, h, d, l.rot, wall);
+      this.put(roofKey, prism, roofMat, cx, y + 0.2 + h, cz, w + 0.8, rh, d + 0.9, l.rot, opts.roof || pick(roofs));
+      let [dx, dz] = at(0, d / 2 + 0.05); this.put('door', box, M.plain, dx, y + 0.2, dz, 1.0, 1.9, 0.1, l.rot, '#4a3426');
+      for (const sx of [-1, 1]) { [dx, dz] = at(sx * w * 0.3, d / 2 + 0.05); this.put('win', box, M.window, dx, y + 1.3, dz, 0.8, 0.8, 0.08, l.rot); [dx, dz] = at(sx * (w / 2 + 0.04), 0); this.put('win', box, M.window, dx, y + 1.3, dz, 0.08, 0.8, 1.0, l.rot); }
+      if (opts.storeys === 2) for (const sx of [-1, 0, 1]) { [dx, dz] = at(sx * w * 0.3, d / 2 + 0.05); this.put('win', box, M.window, dx, y + h - 1.4, dz, 0.8, 0.9, 0.08, l.rot); }
+      if (opts.porch) {
+        [dx, dz] = at(0, d / 2 + 0.9); this.put('wall', box, M.plank, dx, y, dz, w, 0.25, 1.8, l.rot, '#8a7058');
+        this.put('awn', box, M.plank, dx, y + 2.5, dz, w + 0.3, 0.12, 1.9, l.rot, pick(woods));
+        for (const sx of [-1, 1]) { [dx, dz] = at(sx * (w / 2 - 0.1), d / 2 + 1.7); this.put('post', box, M.plank, dx, y, dz, 0.16, 2.5, 0.16, l.rot, '#6a5440'); }
+      }
+      if (opts.front) {   // false front with a painted sign
+        [dx, dz] = at(0, d / 2 + 0.14); this.put('wall', box, M.plank, dx, y + 0.2, dz, w + 0.3, h + rh + 0.5, 0.25, l.rot, wall);
+        [dx, dz] = at(0, d / 2 + 0.3); this.put('sign', box, M.plain, dx, y + h + 0.3, dz, w * 0.75, 0.9, 0.1, l.rot, pick(['#8a2f2f', '#2f4f7a', '#e8e0c8', '#3a5a3a', '#c9a86a']));
+      }
+      if (r() < (opts.chimney == null ? 0.45 : opts.chimney)) {
+        [dx, dz] = at(w * 0.28, -d * 0.2); this.put('chim', box, M.stone, dx, y + h * 0.5, dz, 0.6, h * 0.5 + rh + 1.1, 0.6, l.rot, '#8a7a70');
+        this.chimneys.push(new THREE.Vector3(dx, y + h + rh + 1.7, dz));
+      }
+    };
+    const yard = l => {
+      const c = Math.cos(l.rot), s = Math.sin(l.rot), at = (lx, lz) => [l.x + lx * c + lz * s, l.z - lx * s + lz * c];
+      const side = r() < 0.5 ? -1 : 1;
+      for (let k = 0; k < 2 + Math.floor(r() * 5); k++) {   // crates, some stacked
+        const [x, z] = at(side * (5 + r() * 1.5), -2 + r() * 5), sz = 0.7 + r() * 0.3;
+        this.put('crate', box, M.plank, x, this.groundAt(x, z) + (k % 3 === 2 ? 0.8 : 0), z, sz, sz, sz, r() * 0.4, '#b08a5a');
+      }
+      for (let k = 0; k < Math.floor(r() * 4); k++) { const [x, z] = at(-side * (4.5 + r()), 2 + r() * 2); this.put('barrel', X.cylinder(), M.plank, x, this.groundAt(x, z), z, 0.7, 0.95, 0.7, 0, '#7a5638'); }
+      for (let k = 0; k < Math.floor(r() * 4); k++) { const [x, z] = at(side * (4 + r() * 2), 3 + r() * 2); this.put('sack', X.sack(), M.cloth, x, this.groundAt(x, z), z, 0.8, 0.8, 0.8, r() * 3, '#d8c8a0'); }
+      if (r() < 0.45) for (let k = 0; k < 6; k++) { const [x, z] = at(-side * 5, -3 + (k % 3) * 0.6); this.put('log', X.log(), M.plank, x, this.groundAt(x, z) + 0.3 + Math.floor(k / 3) * 0.5, z, 2.4, 0.5, 0.5, l.rot, '#8a6a4a'); }
+      if (r() < 0.55) {   // a fence along the back of the lot
+        for (let k = -3; k <= 3; k++) { const [x, z] = at(k * 1.6, -7.5); this.put('post', box, M.plank, x, this.groundAt(x, z), z, 0.14, 1.1, 0.14, l.rot, '#6a5440'); }
+        for (const hy of [0.45, 0.85]) { const [x, z] = at(0, -7.5); this.put('rail', box, M.plank, x, this.groundAt(x, z) + hy, z, 9.8, 0.1, 0.07, l.rot, '#7a6450'); }
+      }
+    };
+    T.lots.forEach((l, i) => {
+      const wall = r() < 0.6 ? pick(woods) : pick(paints);
+      switch (l.kind) {
+        case 'church': {
+          house(l, 6.5, 11, 4.6, 3.6, '#dfe6ee', { chimney: 0, roof: biome === 'ice' ? '#eef2f5' : '#5d6670' });
+          const c = Math.cos(l.rot), s = Math.sin(l.rot), tx = l.x + 5.8 * s, tz = l.z + 5.8 * c;
+          this.put('wall', box, M.plank, tx, l.y + 0.2, tz, 2.2, 8.5, 2.2, l.rot, '#dfe6ee');
+          this.put('spire', X.pyramid(), roofMat, tx, l.y + 8.7, tz, 2.6, 3.2, 2.6, l.rot, '#5d6670');
+          this.put('win', box, M.window, tx + 1.12 * s, l.y + 6.5, tz + 1.12 * c, 0.7, 1.0, 0.08, l.rot);
+          this.put('post', box, M.plank, tx, l.y + 11.8, tz, 0.14, 1.6, 0.14, l.rot, '#3a3030');
+          this.put('rail', box, M.plank, tx, l.y + 12.8, tz, 0.9, 0.14, 0.14, l.rot, '#3a3030');
+          break;
+        }
+        case 'house': house(l, 6 + r(), 7 + r(), 5.4, 2.6, wall, { storeys: 2, porch: r() < 0.6 }); break;
+        case 'shop': house(l, 6.4 + r(), 8 + r(), 3.6, 2.2, wall, { front: true, porch: true }); break;
+        case 'barn': house(l, 8, 10, 4.4, 3.6, '#a8503e', { chimney: 0 }); break;
+        case 'tent': {
+          const tw = 3.2 + r() * 0.6, c = pick(['#f2eee4', '#e6dcc2', '#8aa0c8', '#d8d0b8']);
+          this.put('tent', prism, M.cloth, l.x, l.y, l.z, tw, 2.4, 4.2, l.rot, c);
+          const s = Math.sin(l.rot), cc = Math.cos(l.rot);
+          this.put('door', box, M.plain, l.x + 2.12 * s, l.y, l.z + 2.12 * cc, 0.9, 1.4, 0.05, l.rot, '#3a3226');
+          break;
+        }
+        default: house(l, 4.8 + r() * 1.4, 5.4 + r(), 3.1, 2.1, wall, { porch: r() < 0.4 });
+      }
+      yard(l);
+    });
+    // Covered wagons parked along the roads.
+    const wagonGeo = X.wagon(), hoodGeo = X.hood();
+    T.roads.slice(0, 3).forEach(rd => rd.pts.forEach(([x, z], i) => {
+      if (!i || r() > (T.big ? 0.7 : 0.5)) return;
+      const [px, pz] = rd.pts[i - 1], a = Math.atan2(x - px, z - pz), ox = Math.cos(a) * rd.w * 0.8, oz = -Math.sin(a) * rd.w * 0.8, wx = lerp(px, x, 0.5) + ox, wz = lerp(pz, z, 0.5) + oz;
+      this.put('wagon', wagonGeo, M.vc, wx, this.groundAt(wx, wz), wz, 1.4, 1.4, 1.4, a);
+      this.put('hood', hoodGeo, M.cloth, wx, this.groundAt(wx, wz), wz, 1.4, 1.4, 1.4, a, '#efe9dc');
+    }));
+    // People walking the streets.
+    const n = T.big ? (PHONE ? 40 : 70) : 8, base = new THREE.InstancedMesh(X.personBase(), M.vc, n), body = new THREE.InstancedMesh(X.personBody(), M.plain, n), c = new THREE.Color();
+    base.castShadow = body.castShadow = true;
+    this.people = { base, body, list: Array.from({ length: n }, (_, i) => {
+      const rd = T.roads[i % Math.min(T.roads.length, 3)];
+      body.setColorAt(i, c.set(pick(['#8a3a3a', '#3a5a8a', '#6a6a3a', '#e8e0d0', '#5a3a6a', '#3a6a5a', '#9a7a4a'])));
+      return { rd, u: r(), sp: (0.8 + r() * 0.8) * (r() < 0.5 ? -1 : 1), off: (r() - 0.5) * rd.w * 0.8, ph: r() * 6 };
+    }) };
+    this.people.list.forEach(pp => { const L = pp.rd.pts.reduce((a, q, i) => i ? a + Math.hypot(q[0] - pp.rd.pts[i - 1][0], q[1] - pp.rd.pts[i - 1][1]) : 0, 0); pp.len = L; });
+    this.scene.add(base, body);
+    // Chimney smoke.
+    const sm = this.keep(new THREE.SpriteMaterial({ map: puffTex(), color: '#d8d4d0', transparent: true, opacity: 0.45, depthWrite: false, fog: true }));
+    this.smoke = this.chimneys.flatMap((p0, j) => Array.from({ length: 5 }, (_, k) => { const s = new THREE.Sprite(sm); this.scene.add(s); return { s, p0, t: k / 5 + j * 0.13 }; }));
+    if (T.big) this.colony = new THREE.Vector3(T.C.x, T.C.y, T.C.z);
+  }
+
+  /** Trees, shrubs, rocks and grass for a realistic world, kept off roads and lots. */
+  buildNature() {
+    const e = this.e, r = this.rand, M = this.mats, X = REALX, biome = this.p.biome, pal = this.pal, S = this.S;
+    const veg = clamp(this.sim.vegEff * 1.15, 0, 1), dens = PHONE ? 0.6 : 1;
+    const greens = pal.flora || [pal.veg];
+    const scatter = (key, geo, mat, n, sc, ok, o = {}) => {
+      n = Math.floor(n * dens);
+      for (let k = 0, placed = 0; k < n * 6 && placed < n; k++) {
+        const x = (r() * 2 - 1) * S * 0.49, z = (r() * 2 - 1) * S * 0.49, y = this.groundAt(x, z);
+        if (this.occupied(x, z) || !ok(x, y, z)) continue;
+        if (!o.flat && this.slopeAt(x, z) > (o.slope || 1.1)) continue;
+        const s = lerp(sc[0], sc[1], Math.pow(r(), 1.5));
+        this.put(key, geo, mat, x, y - 0.1, z, s, s * (0.85 + r() * 0.3), s, r() * 6.28, o.color ? o.color() : null, o.cast !== false);
+        placed++;
+      }
+    };
+    const land = need => (x, y, z) => y > 1.2 && (!need || r() < this.vegAt(x, z) * 1.6 + need);
+    const lush = ({ jungle: 1, ocean: 0.8 })[biome] || 0;
+    const tintG = hex => () => new THREE.Color(hex).multiplyScalar(0.85 + r() * 0.3).getHex();
+    if (biome === 'jungle' || biome === 'ocean') {
+      const gA = mixHex(greens[0], '#3f6a28', 0.5), gB = mixHex(greens[1 % greens.length], '#5a7a2a', 0.5);
+      if (biome === 'ocean') { scatter('palm', this.keep(PROPS.palm('#4f8a3a', 1)), M.vcLeaf, 260 * veg + 40, [2.4, 4.2], (x, y) => y > 0.4 && y < 12); }
+      scatter('leafA', X.leafy(gA, 1), M.vc, 700 * veg * lush + 40, [2.6, 4.6], land(0.15));
+      scatter('leafB', X.leafy(gB, 2), M.vc, 500 * veg * lush + 30, [2.2, 4.0], land(0.15));
+      scatter('conif', X.conifer('#2f4f2a', false, 1), M.vc, 200 * veg + 20, [2.6, 4.4], land(0.1));
+      scatter('shrub', X.shrub('#4a6a2a', 1), M.vc, 700 * veg + 60, [0.9, 1.8], land(0.1));
+    } else if (biome === 'desert') {
+      scatter('sage', X.shrub('#8a9270', 2), M.vc, 500, [0.6, 1.3], (x, y) => y > 1.2);
+      scatter('yucca', X.yucca('#7a8a50'), M.vc, 160, [1.0, 1.8], (x, y) => y > 1.2);
+      scatter('dead', X.deadTree(), M.vc, 40, [1.6, 2.6], (x, y) => y > 1.2);
+      scatter('redRock', X.boulder('#a8603e', 2, true), M.vc, 140, [1.5, 4], (x, y) => y > 0.5, { slope: 3 });
+      scatter('outcrop', X.boulder('#b0684a', 5, true), M.vc, 26, [3.5, 7], (x, y) => y > 1.5, { slope: 3 });
+    } else if (biome === 'ice') {
+      scatter('conif', X.conifer('#2e4a3a', true, 1), M.vc, 500 * veg + 60, [2.4, 4.6], land(0.2));
+      scatter('conif2', X.conifer('#3a5a44', true, 2), M.vc, 300 * veg + 40, [1.6, 3.0], land(0.2));
+      scatter('rock', X.boulder('#8a8f96', 3), M.vc, 160, [1.2, 3.4], (x, y) => y > 0.5, { slope: 3 });
+    } else if (biome === 'lava') {
+      scatter('basalt', this.keep(PROPS.basalt()), M.vc, 120, [1.4, 3.4], (x, y) => y > 0.5, { slope: 3 });
+      scatter('shard', this.keep(PROPS.shard('#1a1320')), M.vcGlow, 200, [0.6, 1.4], (x, y) => y > 0.3);
+      scatter('dead', X.deadTree(), M.vc, 50, [1.4, 2.4], (x, y) => y > 1.2);
+      scatter('rock', X.boulder('#2e2628', 4), M.vc, 200, [1.2, 3.2], (x, y) => y > 0.3, { slope: 3 });
+    } else {   // crystal and rogue worlds
+      scatter('crys', this.keep(PROPS.crystals(greens[0], 1)), M.vcGlow, 260, [0.9, 2.4], (x, y) => y > 0.6, { slope: 2 });
+      scatter('crys2', this.keep(PROPS.crystals(greens[1 % greens.length], 2)), M.vcGlow, 160, [0.6, 1.6], (x, y) => y > 0.6, { slope: 2 });
+      scatter('mush', this.keep(PROPS.mushroom(greens[2 % greens.length])), M.vcGlow, 300 * veg + 30, [0.8, 1.8], land(0.2));
+      scatter('leafA', X.leafy(mixHex(greens[0], '#2a2a4a', 0.5), 3), biome === 'rogue' ? M.vcGlow : M.vc, 300 * veg + 30, [2.2, 3.8], land(0.2));
+      scatter('rock', X.boulder('#4a4064', 6), M.vc, 160, [1.2, 3.2], (x, y) => y > 0.3, { slope: 3 });
+    }
+    if (biome !== 'desert' && biome !== 'lava') scatter('rock', X.boulder(biome === 'ice' ? '#8a8f96' : '#7a746e', 7), M.vc, 110, [0.8, 2.6], (x, y) => y > 0.3, { slope: 3 });
+    // Grass: crossed blade cards, dense where the ground is green.
+    const grassCol = ({ jungle: '#6d9a3a', ocean: '#7aa048', desert: '#c8b070', ice: '#c9d8c8', crystal: '#9a88d8', rogue: '#3a8a70', lava: '#5a4a40' })[biome] || '#7aa048';
+    if (biome !== 'lava') scatter('grass', X.grassCard(), M.grass, (PHONE ? 3500 : 6000) * (lush ? 0.6 + veg * 0.6 : 0.35), [1.0, 1.9],
+      (x, y, z) => y > 1.1 && (lush ? r() < 0.25 + this.vegAt(x, z) * 1.5 : r() < 0.4), { cast: false, color: tintG(grassCol) });
+  }
+
+  /** Sea (or lava sea) at height 0; the diorama's sea ends in clear walls at the island's edge. */
+  buildSea(real) {
+    const S = this.S, lava = !!this.b.lavaSea, cHot = this.col('hot');
     // Sea (or lava sea) at height 0.
     const sea = new THREE.ShaderMaterial({
       transparent: true, fog: true, depthWrite: false,
@@ -2812,8 +3396,9 @@ class ExploreWorld {
         }`
     });
     this.keep(sea); this.seaMat = sea;
-    const water = new THREE.Mesh(this.keep(new THREE.PlaneGeometry(S, S, 1, 1).rotateX(-Math.PI / 2)), sea);
-    water.position.y = 0.01; this.scene.add(water);
+    const water = new THREE.Mesh(this.keep(new THREE.PlaneGeometry(real ? S * 3 : S, real ? S * 3 : S, 1, 1).rotateX(-Math.PI / 2)), sea);
+    water.position.y = 0.01; water.receiveShadow = !!real; this.scene.add(water);
+    if (real) return;
     // The island floats: the sea ends in a clear wall at its edges.
     const wallM = this.keep(new THREE.MeshBasicMaterial({ color: lava ? this.col('hot') : this.col('shallow').lerp(this.col('deep'), 0.4), transparent: true, opacity: lava ? 0.75 : 0.42, side: THREE.DoubleSide, depthWrite: false, fog: true }));
     const wallG = this.keep(new THREE.PlaneGeometry(S, 30));
@@ -2821,9 +3406,6 @@ class ExploreWorld {
       const w = new THREE.Mesh(wallG, wallM); w.position.set(x, -15, z); w.rotation.y = r; this.scene.add(w);
     });
 
-    this.buildFlora();
-    if (lava || e.eruption > 0.3) this.buildVolcano();
-    if (this.eco && this.sim.colonists > 1) this.buildColony();
   }
 
   /** Tile index under (x, z). */
@@ -2832,10 +3414,21 @@ class ExploreWorld {
     return iz * N + ix;
   }
   /** Ground height at (x, z): the top of the tile there. */
-  groundAt(x, z) { return this.gas ? 0 : this.tileY[this.tileAt(x, z)]; }
-  vegAt(x, z) { return this.tileVeg[this.tileAt(x, z)]; }
+  groundAt(x, z) {
+    if (this.gas) return 0;
+    if (!this.real) return this.tileY[this.tileAt(x, z)];
+    const N = this.N, fx = clamp((x + this.S / 2) / this.seg, 0, N - 0.001), fz = clamp((z + this.S / 2) / this.seg, 0, N - 0.001);
+    const ix = Math.floor(fx), iz = Math.floor(fz), tx = fx - ix, tz = fz - iz, g = this.hgrid, r = N + 1;
+    return lerp(lerp(g[iz * r + ix], g[iz * r + ix + 1], tx), lerp(g[(iz + 1) * r + ix], g[(iz + 1) * r + ix + 1], tx), tz);
+  }
+  vegAt(x, z) {
+    if (!this.real) return this.tileVeg[this.tileAt(x, z)];
+    const N = this.N, ix = Math.round(clamp((x + this.S / 2) / this.seg, 0, N)), iz = Math.round(clamp((z + this.S / 2) / this.seg, 0, N));
+    return this.vgrid[iz * (N + 1) + ix];
+  }
   /** True when (x, z) is well inside a tile, so a prop won't hang over a step. */
   inTile(x, z, m = 0.18) {
+    if (this.real) return true;
     const fx = ((x + this.S / 2) / this.TS) % 1, fz = ((z + this.S / 2) / this.TS) % 1;
     return fx > m && fx < 1 - m && fz > m && fz < 1 - m;
   }
@@ -2952,7 +3545,7 @@ class ExploreWorld {
       const n = (this.eco ? 36 : 14), wing = new THREE.BufferGeometry();
       wing.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, 0, 0.35, -1, 0.15, -0.1, 0, 0, -0.2, 0, 0, 0.35, 0, 0, -0.2, 1, 0.15, -0.1]), 3));
       wing.computeVertexNormals(); this.keep(wing);
-      const bm = this.keep(new THREE.MeshBasicMaterial({ color: kind === 'pine' ? '#2a2f3a' : '#1f1a2a', side: THREE.DoubleSide, fog: true }));
+      const bm = this.keep(new THREE.MeshBasicMaterial({ color: this.real ? '#ecebe6' : kind === 'pine' ? '#2a2f3a' : '#1f1a2a', side: THREE.DoubleSide, fog: true }));
       this.birds = { mesh: new THREE.InstancedMesh(wing, bm, n), list: [] };
       for (let i = 0; i < n; i++) {
         const flock = i % 3;
@@ -3257,6 +3850,35 @@ class ExploreWorld {
     }
   }
 
+  /** Top-down camera like a strategy game: a point on the ground, a distance, a heading. */
+  initRts() {
+    const p0 = this.pois[0].pos, d0 = this.gas ? 95 : 72;
+    this.rts = { x: p0.x, z: p0.z, tx: p0.x, tz: p0.z, dist: d0 * 1.7, tdist: d0, yaw: 0.7, tyaw: 0.7, gy: Math.max(0, this.groundAt(p0.x, p0.z)), vx: 0, vz: 0,
+      min: 14, max: this.gas ? 260 : 190 };
+    this.pathSamples = this.path.getSpacedPoints(200);
+  }
+  rtsPose(pos, look, useTarget) {
+    const R = this.rts, x = useTarget ? R.tx : R.x, z = useTarget ? R.tz : R.z, dist = useTarget ? R.tdist : R.dist, yaw = useTarget ? R.tyaw : R.yaw;
+    const gy = useTarget ? Math.max(0, this.groundAt(x, z)) : R.gy;
+    // Closer in, the view tilts towards the horizon; further out it looks straight down on the map.
+    const pitch = lerp(0.5, 1.12, clamp((dist - 18) / 150, 0, 1));
+    look.set(x, gy, z);
+    pos.set(x + Math.sin(yaw) * Math.cos(pitch) * dist, gy + Math.sin(pitch) * dist, z + Math.cos(yaw) * Math.cos(pitch) * dist);
+    pos.y = Math.max(pos.y, this.groundAt(pos.x, pos.z) + 5);
+  }
+  /** Pan by a screen drag (pixels), relative to the current heading. */
+  panBy(dx, dy, pxPerUnit) {
+    const R = this.rts, k = R.dist / pxPerUnit, s = Math.sin(R.yaw), c = Math.cos(R.yaw);
+    R.tx += (-c * dx - s * dy) * k; R.tz += (s * dx - c * dy) * k;
+  }
+  /** Glide to the next or previous point of interest (in tour order). */
+  goPoi(d) {
+    const R = this.rts, n = this.pois.length; let best = 0, bd = Infinity;
+    this.pois.forEach((p, i) => { const dd = Math.hypot(p.pos.x - R.tx, p.pos.z - R.tz); if (dd < bd) { bd = dd; best = i; } });
+    const q = this.pois[bd < 6 ? (best + d + n) % n : best].pos;
+    R.tx = q.x; R.tz = q.z; this.auto = false;
+  }
+
   placeCamera(dt, snap) {
     const pos = new THREE.Vector3(), look = new THREE.Vector3();
     if (this.focus) {
@@ -3267,7 +3889,20 @@ class ExploreWorld {
       look.lerpVectors(f.fromLook, f.toLook, k);
       if (f.back && f.t >= 1) this.focus = null;
     } else {
-      this.pathPose(this.progress, pos, look);
+      const R = this.rts;
+      if (this.auto) {   // auto tour: glide along the loop through the points of interest
+        this.target += dt * 0.008;
+        const q = this.path.getPointAt(((this.target % 1) + 1) % 1); R.tx = q.x; R.tz = q.z; R.tyaw += dt * 0.05;
+      }
+      R.tx += R.vx * dt; R.tz += R.vz * dt; R.vx = damp(R.vx, 0, 3.5, dt); R.vz = damp(R.vz, 0, 3.5, dt);
+      const lim = this.S * (this.gas ? 0.3 : 0.47); R.tx = clamp(R.tx, -lim, lim); R.tz = clamp(R.tz, -lim, lim);
+      R.tdist = clamp(R.tdist, R.min, R.max);
+      R.x = damp(R.x, R.tx, 7, dt); R.z = damp(R.z, R.tz, 7, dt); R.dist = damp(R.dist, R.tdist, 5, dt); R.yaw = damp(R.yaw, R.tyaw, 7, dt);
+      R.gy = damp(R.gy, Math.max(0, this.groundAt(R.x, R.z)), 4, dt);
+      this.rtsPose(pos, look);
+      // Where we are along the tour loop, for the track under the view.
+      let bi = 0, bd = Infinity; this.pathSamples.forEach((q, i) => { const dd = (q.x - R.x) ** 2 + (q.z - R.z) ** 2; if (dd < bd) { bd = dd; bi = i; } });
+      this.progress = bi / this.pathSamples.length;
     }
     // Look around: yaw the gaze about the camera.
     const dir = look.clone().sub(pos), yaw = this.yaw;
@@ -3287,20 +3922,43 @@ class ExploreWorld {
   }
   leaveFocus() {
     const f = this.focus; if (!f) return;
-    this.progress = this.target = f.poi.u - 0.02;
-    const pos = new THREE.Vector3(), look = new THREE.Vector3(); this.pathPose(this.progress, pos, look);
+    // Back to the overhead view, centred on the point we were looking at.
+    const R = this.rts; R.tx = R.x = f.poi.pos.x; R.tz = R.z = f.poi.pos.z; R.gy = Math.max(0, this.groundAt(R.x, R.z)); R.tdist = R.dist = Math.min(R.tdist, 70); R.vx = R.vz = 0;
+    const pos = new THREE.Vector3(), look = new THREE.Vector3(); this.rtsPose(pos, look);
+    this.target = f.poi.u;
     this.focus = { poi: f.poi, t: 0, fromPos: this.cam.position.clone(), fromLook: f.toLook.clone(), toPos: pos, toLook: look, back: true };
   }
 
   update(dt) {
     this.t += dt;
-    if (!this.focus) {
-      if (this.auto) this.target += dt * 0.012;
-      this.progress = damp(this.progress, this.target, 2.4, dt);
-    }
-    this.yaw = damp(this.yaw, this.yawT, 4, dt);
+    this.yaw = 0;
     this.placeCamera(dt);
     if (this.seaMat) this.seaMat.uniforms.uTime.value = this.t;
+    if (this.real) {
+      // Shadows cover the area under the camera; snap to the shadow texel grid so edges don't crawl.
+      const R = this.rts, step = 160 / this.sun.shadow.mapSize.x, fx = Math.round(R.x / step) * step, fz = Math.round(R.z / step) * step;
+      this.sun.target.position.set(fx, R.gy, fz); this.sun.position.copy(this.sunDir).multiplyScalar(250).add(this.sun.target.position);
+      this.sun.target.updateMatrixWorld();
+    }
+    if (this.people) {
+      const m = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3(1, 1, 1), up = new THREE.Vector3(0, 1, 0);
+      this.people.list.forEach((pp, i) => {
+        pp.u = ((pp.u + pp.sp * dt / Math.max(10, pp.len)) % 1 + 1) % 1;
+        const pts = pp.rd.pts; let dist = pp.u * pp.len, k = 1;
+        for (; k < pts.length; k++) { const L = Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1]); if (dist <= L) break; dist -= L; }
+        k = Math.min(k, pts.length - 1);
+        const [ax, az] = pts[k - 1], [bx, bz] = pts[k], L = Math.hypot(bx - ax, bz - az) || 1, tx = (bx - ax) / L, tz = (bz - az) / L, f = clamp(dist / L, 0, 1);
+        const x = lerp(ax, bx, f) - tz * pp.off, z = lerp(az, bz, f) + tx * pp.off;
+        q.setFromAxisAngle(up, Math.atan2(tx * Math.sign(pp.sp), tz * Math.sign(pp.sp)));
+        m.compose(v.set(x, this.groundAt(x, z) + Math.abs(Math.sin(this.t * 7 + pp.ph)) * 0.08, z), q, sc);
+        this.people.base.setMatrixAt(i, m); this.people.body.setMatrixAt(i, m);
+      });
+      this.people.base.instanceMatrix.needsUpdate = this.people.body.instanceMatrix.needsUpdate = true;
+    }
+    if (this.smoke) this.smoke.forEach(p => {
+      p.t = (p.t + dt * 0.18) % 1;
+      p.s.position.set(p.p0.x + p.t * 3, p.p0.y + p.t * 7, p.p0.z + p.t * 1.5); p.s.scale.setScalar(1 + p.t * 4);
+    });
     if (this.birds) {
       const m = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
       this.birds.list.forEach((b, i) => {
@@ -4284,9 +4942,23 @@ class App {
     $('[data-x-name]').textContent = tr(`ดาว${p.name}`, p.name);
     $('[data-x-panel]').hidden = true;
     Sound.launch();
-    // Build on the next frame so the landing screen shows first.
+    this.buildExploreWorld(false);
+  }
+
+  /** (Re)build the landing scene on the next frames, behind the landing screen. */
+  buildExploreWorld(rebuild) {
+    const p = PLANETS[this.current], load = $('[data-x-loading]');
+    if (rebuild) {
+      this.stopExploreLoop(); load.classList.remove('done');
+      if (this.xPoi != null) { $('[data-x-panel]').hidden = true; this.xPoi = null; }
+      const auto = $('[data-x-auto]'); auto.setAttribute('aria-pressed', 'false'); auto.textContent = tr('▶ ทัวร์อัตโนมัติ', "▶ Auto tour");
+    }
+    const sb = $('[data-x-style]');
+    sb.hidden = BIOMES[p.biome].type === 'gas';
+    sb.textContent = this.state.xstyle === 'diorama' ? tr('🧊 แบบไดโอรามา', '🧊 Diorama') : tr('🌄 แบบสมจริง', '🌄 Realistic');
     requestAnimationFrame(() => requestAnimationFrame(() => {
       if (!this.inExplore) return;
+      if (this.world) { this.world.dispose(); this.world = null; }
       this.world = new ExploreWorld(this, p);
       const w = this.world, sim = w.sim;
       $('[data-x-stats]').innerHTML = [`🌡️ ${Math.round(sim.temp)}°C`, `${sim.weather.icon} ${sim.weather.name}`, `O₂ ${sim.o2.toFixed(sim.o2 < 1 ? 1 : 0)}%`, `☀️ ${fmtLight(p.au)}`].map(t => `<span>${t}</span>`).join('');
@@ -4318,6 +4990,13 @@ class App {
     const w = this.world; if (!w) return;
     const host = $('#xstage'), W = host.clientWidth, H = host.clientHeight;
     w.cam.aspect = W / Math.max(1, H); w.cam.fov = W < H ? 66 : 56; w.cam.updateProjectionMatrix();
+    const K = this.xKeys;
+    if (K && K.size && !w.focus) {
+      const R = w.rts, kx = (K.has('d') || K.has('arrowright') ? 1 : 0) - (K.has('a') || K.has('arrowleft') ? 1 : 0), kz = (K.has('s') || K.has('arrowdown') ? 1 : 0) - (K.has('w') || K.has('arrowup') ? 1 : 0);
+      if (kx || kz) { w.panBy(-kx * 700 * dt, -kz * 700 * dt, H); w.auto = false; }
+      if (K.has('q')) R.tyaw += dt * 1.4; if (K.has('e')) R.tyaw -= dt * 1.4;
+      if (K.has('=') || K.has('+')) R.tdist *= 1 - dt; if (K.has('-')) R.tdist *= 1 + dt;
+    }
     w.update(dt);
     // Labels follow their holograms; the track shows where we are on the loop.
     const v = new THREE.Vector3();
@@ -4330,7 +5009,10 @@ class App {
       poi.sx = (v.x + 1) / 2 * W; poi.sy = (1 - v.y) / 2 * H; poi.on = on;
     });
     const pos = $('[data-x-pos]'); if (pos) pos.style.left = (this.trackAt(((w.progress % 1) + 1) % 1) * 100).toFixed(2) + '%';
-    this.stage.renderer.render(w.scene, w.cam);
+    const r = this.stage.renderer;
+    if (w.real) { r.shadowMap.enabled = true; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.15; }
+    r.render(w.scene, w.cam);
+    if (w.real) { r.shadowMap.enabled = false; r.toneMapping = THREE.NoToneMapping; }
   }
 
   /** Where a path position falls on the evenly spaced track, between the ticks it lies between. */
@@ -4383,9 +5065,7 @@ class App {
       const w = this.world; if (!w) return;
       const n = w.pois.length;
       if (this.xPoi != null) { this.openPoi((this.xPoi + d + n) % n); return; }
-      // Next point of interest ahead of (or behind) the camera along the loop.
-      const u = ((w.target % 1) + 1) % 1, order = w.pois.map((p, i) => ({ i, du: (((p.u - u) * d) % 1 + 1) % 1 })).filter(o => o.du > 0.01).sort((a, b) => a.du - b.du);
-      if (order.length) w.target += order[0].du * d;
+      w.goPoi(d);
     };
     $('[data-x-prev]').addEventListener('click', () => step(-1));
     $('[data-x-next]').addEventListener('click', () => step(1));
@@ -4398,30 +5078,68 @@ class App {
       e.currentTarget.textContent = w.auto ? tr('⏸ หยุดทัวร์', "⏸ Stop tour") : tr('▶ ทัวร์อัตโนมัติ', "▶ Auto tour");
     });
     $('[data-x-track]').addEventListener('click', e => { const b = e.target.closest('[data-xgo]'); if (b) this.openPoi(+b.dataset.xgo); });
-    // Swipe or scroll to travel; drag sideways to look around; tap a hologram.
-    const el = $('#xstage');
-    let drag = null;
-    el.addEventListener('pointerdown', e => { el.setPointerCapture(e.pointerId); drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, t: performance.now(), axis: null }; });
+    // Strategy-game controls: drag to pan, pinch or wheel to zoom, twist (or right-drag, shift-drag, Q/E) to turn.
+    const el = $('#xstage'), pts = new Map();
+    let drag = null, two = null;
+    const stopTour = () => { const w = this.world; if (w && w.auto) { w.auto = false; const b = $('[data-x-auto]'); b.setAttribute('aria-pressed', 'false'); b.textContent = tr('▶ ทัวร์อัตโนมัติ', "▶ Auto tour"); } };
+    const twoInfo = () => { const [p, q] = [...pts.values()]; return { d: Math.hypot(p.x - q.x, p.y - q.y) || 1, a: Math.atan2(q.y - p.y, q.x - p.x), mx: (p.x + q.x) / 2, my: (p.y + q.y) / 2 }; };
+    el.addEventListener('contextmenu', e => e.preventDefault());
+    el.addEventListener('pointerdown', e => {
+      el.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pts.size === 1) drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, t: performance.now(), moved: false, rot: e.button === 2 || e.shiftKey, vx: 0, vz: 0, lt: performance.now() };
+      else if (pts.size === 2) { two = twoInfo(); if (drag) drag.moved = true; }
+    });
     el.addEventListener('pointermove', e => {
-      const w = this.world; if (!drag || !w) return;
+      const w = this.world; if (!w || !pts.has(e.pointerId)) return;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      const R = w.rts, H = el.clientHeight || 600;
+      if (pts.size >= 2 && two) {
+        if (w.focus) this.closePoi();
+        const g = twoInfo();
+        R.tdist = clamp(R.tdist * two.d / g.d, R.min, R.max);
+        let da = g.a - two.a; if (da > Math.PI) da -= 2 * Math.PI; if (da < -Math.PI) da += 2 * Math.PI;
+        R.tyaw -= da;
+        w.panBy(g.mx - two.mx, g.my - two.my, H);
+        two = g; stopTour(); return;
+      }
+      if (!drag) return;
       const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
-      if (!drag.axis && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8) drag.axis = Math.abs(e.clientX - drag.sx) > Math.abs(e.clientY - drag.sy) ? 'x' : 'y';
-      if (drag.axis === 'x') w.yawT = clamp(w.yawT + dx * 0.006, -1.4, 1.4);
-      if (drag.axis === 'y' && !w.focus) { w.target -= dy * 0.0009; w.auto = false; }
+      if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 7) { drag.moved = true; stopTour(); if (w.focus) this.closePoi(); }
+      if (!drag.moved) return;
+      if (drag.rot) { R.tyaw -= dx * 0.008; R.tdist = clamp(R.tdist * (1 + dy * 0.004), R.min, R.max); return; }
+      const bx = R.tx, bz = R.tz; w.panBy(dx, dy, H);
+      const now = performance.now(), dtm = Math.max(8, now - drag.lt) / 1000; drag.lt = now;
+      drag.vx = lerp(drag.vx, (R.tx - bx) / dtm, 0.5); drag.vz = lerp(drag.vz, (R.tz - bz) / dtm, 0.5);
     });
     const up = e => {
       const w = this.world;
-      if (drag && w && e.type === 'pointerup' && !drag.axis && performance.now() - drag.t < 350) {
+      if (drag && w && e.type === 'pointerup' && pts.size === 1 && !drag.moved && performance.now() - drag.t < 350) {
         const r = el.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
         let best = -1, bd = 44;
         w.pois.forEach((poi, i) => { if (!poi.on) return; const d = Math.hypot(poi.sx - x, poi.sy - y); if (d < bd) { bd = d; best = i; } });
         if (best >= 0) this.openPoi(best); else if (this.xPoi != null) this.closePoi();
-      }
-      if (drag && drag.axis === 'x' && w) w.yawT = damp(w.yawT, 0, 1, 0.1);
-      drag = null;
+      } else if (drag && w && drag.moved && !drag.rot && pts.size === 1 && performance.now() - drag.lt < 80) { w.rts.vx = drag.vx * 0.8; w.rts.vz = drag.vz * 0.8; }
+      pts.delete(e.pointerId);
+      if (pts.size < 2) two = null;
+      if (!pts.size) drag = null;
+      else if (pts.size === 1) { const [p] = [...pts.values()]; drag = { x: p.x, y: p.y, sx: p.x, sy: p.y, t: 0, moved: true, rot: false, vx: 0, vz: 0, lt: performance.now() }; }
     };
     el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
-    el.addEventListener('wheel', e => { const w = this.world; if (!w || w.focus) return; e.preventDefault(); w.target += e.deltaY * 0.00035; w.auto = false; }, { passive: false });
+    el.addEventListener('wheel', e => {
+      const w = this.world; if (!w) return; e.preventDefault(); stopTour();
+      if (w.focus) this.closePoi();
+      const R = w.rts;
+      if (e.shiftKey) R.tyaw -= e.deltaY * 0.004;
+      else R.tdist = clamp(R.tdist * (1 + e.deltaY * (e.ctrlKey ? 0.01 : 0.0012)), R.min, R.max);
+    }, { passive: false });
+    this.xKeys = new Set();
+    addEventListener('keydown', e => { if (!this.inExplore || e.target.closest('input,textarea')) return; const k = e.key.toLowerCase(); if ('wasdqe=+-'.includes(k) || k.startsWith('arrow')) { this.xKeys.add(k); stopTour(); if (k.startsWith('arrow')) e.preventDefault(); } });
+    addEventListener('keyup', e => this.xKeys.delete(e.key.toLowerCase()));
+    addEventListener('blur', () => this.xKeys.clear());
+    $('[data-x-style]').addEventListener('click', () => {
+      this.state.xstyle = this.state.xstyle === 'diorama' ? 'real' : 'diorama'; this.save();
+      this.buildExploreWorld(true);
+    });
   }
 
   /* ---------------- Space station ---------------- */
@@ -5395,8 +6113,8 @@ class App {
     if (!page) { main.hidden = false; pg.hidden = true; return; }
     main.hidden = true; pg.hidden = false;
     const back = tr('<button class="btn ghost" type="button" data-menu-back style="width:100%;margin-top:10px">กลับ</button>', "<button class=\"btn ghost\" type=\"button\" data-menu-back style=\"width:100%;margin-top:10px\">Back</button>");
-    if (page === 'howto') pg.innerHTML = tr(`<h3>วิธีเล่น</h3><p>1. เริ่มจากสถานีอวกาศข้างดาวฤกษ์ แตะสถานีเพื่อสำรวจและปรับแต่งโมดูล ซึ่งมีผลต่อความเร็วยาน<br>แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น กด 🛬 ลงสำรวจ เพื่อลงไปเดินดูพื้นผิวที่สร้างจากค่าที่ปรับไว้ แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงได้ในเมนู<br>ปุ่มมุมขวาล่าง: 🪐 3D สลับเป็นมุมมองระบบดาว 3 มิติ (ลากเพื่อหมุน บีบนิ้วเพื่อซูม), 1× ปรับความเร็วของอวกาศ, 🚀 ปรับความเร็วยาน, 🌘 ปรับโทนพื้นหลัง, ✨ ปรับปริมาณอนุภาคและเอฟเฟกต์, วงกลม % แสดงความคืบหน้า<br>ปุ่ม TH/EN มุมขวาบนใช้เปลี่ยนภาษา<br>แตะดาวหรือพื้นหลังในหน้าดาวเพื่อพับแผงปรับแต่ง แล้วกดปุ่มด้านล่างเพื่อเปิดกลับ<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`,
-      `<h3>How to play</h3><p>1. Start at the space station beside the star. Tap it to explore and customise its modules, which change your ship's speed.<br>Tap a planet on the map and the ship flies along the dotted route.<br>2. Drag a planet to spin it and tap it to send a ripple. Press 🛬 Land to walk a surface built from your settings, and use the sliders in the “Shape” tab to change heat, water, plants and more.<br>3. Press “Create ecosystem” to bring in animals and people.<br>4. Grow the economy without wrecking nature.<br>Leave a planet alone for a while and it slowly changes by itself. Sound can be turned on in the menu.<br>Bottom-right buttons: 🪐 3D switches to the 3D system view (drag to spin, pinch to zoom), 1× sets the speed of space, 🚀 sets the ship's speed, 🌘 changes the background tone, ✨ sets the amount of particles and effects, and the % ring shows your progress.<br>The TH/EN button at the top right switches language.<br>Tap the planet or the background on a planet page to fold the controls away; press the button at the bottom to bring them back.<br>Explore every planet and bring each one to life to fill the progress bar.</p>${back}`);
+    if (page === 'howto') pg.innerHTML = tr(`<h3>วิธีเล่น</h3><p>1. เริ่มจากสถานีอวกาศข้างดาวฤกษ์ แตะสถานีเพื่อสำรวจและปรับแต่งโมดูล ซึ่งมีผลต่อความเร็วยาน<br>แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น กด 🛬 ลงสำรวจ เพื่อลงไปเดินดูพื้นผิวที่สร้างจากค่าที่ปรับไว้ แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงได้ในเมนู<br>ปุ่มมุมขวาล่าง: 🪐 3D สลับเป็นมุมมองระบบดาว 3 มิติ (ลากเพื่อหมุน บีบนิ้วเพื่อซูม), 1× ปรับความเร็วของอวกาศ, 🚀 ปรับความเร็วยาน, 🌘 ปรับโทนพื้นหลัง, ✨ ปรับปริมาณอนุภาคและเอฟเฟกต์, วงกลม % แสดงความคืบหน้า<br>ปุ่ม TH/EN มุมขวาบนใช้เปลี่ยนภาษา<br>แตะดาวหรือพื้นหลังในหน้าดาวเพื่อพับแผงปรับแต่ง แล้วกดปุ่มด้านล่างเพื่อเปิดกลับ<br>ตอนลงสำรวจ: ลากเพื่อเลื่อนดู บีบนิ้วหรือล้อเมาส์เพื่อซูม หมุนสองนิ้วเพื่อหมุนมุมมอง ปุ่ม 🌄/🧊 สลับแบบสมจริงกับไดโอรามา<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`,
+      `<h3>How to play</h3><p>1. Start at the space station beside the star. Tap it to explore and customise its modules, which change your ship's speed.<br>Tap a planet on the map and the ship flies along the dotted route.<br>2. Drag a planet to spin it and tap it to send a ripple. Press 🛬 Land to walk a surface built from your settings, and use the sliders in the “Shape” tab to change heat, water, plants and more.<br>3. Press “Create ecosystem” to bring in animals and people.<br>4. Grow the economy without wrecking nature.<br>Leave a planet alone for a while and it slowly changes by itself. Sound can be turned on in the menu.<br>Bottom-right buttons: 🪐 3D switches to the 3D system view (drag to spin, pinch to zoom), 1× sets the speed of space, 🚀 sets the ship's speed, 🌘 changes the background tone, ✨ sets the amount of particles and effects, and the % ring shows your progress.<br>The TH/EN button at the top right switches language.<br>Tap the planet or the background on a planet page to fold the controls away; press the button at the bottom to bring them back.<br>When landed: drag to pan, pinch or scroll to zoom, twist with two fingers to rotate; the 🌄/🧊 button switches between realistic and diorama.<br>Explore every planet and bring each one to life to fill the progress bar.</p>${back}`);
     if (page === 'model') pg.innerHTML = tr(`<h3>ตัวเลขมาจากไหน</h3><p>ระยะห่างของดาวใช้หน่วยดาราศาสตร์ (1 หน่วย ≈ 149.6 ล้าน กม.) และคิดตอนดาวเรียงอยู่ด้านเดียวกันของดาวฤกษ์ เวลาเดินทางคิดจากยานความเร็ว ${nf.format(CONFIG.rocketKmh)} กม./ชม. ใกล้เคียงยานนิวฮอไรซันส์<br><br>อุณหภูมิ ออกซิเจน และจำนวนประชากรมาจากแบบจำลองอย่างง่ายเพื่อการเล่น ไม่ใช่การคำนวณทางวิทยาศาสตร์จริง สัดส่วนน้ำและดินนับจากจุด 2,400 จุดบนพื้นผิวดาวจริงที่เห็นบนจอ</p>${back}`,
       `<h3>Where the numbers come from</h3><p>Planet distances use astronomical units (1 AU ≈ 149.6 million km) and assume the planets line up on the same side of the star. Travel times assume a ship at ${nf.format(CONFIG.rocketKmh)} km/h, close to NASA's New Horizons.<br><br>Temperature, oxygen and population come from a simple model made for play, not a real scientific calculation. The share of water and land is counted from 2,400 points on the planet surface you see on screen.</p>${back}`);
     if (page === 'reset') pg.innerHTML = `<h3>${tr('เริ่มต้นใหม่ทั้งหมด?', 'Start over?')}</h3><p>${tr('การปรับแต่ง ระบบนิเวศ สถานีอวกาศ และความคืบหน้าของทุกดาวจะหายไป', 'Every planet’s changes, ecosystems, the station and your progress will be cleared.')}</p>
