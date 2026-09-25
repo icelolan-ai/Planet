@@ -76,8 +76,17 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 
 /* ------------------------------------------------------------------ Map */
 #map{overflow:hidden}
-.map-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
-.map-head{position:sticky;top:0;z-index:3;background:linear-gradient(180deg,rgba(30,25,52,.96) 70%,rgba(30,25,52,0))}
+.map-scroll{position:relative;z-index:1;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+/* Warm near the star, cold at the edge of the system; driven by --warm and --cold on #map. */
+.map-glow{position:absolute;inset:0;z-index:0;pointer-events:none}
+.map-glow i{position:absolute;inset:0;transition:opacity .35s linear}
+.map-glow .warm{background:radial-gradient(95% 60% at 50% 0%,rgba(255,150,70,.3),rgba(255,120,60,0) 70%);opacity:var(--warm,1)}
+.map-glow .cold{background:radial-gradient(110% 65% at 50% 100%,rgba(90,170,255,.26),rgba(90,170,255,0) 70%);opacity:var(--cold,0)}
+.zone{max-width:480px;margin:0 auto;padding:2px 22px 0;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;font-size:13.5px;transition:opacity .25s var(--ease)}
+.zone b{font-weight:500}
+.zone small{color:var(--ink-3);font-size:12px}
+.zone.swap{opacity:0}
+.map-head{position:sticky;top:0;z-index:3;padding-bottom:24px;background:linear-gradient(180deg,rgba(30,25,52,.97) calc(100% - 12px),rgba(30,25,52,0))}
 .map-intro{margin:0 auto;max-width:480px;padding:0 22px 6px;color:var(--ink-2);font-size:14px}
 .journey{position:relative;margin:0 auto;max-width:480px}
 .journey svg.route{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
@@ -219,6 +228,13 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 .route-row img{width:44px;height:44px}
 .route-row strong{display:block;font-weight:500;font-size:14.5px}
 .route-row small{display:block;color:var(--ink-3);font-size:12.5px}
+.xsec svg{display:block;width:100%;max-width:340px;height:auto;margin:2px auto 12px}
+.xsec path{transform-origin:160px 162px;animation:xs .8s var(--ease) both;animation-delay:calc(var(--i) * 90ms)}
+@keyframes xs{from{transform:scale(.55);opacity:0}}
+.layers{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.layers li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px}
+.layers .sw{width:12px;height:12px;border-radius:4px;flex:none;margin-top:5px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+.layers small{display:block;color:var(--ink-3);font-size:12px;line-height:1.45}
 .info-list{margin:0;padding:0}
 .info-list div{display:flex;justify-content:space-between;gap:16px;padding:11px 2px;border-bottom:1px solid var(--line);font-size:14px}
 .info-list dt{color:var(--ink-3)}
@@ -252,7 +268,8 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   .stage-hint{bottom:24px}
 }
 @media (prefers-reduced-motion: reduce){
-  .panel>*,.launch .rocket,.puff{animation:none}
+  .panel>*,.launch .rocket,.puff,.xsec path{animation:none}
+  .zone,.map-glow i{transition:none}
   .puff{opacity:.85}
 }
 </style>
@@ -270,6 +287,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 
 <!-- Map -->
 <section class="screen" id="map" aria-label="แผนที่ระบบดาว">
+  <div class="map-glow" aria-hidden="true"><i class="warm"></i><i class="cold"></i></div>
   <div class="map-scroll" id="mapScroll">
     <div class="map-head">
       <header class="bar">
@@ -279,6 +297,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
         </button>
       </header>
       <p class="map-intro">แตะดาวเพื่อบินไปสำรวจ ปรับแต่งดาว และสร้างสิ่งมีชีวิตของคุณเอง</p>
+      <p class="zone" data-zone><b data-zone-name></b><small data-zone-note></small></p>
     </div>
     <div class="journey" id="journey"></div>
   </div>
@@ -618,6 +637,25 @@ const PLANETS = [
     d: { size: 0.8, age: 9, glow: 0.7, veg: 0.5, water: 0.3 } }
 ];
 const STAR = { name: 'ประภา', note: 'ดาวฤกษ์ของระบบ' };
+
+/** Regions of the system by distance (AU). Shown on the map as the player scrolls outward. */
+const ZONES = [
+  { to: 0.6, name: '🔥 เขตร้อนจัด', note: 'ใกล้ดาวฤกษ์ หินยังหลอมละลายได้' },
+  { to: 1.5, name: '🌍 เขตอาศัยได้', note: 'ระยะที่น้ำเป็นของเหลวบนพื้นผิวได้' },
+  { to: 2.7, name: '🏜️ ขอบนอกเขตอาศัยได้', note: 'แสงอ่อนลง น้ำเริ่มหายาก' },
+  { to: 8, name: '❄️ เลยแนวหิมะ', note: 'น้ำแข็งตัว ดาวยักษ์จึงก่อตัวได้' },
+  { to: Infinity, name: '🌌 ห้วงอวกาศลึก', note: 'มืดและหนาวเย็นมาก' }
+];
+/** Starlight at a distance, compared with what Earth gets at 1 AU (inverse square). */
+function fmtLight(au) {
+  const L = 1 / (au * au);
+  return L >= 1 ? L.toFixed(1) + ' เท่าของโลก' : Math.max(1, Math.round(L * 100)) + '% ของโลก';
+}
+function mixHex(a, b, t) {
+  const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const x = p(a), y = p(b);
+  return '#' + x.map((v, i) => Math.round(lerp(v, y[i], clamp(t, 0, 1))).toString(16).padStart(2, '0')).join('');
+}
 
 /* ================================================================
    Terrain (shared by rendering and statistics)
@@ -1353,6 +1391,7 @@ class App {
     this.drag = { active: false, x: 0, y: 0, vx: 0, vy: 0 };
     this.rotX = 0.3; this.rotY = 0; this.velY = 0.12; this.velX = 0;
     this.lastPoke = 0; this.touched = false; this.idleShown = false;
+    this.arrive = 1; this.spinIn = 0;
     this.loop = this.loop.bind(this);
   }
 
@@ -1470,6 +1509,34 @@ class App {
     j.appendChild(this.rocketEl);
     this.placeRocket(this.state.at);
     this.refreshMap();
+    this.updateZone();
+  }
+
+  /** Tint the map and name the region at the middle of the screen, from its distance to the star. */
+  updateZone() {
+    const sc = $('#mapScroll'), jr = $('#journey');
+    if (!this.nodes || !sc.clientHeight) return;
+    // The reading point slides down the screen as the player scrolls, so both ends of the journey are reachable.
+    const prog = sc.scrollTop / Math.max(1, sc.scrollHeight - sc.clientHeight);
+    const y = sc.getBoundingClientRect().top + sc.clientHeight * (0.3 + 0.6 * prog) - jr.getBoundingClientRect().top;
+    const stops = [{ y: this.nodes[0].y, au: 0.2 }, ...PLANETS.map((p, i) => ({ y: this.nodes[i + 1].y, au: p.au }))];
+    let au = stops[stops.length - 1].au;
+    if (y <= stops[0].y) au = stops[0].au;
+    else for (let i = 1; i < stops.length; i++) {
+      if (y <= stops[i].y) { au = lerp(stops[i - 1].au, stops[i].au, (y - stops[i - 1].y) / (stops[i].y - stops[i - 1].y)); break; }
+    }
+    const m = $('#map');
+    m.style.setProperty('--warm', smooth(2.7, 0.4, au).toFixed(3));
+    m.style.setProperty('--cold', smooth(1.5, 7, au).toFixed(3));
+    const z = ZONES.find(z => au < z.to), el = $('[data-zone]');
+    $('[data-zone-note]').textContent = `${z.note} · แสง ${fmtLight(au)}`;
+    if (z === this.zone) return;
+    const first = !this.zone;
+    this.zone = z;
+    const show = () => { $('[data-zone-name]').textContent = z.name; el.classList.remove('swap'); };
+    if (first || REDUCED) { show(); return; }
+    el.classList.add('swap');
+    clearTimeout(this.zoneT); this.zoneT = setTimeout(show, 200);
   }
 
   rocketSpot(i) { if (i < 0) { const n = this.nodes[0]; return { x: n.x - 92, y: n.y + 6, a: 30 }; } const n = this.nodes[i + 1]; const W = Math.min(480, innerWidth); const side = n.x < W / 2 ? 1 : -1; return { x: n.x + side * 70, y: n.y + 30, a: side > 0 ? 20 : -20 }; }
@@ -1584,6 +1651,7 @@ class App {
       this.stage.resize();
       this.stage.camZ = this.stage.fitDistance(body, this.stage.camera, 1.12);
       this.stage.camera.position.set(0, 0, this.stage.camZ * 1.35);
+      this.arrive = REDUCED ? 1 : 0;
       this.startLoop();
     }
     this.renderActions();
@@ -1601,6 +1669,7 @@ class App {
     $('#detail').classList.remove('is-active');
     $('#map').classList.add('is-active');
     this.refreshMap();
+    this.updateZone();
     this.current = -1;
   }
 
@@ -1694,6 +1763,7 @@ class App {
       <dl class="info-list">
         <div><dt>ประเภท</dt><dd>${b.kind}</dd></div>
         <div><dt>ห่างจากดาวฤกษ์</dt><dd>${fmtKm(kmStar)}<br><small style="color:var(--ink-3);font-weight:400">${p.au} หน่วยดาราศาสตร์, บินนาน ${fmtTravel(kmStar)}</small></dd></div>
+        <div><dt>แสงจากดาวฤกษ์</dt><dd>${fmtLight(p.au)}</dd></div>
         ${leg(prev, 'ถึง')}${leg(next, 'ถึง')}
         <div><dt>1 ปีบนดาวนี้</dt><dd>${(Math.pow(p.au, 1.5)).toFixed(2)} ปีโลก</dd></div>
         <div><dt>1 วันบนดาวนี้</dt><dd>${p.dayH} ชั่วโมง</dd></div>
@@ -1701,7 +1771,50 @@ class App {
         <div><dt>อายุดาว</dt><dd class="num" data-b="age"></dd></div>
         <div><dt>ดวงจันทร์</dt><dd>${p.moons ? p.moons + ' ดวง' : 'ไม่มี'}</dd></div>
       </dl>
-      <p class="note">ระยะทางคิดตอนดาวเรียงอยู่ด้านเดียวกันของดาวฤกษ์ เวลาเดินทางคิดจากยานความเร็ว ${nf.format(CONFIG.rocketKmh)} กม./ชม.</p>`;
+      <p class="note">ระยะทางคิดตอนดาวเรียงอยู่ด้านเดียวกันของดาวฤกษ์ เวลาเดินทางคิดจากยานความเร็ว ${nf.format(CONFIG.rocketKmh)} กม./ชม.</p>
+      <h3>ภายในดาว${p.name}</h3>
+      ${this.crossSection(p)}`;
+  }
+
+  /** Layers of the planet from the centre out, shaped by the current slider values. */
+  layers(p) {
+    const b = BIOMES[p.biome], pal = b.palette, st = this.state.planets[p.id];
+    const terrain = this.terrains[p.id] || (this.terrains[p.id] = new Terrain(st.seed));
+    const sim = simulate(p, terrain, st.params, st.eco), e = sim.e;
+    if (b.type === 'gas') return [
+      { r: 0.2, c: '#8a6a5a', n: 'แกนหิน', note: 'หินและน้ำแข็งที่ถูกบีบอัดแน่น' },
+      { r: 0.55, c: '#6a4fc4', n: 'ไฮโดรเจนโลหะ', note: 'ความดันสูงจนไฮโดรเจนนำไฟฟ้าได้' },
+      { r: 0.84, c: pal.high, n: 'ไฮโดรเจนเหลว', note: 'ไม่มีพื้นแข็งให้ยืนเลย' },
+      { r: 0.94, c: pal.low, n: 'แถบเมฆ', note: e.storm > 0.6 ? 'พายุแรง แถบเมฆปั่นป่วน' : 'แถบเมฆเรียงตัวเป็นระเบียบ' },
+      { r: 1, c: pal.atmo, a: 0.45, n: 'บรรยากาศชั้นบน', note: `ไฮโดรเจน ${pct(sim.comp[0].pct)}, ฮีเลียม ${pct(sim.comp[1].pct)}` }
+    ];
+    const crystal = p.biome === 'crystal';
+    const L = [
+      { r: 0.18, c: '#ffe08a', n: 'แกนใน', note: 'เหล็กและนิกเกิลที่เป็นของแข็ง' },
+      { r: 0.36, c: '#ff9a3d', n: 'แกนนอก', note: 'โลหะหลอมเหลว ทำให้เกิดสนามแม่เหล็ก' },
+      { r: 0.74, c: mixHex('#6e3446', pal.hot, e.heat * 0.85), n: 'แมนเทิล',
+        note: e.heat > 0.65 ? 'ร้อนจัด หินหลอมดันขึ้นมาเป็นลาวาบ่อย' : e.heat < 0.25 ? 'เย็นลงแล้ว ภูเขาไฟแทบไม่ปะทุ' : 'หินร้อนที่ค่อย ๆ ไหลวน' },
+      { r: 0.84, c: crystal ? pal.veg : pal.low, n: crystal ? 'ชั้นผลึก' : 'เปลือกดาว', note: crystal ? 'ผลึกเก็บแสงแล้วเรืองออกมา' : 'หินแข็ง บางที่สุดเมื่อเทียบกับชั้นอื่น' }
+    ];
+    if (b.lavaSea) { if (sim.lavaPct > 1) L.push({ r: 0.89, c: pal.shallow, n: 'ทะเลลาวา', note: `ปกคลุม ${pct(sim.lavaPct)} ของพื้นผิว` }); }
+    else if (p.biome === 'ice') L.push(
+      { r: 0.88, c: pal.deep, n: 'มหาสมุทรใต้น้ำแข็ง', note: 'น้ำเหลวที่ซ่อนอยู่ อาจมีสิ่งมีชีวิต' },
+      { r: 0.93, c: pal.ice, n: 'เปลือกน้ำแข็ง', note: e.heat > 0.5 ? 'บางลงเพราะความร้อนสูง' : 'หนาและแข็ง ปิดมหาสมุทรไว้' });
+    else if (sim.waterPct > 1) L.push({ r: 0.89, c: pal.shallow, n: 'มหาสมุทร', note: `ปกคลุม ${pct(sim.waterPct)} ของพื้นผิว` });
+    L.push({ r: 1, c: pal.atmo, a: 0.25 + e.humidity * 0.35, n: 'บรรยากาศ', note: `ออกซิเจน ${sim.o2.toFixed(sim.o2 < 1 ? 1 : 0)}%, ${sim.weather.name}` });
+    return L;
+  }
+
+  crossSection(p) {
+    const L = this.layers(p), cx = 160, cy = 162, R = 150;
+    const paths = L.slice().reverse().map((l, k) => {
+      const r = R * l.r;
+      return `<path d="M${cx - r} ${cy}A${r} ${r} 0 0 1 ${cx + r} ${cy}Z" fill="${l.c}" fill-opacity="${l.a || 1}" stroke="rgba(0,0,0,.2)" stroke-width="1" style="--i:${k}"/>`;
+    }).join('');
+    const legend = L.slice().reverse().map(l => `<li><i class="sw" style="background:${l.c}"></i><div><strong>${l.n}</strong><small>${l.note}</small></div></li>`).join('');
+    return `<div class="card xsec"><svg viewBox="0 0 320 166" role="img" aria-label="ภาพตัดชั้นภายในดาว${p.name}">${paths}</svg>
+      <ul class="layers">${legend}</ul></div>
+      <p class="note">ความหนาของแต่ละชั้นไม่ได้วาดตามสัดส่วนจริง เพื่อให้เห็นทุกชั้นชัด ๆ</p>`;
   }
 
   /** Recompute the model for the current planet and write every bound value. */
@@ -1791,11 +1904,25 @@ class App {
     }
     this.rotY += this.velY * dt;
     this.rotX = clamp(this.rotX + this.velX * dt, -1.1, 1.1);
-    body.group.rotation.set(this.rotX, 0, 0);
-    body.spin.rotation.y = this.rotY;
-    if (body.clouds) body.clouds.rotation.y = this.rotY * 1.05;
     const targetZ = this.stage.fitDistance(body, cam, 1.12);
-    cam.position.z = damp(cam.position.z, targetZ, 2.5, dt);
+    // Arrival: swing in from far off to one side while the planet's spin settles, then hand over to the player.
+    // Grabbing the planet mid-flight ends the shot; the remaining spin is folded in so nothing jumps.
+    if (this.arrive < 1 && this.drag.active) { this.arrive = 1; this.rotY -= this.spinIn; }
+    let spinIn = 0;
+    if (this.arrive < 1) {
+      this.arrive = Math.min(1, this.arrive + dt / 1.8);
+      const e = 1 - Math.pow(1 - this.arrive, 3), k = 1 - e;
+      cam.position.set(targetZ * 0.45 * k, targetZ * 0.2 * k, targetZ * lerp(3.2, 1, e));
+      spinIn = k * k * 2.6;
+    } else {
+      cam.position.x = damp(cam.position.x, 0, 4, dt);
+      cam.position.y = damp(cam.position.y, 0, 4, dt);
+      cam.position.z = damp(cam.position.z, targetZ, 2.5, dt);
+    }
+    body.group.rotation.set(this.rotX, 0, 0);
+    this.spinIn = spinIn;
+    body.spin.rotation.y = this.rotY - spinIn;
+    if (body.clouds) body.clouds.rotation.y = (this.rotY - spinIn) * 1.05;
     cam.lookAt(0, 0, 0);
     this.stage.render();
   }
@@ -1818,6 +1945,9 @@ class App {
         const s = $('#stage'); s.classList.remove('shake'); void s.offsetWidth; if (!REDUCED) s.classList.add('shake');
       } else { body.stormBurst(); Sound.storm(); }
     });
+
+    let zr = 0;
+    $('#mapScroll').addEventListener('scroll', () => { if (!zr) zr = requestAnimationFrame(() => { zr = 0; this.updateZone(); }); }, { passive: true });
 
     // Any touch on the planet view resets the idle timer.
     ['pointerdown', 'input', 'keydown'].forEach(t => $('#detail').addEventListener(t, () => this.poke(), true));
