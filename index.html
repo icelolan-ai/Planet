@@ -5,30 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>สวนดาว — สร้างและดูแลระบบดาวของคุณ</title>
 <meta name="description" content="บินสำรวจดาวเคราะห์ 7 ดวง ปรับแต่งความร้อน น้ำ พืช สร้างระบบนิเวศและเศรษฐกิจของแต่ละดาว">
-<meta name="theme-color" content="#1e1934">
+<meta name="theme-color" content="#2a1178">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
 <style>
 /* ------------------------------------------------------------------
    Tokens. The app is art-directed as a night-sky world, so both colour
    schemes resolve to the same palette.
 ------------------------------------------------------------------- */
 :root{
-  --bg:#1e1934;
-  --bg-2:#2a2150;
-  --panel:#26203c;
-  --card:#312a52;
-  --card-2:#3b3366;
-  --line:rgba(236,232,255,.1);
-  --ink:#f4f1ff;
-  --ink-2:#bfb8e2;
-  --ink-3:#8a83b3;
-  --violet:#7058ff;
-  --violet-2:#9a6bff;
-  --pink:#ff4f8b;
-  --teal:#3fd6c6;
-  --gold:#ffc94a;
+  --bg:#1d0f4a;
+  --bg-2:#2a1170;
+  --panel:rgba(var(--head),.78);
+  --panel-solid:#22125c;
+  --card:rgba(255,255,255,.07);
+  --card-2:rgba(255,255,255,.13);
+  --line:rgba(255,255,255,.1);
+  --ink:#fbf8ff;
+  --ink-2:#cfc4f6;
+  --ink-3:#9b8fd3;
+  --violet:#7b3cff;
+  --violet-2:#b04dff;
+  --pink:#ff4fd8;
+  --teal:#33e1ff;
+  --gold:#ffb13d;
+  --lime:#7dff6a;
+  --grad:linear-gradient(135deg,#ff4fd8 0%,#9a3dff 55%,#6a35ff 100%);
+  --grad-cool:linear-gradient(135deg,#33e1ff,#7b3cff);
   --radius:22px;
   --f-head:"Mitr","Prompt","Noto Sans Thai",system-ui,sans-serif;
   --f-body:"IBM Plex Sans Thai","Noto Sans Thai","Sarabun",system-ui,-apple-system,sans-serif;
@@ -40,12 +44,13 @@
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1e1934;--ink:#f4f1ff;--panel:#26203c}}
-:root[data-theme="dark"]{--bg:#1e1934;--ink:#f4f1ff;--panel:#26203c}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1d0f4a;--ink:#fbf8ff;--panel:rgba(var(--head),.78)}}
+:root[data-theme="dark"]{--bg:#1d0f4a;--ink:#fbf8ff;--panel:rgba(var(--head),.78)}
 /* Background darkness, chosen in the menu (data-bg on <html>). */
-:root{--sky-a:#4a2a6e;--sky-1:#2a1f4a;--sky-2:#1e1934;--sky-3:#1a1630;--head:30,25,52}
-:root[data-bg="dark"]{--bg:#120e22;--sky-a:#2c1946;--sky-1:#17122b;--sky-2:#110d20;--sky-3:#0b0915;--head:18,14,33}
-:root[data-bg="black"]{--bg:#050409;--sky-a:#170d26;--sky-1:#08070f;--sky-2:#040308;--sky-3:#000;--head:7,6,12}
+/* normal = vivid violet, dark = deep navy, black = near black */
+:root{--sky-a:#9b4dff;--sky-1:#4a1fc0;--sky-2:#2a1178;--sky-3:#170a4a;--head:32,16,86}
+:root[data-bg="dark"]{--bg:#0d1532;--sky-a:#2f4f9a;--sky-1:#17285a;--sky-2:#0f1a3d;--sky-3:#091026;--head:14,22,52}
+:root[data-bg="black"]{--bg:#050409;--sky-a:#1d1238;--sky-1:#0a0818;--sky-2:#05040c;--sky-3:#000;--head:9,7,20}
 *,*::before,*::after{box-sizing:inherit}
 [hidden]{display:none!important}
 html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%;background:var(--bg)}
@@ -53,7 +58,7 @@ body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
   -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 :focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:12px}
-h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
+h1,h2,h3{font-family:var(--f-head);font-weight:600;margin:0;line-height:1.2}
 .num{font-variant-numeric:tabular-nums}
 
 #dust{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
@@ -61,15 +66,25 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
   background:radial-gradient(120% 70% at 50% -10%,var(--sky-a) 0%,transparent 60%),linear-gradient(180deg,var(--sky-1),var(--sky-2) 55%,var(--sky-3))}
 
 /* ------------------------------------------------------------------ Boot */
-.boot{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:var(--bg);transition:opacity .6s var(--ease)}
+.boot{position:fixed;inset:0;z-index:60;display:grid;place-items:center;overflow:hidden;transition:opacity .6s var(--ease);
+  background:radial-gradient(60% 45% at 85% 12%,rgba(255,79,216,.35),transparent 70%),radial-gradient(55% 45% at 10% 90%,rgba(51,225,255,.22),transparent 70%),linear-gradient(170deg,#4a1fc0,#2a1178 55%,#170a4a)}
+.boot::before,.boot::after{content:"";position:absolute;border-radius:50%;background:radial-gradient(circle at 35% 30%,#c46bff,#6a2cf0 70%);opacity:.55}
+.boot::before{width:220px;height:220px;right:-70px;top:18%}
+.boot::after{width:150px;height:150px;left:-50px;bottom:12%;background:radial-gradient(circle at 35% 30%,#ff8ae6,#b02fd6 70%)}
+.boot-planet{position:relative;width:170px;height:170px;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 35% 30%,#5b2be0,#24105e 72%);
+  box-shadow:inset -14px -18px 40px rgba(0,0,0,.45),inset 8px 8px 30px rgba(255,255,255,.12),0 0 60px rgba(155,77,255,.55)}
+.boot-planet i{position:absolute;inset:-20%;background:repeating-linear-gradient(100deg,transparent 0 13px,rgba(255,79,216,.6) 13px 15px);border-radius:40%;animation:spin 18s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.logo.big{font-size:40px;margin-top:-4px}
 .boot.is-done{opacity:0;pointer-events:none}
 .boot-in{display:grid;justify-items:center;gap:18px;padding:24px;text-align:center}
-.boot-track{width:180px;height:6px;border-radius:6px;background:var(--card);overflow:hidden}
-.boot-track i{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,var(--violet),var(--violet-2));transition:width .3s var(--ease)}
+.boot-track{width:220px;height:10px;border-radius:10px;background:rgba(255,255,255,.14);overflow:hidden}
+.boot-track i{display:block;height:100%;width:0;border-radius:10px;background:linear-gradient(90deg,#33e1ff,#ff4fd8);transition:width .3s var(--ease)}
 .boot-status{color:var(--ink-3);font-size:13px;min-height:1.4em}
 
 /* ------------------------------------------------------------------ Logo + bars */
-.logo{display:flex;align-items:center;gap:10px;font-family:var(--f-head);font-size:22px;font-weight:500;letter-spacing:.01em}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--f-head);font-size:22px;font-weight:600;letter-spacing:.01em}
+.logo b{font-weight:600;background:linear-gradient(90deg,#ff4fd8,#b04dff);-webkit-background-clip:text;background-clip:text;color:transparent}
 .logo-mark{position:relative;width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#9d86ff,#5a3fd6 70%)}
 .logo-mark::after{content:"";position:absolute;left:-7px;right:-7px;top:11px;height:8px;border-radius:50%;border:2px solid var(--teal);transform:rotate(-18deg)}
 .screen{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .45s var(--ease),visibility 0s .45s}
@@ -107,7 +122,8 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 .node img{display:block;filter:drop-shadow(0 10px 24px rgba(0,0,0,.35));transition:transform .5s var(--ease)}
 .space{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
 /* Live-rendered planets on the map: they spin in the canvas and bob gently here. */
-.node .pl{display:block;border-radius:50%;transition:scale .45s var(--ease);animation:bob 7s ease-in-out var(--d,0s) infinite alternate}
+.node .pl::before{content:"";position:absolute;inset:-26%;border-radius:50%;background:radial-gradient(circle,var(--halo,#9b4dff) 0%,transparent 64%);opacity:.38;z-index:-1}
+.node .pl{position:relative;display:block;border-radius:50%;transition:scale .45s var(--ease);animation:bob 7s ease-in-out var(--d,0s) infinite alternate}
 /* In map mode the 3D renderer's canvas sits over the map and draws each planet onto its .pl placeholder. */
 .planets-layer{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
 @keyframes bob{from{transform:translateY(-5px)}to{transform:translateY(5px)}}
@@ -164,7 +180,7 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 .ring-bg{stroke:rgba(236,232,255,.14)}
 .ring-fg{stroke:var(--teal);stroke-linecap:round;stroke-dasharray:106.8;stroke-dashoffset:106.8;transition:stroke-dashoffset .8s var(--ease)}
 .dock-btn.ring b{position:relative;font-size:10.5px;font-weight:500}
-.fuel-pop{position:absolute;right:0;bottom:56px;width:250px;padding:14px;border-radius:18px;background:var(--panel);border:1px solid var(--line);box-shadow:0 14px 40px rgba(0,0,0,.4)}
+.fuel-pop{position:absolute;right:0;bottom:56px;width:250px;padding:14px;border-radius:20px;background:var(--panel);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--line);box-shadow:0 14px 40px rgba(0,0,0,.4)}
 .fuel-pop small{display:block;margin-top:8px;color:var(--ink-3);font-size:12px}
 .fuel-top{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-2);margin-bottom:8px}
 .fuel-top b{color:var(--ink);font-weight:500}
@@ -172,7 +188,13 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 .fuel-track i{display:block;height:100%;width:0;background:linear-gradient(90deg,#4f6bff,#7fa0ff);border-radius:6px;transition:width .8s var(--ease)}
 
 /* ------------------------------------------------------------------ Launch */
-.launch{position:fixed;inset:0;z-index:40;display:grid;grid-template-rows:auto 1fr auto;justify-items:center;background:var(--panel);overflow:hidden;
+.launch::after{content:"";position:absolute;left:0;right:0;bottom:0;height:34%;z-index:0;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 40' preserveAspectRatio='none'%3E%3Cpath d='M0 12 C16 0 30 24 50 12 C70 0 84 20 100 8 L100 40 L0 40Z' fill='white'/%3E%3C/svg%3E") bottom/100% 100% no-repeat}
+.launch>*{position:relative;z-index:1}
+.launch h2{color:#fff;text-shadow:0 4px 18px rgba(0,0,0,.25)}
+.launch .trip{color:#4b3a8f}.launch .trip b,.launch .trip .big{color:#2a1170}.launch .skip{color:#7a6ab8!important}
+.launch{position:fixed;inset:0;z-index:40;display:grid;grid-template-rows:auto 1fr auto;justify-items:center;overflow:hidden;
+  background:radial-gradient(55% 40% at 80% 20%,rgba(255,79,216,.45),transparent 70%),linear-gradient(165deg,#2a0f7a 0%,#6a2cf0 55%,#b03dff 100%);
   padding:calc(var(--safe-t) + 70px) 24px calc(var(--safe-b) + 28px);opacity:0;transition:opacity .35s var(--ease)}
 .launch.is-on{opacity:1}
 .launch h2{font-size:34px}
@@ -199,13 +221,13 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 @keyframes shake{10%,50%,90%{transform:translate(-3px,1px)}30%,70%{transform:translate(3px,-2px)}}
 .stage-hint{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);font-size:12px;color:var(--ink-3);pointer-events:none;transition:opacity .6s}
 .stage-actions{position:absolute;right:14px;bottom:10px;display:flex;flex-direction:column;gap:8px}
-.act{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:16px;background:rgba(49,42,82,.9);border:1px solid var(--line);font-size:14px;
+.act{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:18px;background:rgba(var(--head),.8);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--line);font-size:14px;
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .2s var(--ease),background-color .2s}
 .act:active{transform:scale(.95)}
 .act.hot{background:linear-gradient(135deg,#ff7a3d,#ff4f8b);border-color:transparent}
-#detail.entering .dbody{animation:rise .6s var(--ease) both}
+#detail.entering .dbody{animation:dbodyIn .6s var(--ease) both}
 #detail.entering .dbar{animation:fadein .5s var(--ease) both}
-@keyframes rise{from{transform:translateY(46px);opacity:0}}
+@keyframes dbodyIn{from{transform:translateY(46px);opacity:0}}
 @keyframes fadein{from{opacity:0}}
 #detail.leaving .dbody,#detail.leaving .dbar{transform:translateY(30px);opacity:0;transition:transform .4s var(--ease),opacity .35s}
 /* Tapping the planet view folds the controls into a small button; tapping that springs them back. */
@@ -231,7 +253,7 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 .part-card h3{font-size:15px;display:flex;gap:8px;align-items:center}
 .part-card p{margin:6px 0 8px;font-size:12.5px;color:var(--ink-2);line-height:1.5}
 .part-card .btn{min-height:36px;font-size:13px;margin-top:8px;padding:6px 12px}
-.mod{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:12px;border-radius:16px;background:var(--card);margin-bottom:8px;transition:box-shadow .3s}
+.mod{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:12px;border-radius:20px;background:var(--card);border:1px solid var(--line);margin-bottom:8px;transition:box-shadow .3s}
 .mod.flash{box-shadow:0 0 0 2px var(--teal)}
 .mod .em{font-size:24px;text-align:center}
 .mod strong{display:block;font-weight:500;font-size:14.5px}
@@ -294,14 +316,43 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 .x-loading{position:absolute;inset:0;display:grid;place-items:center;background:#05040a;color:#19f0ff;font-size:14px;letter-spacing:.2em;transition:opacity .5s}
 .x-loading.done{opacity:0;pointer-events:none}
 .act.land{background:linear-gradient(135deg,#19c8ff,#7058ff);border-color:transparent}
-.dbody{grid-area:body;display:flex;flex-direction:column;min-height:0;background:var(--panel);border-radius:26px 26px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.25)}
+/* First-run intro */
+.intro{position:fixed;inset:0;z-index:65;display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;color:#fff;
+  background:radial-gradient(60% 40% at 90% 10%,rgba(255,79,216,.4),transparent 70%),radial-gradient(50% 40% at 0% 100%,rgba(51,225,255,.25),transparent 70%),linear-gradient(170deg,#4a1fc0,#2a1178 60%,#170a4a);
+  opacity:0;transition:opacity .4s var(--ease)}
+.intro.is-on{opacity:1}
+.intro-skip{justify-self:end;margin:calc(var(--safe-t) + 14px) 18px 0;padding:8px 14px;border-radius:16px;font-weight:500;color:#fff;background:rgba(255,255,255,.12)}
+.intro-view{overflow:hidden;touch-action:pan-y}
+.intro-track{display:flex;height:100%;transition:transform .5s var(--ease)}
+.intro-slide{flex:0 0 100%;display:grid;align-content:center;justify-items:center;gap:14px;padding:0 32px;text-align:center}
+.intro-slide h2{font-size:32px;line-height:1.15}
+.intro-slide h2 span{display:block;font-size:18px;font-weight:500;color:#ffc6f4}
+.intro-slide p{max-width:360px;margin:0;color:rgba(255,255,255,.82);font-size:15px;line-height:1.65}
+.toon{position:relative;width:190px;height:190px;border-radius:50%;margin-bottom:10px;
+  box-shadow:inset -18px -22px 40px rgba(0,0,0,.35),inset 10px 10px 26px rgba(255,255,255,.28),0 0 70px var(--g)}
+.toon::before{content:"";position:absolute;inset:0;border-radius:50%;background:var(--spots);mix-blend-mode:multiply;opacity:.55}
+.toon::after{content:"";position:absolute;left:-28%;right:-28%;top:44%;height:22%;border-radius:50%;border:5px solid var(--ring,transparent);transform:rotate(-16deg)}
+.toon.t1{--g:rgba(255,79,216,.55);background:radial-gradient(circle at 34% 30%,#ffd1f4,#ff4fd8 45%,#8a1fb8 90%);
+  --spots:radial-gradient(circle at 70% 60%,#b0209a 0 9%,transparent 10%),radial-gradient(circle at 40% 72%,#b0209a 0 6%,transparent 7%),radial-gradient(circle at 60% 30%,#b0209a 0 5%,transparent 6%)}
+.toon.t2{--g:rgba(51,225,255,.5);--ring:#ffd36b;background:radial-gradient(circle at 34% 30%,#c9f7ff,#33c6ff 45%,#2a3fb8 92%);
+  --spots:repeating-linear-gradient(-12deg,transparent 0 16px,rgba(20,40,140,.55) 16px 22px)}
+.toon.t3{--g:rgba(125,255,106,.45);background:radial-gradient(circle at 34% 30%,#e4ffd2,#57e06a 45%,#127a5a 92%);
+  --spots:radial-gradient(circle at 66% 38%,#0e5c44 0 12%,transparent 13%),radial-gradient(circle at 36% 66%,#0e5c44 0 9%,transparent 10%),radial-gradient(circle at 74% 74%,#0e5c44 0 5%,transparent 6%)}
+.intro-foot{display:grid;gap:16px;justify-items:center;padding:0 24px calc(var(--safe-b) + 28px)}
+.intro-foot .btn{max-width:320px}
+.intro-dots{display:flex;gap:8px}
+.intro-dots i{width:8px;height:8px;border-radius:4px;background:rgba(255,255,255,.35);transition:width .3s,background-color .3s}
+.intro-dots i.on{width:24px;background:#fff}
+.dbody{grid-area:body;display:flex;flex-direction:column;min-height:0;background:var(--panel);border-radius:28px 28px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.08);
+  -webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3)}
 .chips{flex:none;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 16px 4px}
-.chip{background:var(--card);border-radius:16px;padding:9px 6px;text-align:center;min-width:0}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:9px 6px;text-align:center;min-width:0}
 .chip small{display:block;font-size:11.5px;color:var(--ink-3);white-space:nowrap}
 .chip b{display:block;font-family:var(--f-head);font-weight:500;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tabs{flex:none;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:10px 16px 0;padding:4px;border-radius:16px;background:var(--card)}
+.tabs{flex:none;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:10px 16px 0;padding:4px;border-radius:20px;background:var(--card);border:1px solid var(--line)}
 .tab{padding:9px 4px;border-radius:12px;font-size:13.5px;color:var(--ink-2);transition:background-color .25s,color .25s}
-.tab[aria-selected="true"]{background:linear-gradient(135deg,var(--violet),var(--violet-2));color:#fff;box-shadow:0 6px 16px rgba(112,88,255,.35)}
+.tab{border-radius:16px!important}
+.tab[aria-selected="true"]{background:var(--grad);color:#fff;box-shadow:0 6px 18px rgba(255,79,216,.35)}
 .panel{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:14px 16px calc(var(--safe-b) + 28px)}
 .panel>*{animation:rise .45s var(--ease) both}
 @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -310,26 +361,26 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 .lead{margin:0 2px 14px;color:var(--ink-2);font-size:14px}
 
 /* controls */
-.ctl{background:var(--card);border-radius:18px;padding:12px 14px 10px;margin-bottom:10px}
+.ctl{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:12px 14px 10px;margin-bottom:10px}
 .ctl-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
 .ctl-ic{font-size:18px;width:24px;text-align:center}
 .ctl-top label{flex:1;font-size:14.5px}
 .ctl-top output{font-family:var(--f-head);font-size:15px;color:var(--ink)}
 .ctl-hint{margin:4px 0 0;font-size:12px;color:var(--ink-3);line-height:1.45}
 input[type=range]{--p:50%;width:100%;height:32px;margin:0;background:transparent;-webkit-appearance:none;appearance:none;touch-action:pan-y}
-input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:8px;background:linear-gradient(90deg,var(--violet) 0 var(--p),#4a4380 var(--p) 100%)}
-input[type=range]::-moz-range-track{height:8px;border-radius:8px;background:linear-gradient(90deg,var(--violet) 0 var(--p),#4a4380 var(--p) 100%)}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-9px;border-radius:50%;background:#fff;border:0;box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 5px rgba(112,88,255,.25)}
-input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#fff;border:0;box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 5px rgba(112,88,255,.25)}
+input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:10px;background:linear-gradient(90deg,#33e1ff 0,#ff4fd8 var(--p),rgba(255,255,255,.14) var(--p) 100%)}
+input[type=range]::-moz-range-track{height:10px;border-radius:10px;background:linear-gradient(90deg,#33e1ff 0,#ff4fd8 var(--p),rgba(255,255,255,.14) var(--p) 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-8px;border-radius:50%;background:#fff;border:0;box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 5px rgba(255,79,216,.28)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#fff;border:0;box-shadow:0 3px 10px rgba(0,0,0,.35),0 0 0 5px rgba(255,79,216,.28)}
 .row-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 16px;border-radius:16px;font-size:14.5px;font-weight:500;transition:transform .15s var(--ease),filter .2s}
 .btn:active{transform:scale(.97)}
-.btn.primary{width:100%;background:linear-gradient(135deg,var(--violet),var(--violet-2));color:#fff;box-shadow:0 10px 24px rgba(112,88,255,.35)}
-.btn.ghost{background:var(--card);color:var(--ink)}
+.btn.primary{width:100%;background:var(--grad);color:#fff;box-shadow:0 10px 26px rgba(255,79,216,.35)}
+.btn.ghost{background:var(--card);border:1px solid var(--line);color:var(--ink)}
 .btn.pink{background:#fff;color:#c2295f}
 
 /* cards */
-.card{background:var(--card);border-radius:18px;padding:14px;margin-bottom:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px;margin-bottom:10px}
 .card.warn{background:linear-gradient(135deg,#ff4f8b,#e8457a);color:#fff}
 .card.warn small{color:rgba(255,255,255,.85)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
@@ -391,7 +442,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 /* ------------------------------------------------------------------ Sheet + toast */
 .sheet{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;background:rgba(10,8,20,.55);opacity:0;transition:opacity .3s var(--ease)}
 .sheet.is-on{opacity:1}
-.sheet-in{width:100%;max-width:520px;max-height:86dvh;overflow:auto;background:var(--panel);border-radius:26px 26px 0 0;padding:10px 20px calc(var(--safe-b) + 22px);transform:translateY(40px);transition:transform .35s var(--ease)}
+.sheet-in{width:100%;max-width:520px;max-height:86dvh;overflow:auto;background:var(--panel);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-radius:26px 26px 0 0;padding:10px 20px calc(var(--safe-b) + 22px);transform:translateY(40px);transition:transform .35s var(--ease)}
 .sheet.is-on .sheet-in{transform:none}
 .grab{width:44px;height:5px;border-radius:5px;background:var(--card-2);margin:4px auto 14px}
 .menu-item{width:100%;display:flex;align-items:center;gap:14px;padding:14px 6px;border-bottom:1px solid var(--line);text-align:left;font-size:15px}
@@ -406,13 +457,13 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 /* ------------------------------------------------------------------ Wide screens */
 @media (min-width:900px){
   #detail,#station{grid-template-columns:1fr minmax(380px,440px);grid-template-rows:auto 1fr;grid-template-areas:"stage bar" "stage body"}
-  .dbar{background:var(--panel)}
+  .dbar{background:var(--panel);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
   .dbody{border-radius:0;box-shadow:none}
   .stage-hint{bottom:24px}
   #detail.collapsed{grid-template-columns:1fr;grid-template-rows:auto 1fr;grid-template-areas:"bar" "stage"}
 }
 @media (prefers-reduced-motion: reduce){
-  .x-panel,.part-card,.panel>*,.launch .rocket,.puff,.xsec path,.star-node .sun.poke,.node .pl,#detail.entering .dbody,#detail.entering .dbar,#detail.expanding .dbody,#detail.collapsed .panel-pill{animation:none}
+  .boot-planet i,.x-panel,.part-card,.panel>*,.launch .rocket,.puff,.xsec path,.star-node .sun.poke,.node .pl,#detail.entering .dbody,#detail.entering .dbar,#detail.expanding .dbody,#detail.collapsed .panel-pill{animation:none}
   .zone,.map-glow i{transition:none}
   .puff{opacity:.85}
 }
@@ -424,10 +475,22 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 
 <div class="boot" id="boot" role="status" aria-live="polite">
   <div class="boot-in">
-    <div class="logo"><span class="logo-mark" aria-hidden="true"></span>สวนดาว</div>
+    <div class="boot-planet" aria-hidden="true"><i></i></div>
+    <div class="logo big"><span><b>สวน</b>ดาว</span></div>
     <div class="boot-track"><i data-boot-bar></i></div>
     <div class="boot-status" data-boot-status>กำลังเตรียมยานสำรวจ</div>
   </div>
+</div>
+
+<!-- First-run intro -->
+<div class="intro" id="intro" role="dialog" aria-modal="true" aria-label="แนะนำสวนดาว" hidden>
+  <button class="intro-skip" type="button" data-intro-skip>ข้าม</button>
+  <div class="intro-view"><div class="intro-track" data-intro-track>
+    <section class="intro-slide"><div class="toon t1" aria-hidden="true"></div><h2>ออกสำรวจ<span>ระบบดาวของคุณเอง</span></h2><p>บินจากสถานีอวกาศไปยังดาว 7 ดวง ดูระยะทางและเวลาเดินทาง หรือเปิดมุมมอง 3 มิติเพื่อหมุนดูทั้งระบบ</p></section>
+    <section class="intro-slide"><div class="toon t2" aria-hidden="true"></div><h2>ปั้นดาว<span>ในแบบที่คุณชอบ</span></h2><p>ปรับความร้อน น้ำ พืช น้ำแข็ง และพายุ แล้วดูดาวเปลี่ยนไปต่อหน้า ซูมเข้าไปดูรายละเอียดได้ใกล้ ๆ</p></section>
+    <section class="intro-slide"><div class="toon t3" aria-hidden="true"></div><h2>สร้างชีวิต<span>แล้วลงไปเดินดู</span></h2><p>สร้างระบบนิเวศ ดูแลเศรษฐกิจให้ยั่งยืน และกดลงสำรวจเพื่อเดินชมพื้นผิว นิคม และสัตว์บนดาว</p></section>
+  </div></div>
+  <div class="intro-foot"><div class="intro-dots" data-intro-dots><i class="on"></i><i></i><i></i></div><button class="btn primary" type="button" data-intro-next>ถัดไป</button></div>
 </div>
 
 <!-- Map -->
@@ -441,7 +504,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   </div>
   <div class="map-head">
     <header class="bar mbar">
-      <div class="logo"><span class="logo-mark" aria-hidden="true"></span>สวนดาว</div>
+      <div class="logo"><span class="logo-mark" aria-hidden="true"></span><span><b>สวน</b>ดาว</span></div>
       <p class="zone" data-zone><b data-zone-name></b><small data-zone-note></small></p>
       <button class="icon-btn" type="button" data-open-menu aria-label="เปิดเมนู">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -452,7 +515,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <button class="dock-btn" type="button" data-view3d aria-pressed="false" aria-label="มุมมองระบบดาว 3 มิติ"><span data-view-label>🪐 3D</span></button>
     <button class="dock-btn" type="button" data-speed aria-label="ความเร็วของอวกาศ"><span data-speed-label>1×</span></button>
     <button class="dock-btn stack" type="button" data-flight-toggle aria-label="ความเร็วยานอวกาศ"><span aria-hidden="true">🚀</span><small data-flight-label>ปกติ</small></button>
-    <button class="dock-btn" type="button" data-bg-toggle aria-label="ความมืดของพื้นหลัง"><span data-bg-icon>🌘</span></button>
+    <button class="dock-btn" type="button" data-bg-toggle aria-label="โทนพื้นหลัง"><span data-bg-icon>🌘</span></button>
     <button class="dock-btn ring" type="button" data-fuel-toggle aria-expanded="false" aria-controls="fuelPop" aria-label="ความคืบหน้าการสำรวจ">
       <svg viewBox="0 0 38 38" aria-hidden="true"><circle class="ring-bg" cx="19" cy="19" r="17"/><circle class="ring-fg" cx="19" cy="19" r="17" data-fuel-ring/></svg>
       <b class="num" data-fuel-pct>0%</b>
@@ -567,6 +630,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   <div class="sheet-in" role="dialog" aria-modal="true" aria-label="เมนู">
     <div class="grab" aria-hidden="true"></div>
     <div data-menu-main>
+      <button class="menu-item" type="button" data-show-intro><span class="em">✨</span><span>ดูหน้าแนะนำอีกครั้ง<small>สามขั้นตอนเริ่มต้น</small></span></button>
       <button class="menu-item" type="button" data-menu="howto"><span class="em">🧭</span><span>วิธีเล่น<small>บิน สำรวจ ปรับแต่ง และสร้างชีวิต</small></span></button>
       <button class="menu-item" type="button" data-sound-toggle aria-pressed="false"><span class="em" data-sound-ic>🔈</span><span>เสียง<small data-sound-label>ปิดอยู่ แตะเพื่อเปิด</small></span></button>
       <button class="menu-item" type="button" data-menu="model"><span class="em">📐</span><span>ตัวเลขมาจากไหน<small>ระยะทาง เวลาเดินทาง และการคำนวณ</small></span></button>
@@ -1095,10 +1159,25 @@ void main(){
 
 const SURF_FRAG = `
 uniform float uType, uSea, uVeg, uHumid, uHeat, uIce, uGlow, uStorm, uTime, uLavaSea, uErupt, uFlash;
-uniform vec3 cDeep, cShallow, cLow, cHigh, cVeg, cDry, cIce, cHot, uSun;
+uniform vec3 cDeep, cShallow, cLow, cHigh, cVeg, cDry, cIce, cHot, uSun, cRim;
+uniform float uCrater;
 varying float vH; varying vec3 vP; varying vec3 vWN; varying vec3 vWorld;
 ${NOISE}
 ${RIPPLE}
+/* Round craters from a jittered 3D cell grid: x = bowl, y = raised rim. */
+vec2 craters(vec3 p){
+  vec3 q = p * 4.5, i = floor(q), f = fract(q);
+  float bowl = 0.0, rim = 0.0;
+  for (int x = -1; x <= 1; x++) for (int y = -1; y <= 1; y++) for (int z = -1; z <= 1; z++) {
+    vec3 o = vec3(float(x), float(y), float(z)), c = i + o;
+    vec3 h = fract(sin(vec3(dot(c, vec3(127.1, 311.7, 74.7)), dot(c, vec3(269.5, 183.3, 246.1)), dot(c, vec3(113.5, 271.9, 124.6)))) * 43758.5453);
+    if (h.y > 0.5) continue;
+    float d = length(o + h - f) / (0.16 + 0.24 * h.x);
+    bowl = max(bowl, 1.0 - smoothstep(0.65, 1.0, d));
+    rim = max(rim, smoothstep(0.72, 0.95, d) * (1.0 - smoothstep(0.95, 1.2, d)));
+  }
+  return vec2(bowl, rim);
+}
 /* Bump from a per-pixel height, using screen-space derivatives (as three.js's perturbNormalArb). */
 vec3 bumpN(vec3 N, float hb, float k){
   vec3 dpx = dFdx(vWorld), dpy = dFdy(vWorld);
@@ -1129,7 +1208,10 @@ void main(){
     col *= 0.94 + 0.1 * snoise(vec3(p.x * 40.0, p.y * 110.0, p.z * 40.0) + warp * 3.0);
   } else {
     // Per-pixel detail on top of the per-vertex height, so coastlines don't show the mesh's triangles.
-    float h = vH + snoise(p * 22.0) * 0.014 + snoise(p * 57.0) * 0.007 + snoise(p * 140.0) * 0.003;
+    // Fade out detail finer than a pixel, so distant views stay clean and close-ups stay sharp.
+    float px = length(fwidth(p));
+    float aa1 = 1.0 - smoothstep(0.004, 0.012, px), aa2 = 1.0 - smoothstep(0.0015, 0.005, px);
+    float h = vH + snoise(p * 22.0) * 0.014 + snoise(p * 57.0) * 0.007 * aa1 + snoise(p * 140.0) * 0.003 * aa2;
     if (h < uSea) {
       float depth = clamp((uSea - h) / max(uSea, 0.05), 0.0, 1.0);
       if (uLavaSea > 0.5) {
@@ -1144,9 +1226,11 @@ void main(){
     } else {
       float t = clamp((h - uSea) / max(1.0 - uSea, 0.05), 0.0, 1.0);
       // Rock grain and a bumped surface, so close-ups show detail instead of flat colour.
-      float grain = snoise(p * 90.0) * 0.5 + snoise(p * 230.0) * 0.25;
-      Nb = bumpN(N, snoise(p * 45.0) * 0.6 + snoise(p * 120.0) * 0.3 + grain * 0.2, 0.011 + t * 0.012);
+      float grain = snoise(p * 90.0) * 0.5 * aa1 + snoise(p * 230.0) * 0.25 * aa2;
+      vec2 cr = uCrater > 0.01 ? craters(p) * uCrater : vec2(0.0);
+      Nb = bumpN(N, snoise(p * 45.0) * 0.6 + snoise(p * 120.0) * 0.3 * aa1 + grain * 0.2 + (cr.y - cr.x) * 1.4, (0.011 + t * 0.012) * (0.4 + 0.6 * aa1));
       col = mix(cLow, cHigh, smoothstep(0.0, 0.85, t)) * (0.85 + 0.3 * dn) * (0.93 + 0.1 * grain);
+      col = col * (1.0 - cr.x * 0.28) + cr.y * 0.12;
       col = mix(col, cDry, (1.0 - uHumid) * 0.55);
       float vm = smoothstep(0.35, 0.7, snoise(p * 3.2 + 7.0) * 0.5 + 0.5 + uVeg * 0.45);
       float veg = clamp(uVeg * 1.2, 0.0, 1.0) * vm * (1.0 - smoothstep(0.55, 0.95, t)) * smoothstep(0.05, 0.4, uHumid + uGlow);
@@ -1162,7 +1246,13 @@ void main(){
     emis *= 1.0 - cap; spec *= 1.0 - cap;
   }
   float dif = max(dot(Nb, uSun), 0.0);
-  vec3 lit = col * (0.16 + 1.0 * dif) + spec * dif;
+  // Illustrated look: a soft two-step terminator, a coloured rim light and a glossy highlight.
+  float cel = smoothstep(0.0, 0.2, dif) * 0.62 + smoothstep(0.35, 0.85, dif) * 0.38;
+  float rim = pow(1.0 - max(dot(N, V), 0.0), 2.6);
+  float gloss = pow(max(dot(reflect(-uSun, Nb), V), 0.0), 26.0) * 0.22;
+  col = mix(vec3(dot(col, vec3(0.3, 0.59, 0.11))), col, 1.18);   // a touch more saturation
+  vec3 lit = col * (0.2 + 0.95 * cel) + spec * dif + vec3(gloss) * cel;
+  lit += cRim * rim * (0.28 + 0.5 * cel);
   lit += cHot * emis * (1.0 + uFlash) + cVeg * glowE * (0.35 + 0.65 * (1.0 - dif));
   float rp = ripple(p);
   lit = lit * (1.0 + min(rp, 0.0) * 0.45) + mix(vec3(1.0), cShallow, 0.4) * max(rp, 0.0) * 0.7 * (0.5 + 0.5 * dif);
@@ -1265,6 +1355,7 @@ class PlanetBody {
       uHumid: { value: 0.5 }, uHeat: { value: 0 }, uIce: { value: 0 }, uGlow: { value: 0 }, uStorm: { value: 0 },
       uTime: { value: 0 }, uLavaSea: { value: this.b.lavaSea ? 1 : 0 }, uErupt: { value: 0 }, uFlash: { value: 0 },
       uRip: { value: new THREE.Vector3(0, 1, 0) }, uRipT: { value: -1 },
+      cRim: { value: hex(pal.atmo) }, uCrater: { value: ({ lava: 0.35, jungle: 0.1, ocean: 0.08, desert: 0.85, gas: 0, ice: 0.55, rogue: 0.35, crystal: 0.3 })[planet.biome] || 0 },
       cDeep: { value: hex(pal.deep) }, cShallow: { value: hex(pal.shallow) }, cLow: { value: hex(pal.low) }, cHigh: { value: hex(pal.high) },
       cVeg: { value: hex(pal.veg) }, cDry: { value: hex(pal.dry) }, cIce: { value: hex(pal.ice) }, cHot: { value: hex(pal.hot) },
       uSun: { value: SUN }
@@ -1832,7 +1923,7 @@ const Sound = {
 
 /* Player settings: how dark the sky is and how fast space moves on the map. */
 const BG_MODES = ['normal', 'dark', 'black'];
-const BG_LABEL = { normal: 'ปกติ', dark: 'มืด', black: 'มืดสนิท' };
+const BG_LABEL = { normal: 'ม่วงสด', dark: 'น้ำเงินเข้ม', black: 'มืดสนิท' };
 const SPEEDS = [0, 0.5, 1, 2, 4];
 /** How long the ship's flights take on screen (multiplier on the animation time). */
 const FLIGHTS = { slow: [2.6, 'ช้า'], normal: [1.6, 'ปกติ'], fast: [0.8, 'เร็ว'] };
@@ -1849,7 +1940,9 @@ const Store = {
     base.at = typeof s.at === 'number' ? s.at : -1;
     base.sound = s.sound === true;
     base.secret = s.secret === true;
-    if (BG_MODES.includes(s.bg)) base.bg = s.bg;
+    base.intro = s.intro === true;
+    // Saves from before the vivid theme start on it once; after that the player's choice sticks.
+    if (BG_MODES.includes(s.bg) && s.theme === 2) base.bg = s.bg;
     if (SPEEDS.includes(s.speed)) base.speed = s.speed;
     if (s.view === '3d') base.view = '3d';
     if (FLIGHTS[s.flight]) base.flight = s.flight;
@@ -1865,7 +1958,7 @@ const Store = {
     return base;
   },
   fresh() {
-    return { v: 1, at: -1, visited: [], sound: false, secret: false, bg: 'dark', speed: REDUCED ? 0 : 1, view: 'map', flight: 'normal', station: cleanStation(null), planets: Object.fromEntries(allPlanets().map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
+    return { v: 1, at: -1, visited: [], sound: false, secret: false, intro: false, bg: 'normal', theme: 2, speed: REDUCED ? 0 : 1, view: 'map', flight: 'normal', station: cleanStation(null), planets: Object.fromEntries(allPlanets().map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
   },
   save(state) { try { localStorage.setItem(CONFIG.storeKey, JSON.stringify(state)); } catch (e) { /* storage may be unavailable; progress stays in memory */ } }
 };
@@ -1873,18 +1966,65 @@ const Store = {
 /* ================================================================
    Starry background (drawn once per resize)
 ================================================================ */
+let SKY_TEX = null;   // the 3D system view reuses the painted sky as its backdrop
+/** Illustrated sky for the current darkness mode: gradient, soft colour glows, wavy contour rings and sparkles. */
 function drawSky() {
-  const c = $('#sky'), dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const w = innerWidth, h = innerHeight;
-  c.width = w * dpr; c.height = h * dpr;
-  const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
-  const r = rng(7), n = Math.round(w * h / 3200);
+  const c = $('#sky'), w = innerWidth, h = innerHeight;
+  c.width = Math.round(w * DPR); c.height = Math.round(h * DPR);
+  const g = c.getContext('2d'); g.setTransform(DPR, 0, 0, DPR, 0, 0);
+  const css = getComputedStyle(document.documentElement), v = k => css.getPropertyValue(k).trim();
+  const mode = document.documentElement.dataset.bg || 'normal', vivid = { normal: 1, dark: 0.55, black: 0.22 }[mode] || 1;
+  const bg = g.createLinearGradient(0, 0, w * 0.3, h);
+  bg.addColorStop(0, v('--sky-1') || '#4a1fc0'); bg.addColorStop(0.55, v('--sky-2') || '#2a1178'); bg.addColorStop(1, v('--sky-3') || '#170a4a');
+  g.fillStyle = bg; g.fillRect(0, 0, w, h);
+  const glow = (x, y, rad, rgb, a) => {
+    const gr = g.createRadialGradient(x, y, 0, x, y, rad);
+    gr.addColorStop(0, `rgba(${rgb},${a})`); gr.addColorStop(1, `rgba(${rgb},0)`);
+    g.fillStyle = gr; g.fillRect(x - rad, y - rad, rad * 2, rad * 2);
+  };
+  const M = Math.max(w, h);
+  const tint = mode === 'dark' ? ['80,140,255', '51,225,255', '140,110,255'] : ['176,77,255', '255,79,216', '51,225,255'];
+  glow(w * 0.85, h * 0.08, M * 0.55, tint[0], 0.35 * vivid);
+  glow(w * 0.1, h * 0.55, M * 0.45, tint[1], 0.16 * vivid);
+  glow(w * 0.7, h * 1.02, M * 0.5, tint[2], 0.14 * vivid);
+  // Wavy contour rings, like ink swirls.
+  const r = rng(7), k = Math.min(w, h) / 800;
+  g.lineWidth = 1.3;
+  [[0.12, 0.22], [0.92, 0.38], [0.28, 0.88], [0.8, 0.92], [0.55, 0.6]].forEach(([cx, cy], n) => {
+    const ph = r() * 6.28, ps = r() * 6.28;
+    for (let i = 0; i < 7; i++) {
+      const rad = (46 + i * 28) * k * (0.8 + (n % 3) * 0.25);
+      g.strokeStyle = `rgba(255,255,255,${((0.05 + 0.02 * (i % 2)) * vivid + 0.015).toFixed(3)})`;
+      g.beginPath();
+      for (let a = 0; a <= 6.3; a += 0.05) {
+        const rr = rad * (1 + 0.09 * Math.sin(3 * a + ph + i * 0.35) + 0.05 * Math.sin(5 * a + ps));
+        const x = cx * w + Math.cos(a) * rr, y = cy * h + Math.sin(a) * rr * 0.8;
+        a ? g.lineTo(x, y) : g.moveTo(x, y);
+      }
+      g.stroke();
+    }
+  });
+  // Stars, coloured dots and four-point sparkles.
+  const n = Math.round(w * h / 2600);
   for (let i = 0; i < n; i++) {
-    const x = r() * w, y = r() * h, s = r() < 0.08 ? 1.6 : 0.5 + r() * 0.8;
-    g.fillStyle = `rgba(255,${220 + r() * 35 | 0},255,${0.25 + r() * 0.6})`;
-    g.beginPath(); g.arc(x, y, s, 0, 6.283); g.fill();
-    if (s > 1.5 && r() < 0.5) { g.strokeStyle = 'rgba(255,240,255,.5)'; g.lineWidth = 1; g.beginPath(); g.moveTo(x - 5, y); g.lineTo(x + 5, y); g.moveTo(x, y - 5); g.lineTo(x, y + 5); g.stroke(); }
+    const x = r() * w, y = r() * h, sz = r() < 0.08 ? 1.5 : 0.4 + r() * 0.8;
+    g.fillStyle = `rgba(255,${225 + r() * 30 | 0},255,${0.3 + r() * 0.6})`;
+    g.beginPath(); g.arc(x, y, sz, 0, 6.283); g.fill();
   }
+  const dots = ['51,225,255', '255,79,216', '255,177,61', '125,255,106'];
+  for (let i = 0; i < 16; i++) {
+    const x = r() * w, y = r() * h, sz = 2 + r() * 3.5;
+    g.fillStyle = `rgba(${dots[i % 4]},${(0.35 + 0.35 * vivid).toFixed(2)})`;
+    g.beginPath(); g.arc(x, y, sz, 0, 6.283); g.fill();
+  }
+  g.fillStyle = 'rgba(255,255,255,.85)';
+  for (let i = 0; i < 14; i++) {
+    const x = r() * w, y = r() * h, sz = 3 + r() * 5;
+    g.beginPath(); g.moveTo(x, y - sz);
+    g.quadraticCurveTo(x, y, x + sz, y); g.quadraticCurveTo(x, y, x, y + sz);
+    g.quadraticCurveTo(x, y, x - sz, y); g.quadraticCurveTo(x, y, x, y - sz); g.fill();
+  }
+  if (SKY_TEX) SKY_TEX.needsUpdate = true;
 }
 
 /* ================================================================
@@ -2645,6 +2785,7 @@ class App {
     $('#boot').classList.add('is-done');
     $('#map').classList.add('is-active');
     this.startMapLoop();
+    if (!this.state.intro) this.showIntro();
     setTimeout(() => $('#boot').remove(), 700);
   }
 
@@ -2744,7 +2885,7 @@ class App {
       btn.type = 'button'; btn.className = p.secret ? 'node secret' : 'node';
       btn.style.left = n.x + 'px'; btn.style.top = n.y + 'px';
       btn.setAttribute('aria-label', `บินไปดาว${p.name}, ${BIOMES[p.biome].kind}`);
-      const img = !this.noGL ? `<span class="pl" style="width:${size}px;height:${size}px;--d:${(-i * 1.7).toFixed(1)}s"></span>` :
+      const img = !this.noGL ? `<span class="pl" style="width:${size}px;height:${size}px;--d:${(-i * 1.7).toFixed(1)}s;--halo:${BIOMES[p.biome].palette.atmo}"></span>` :
         `<span style="display:block;width:${size * 0.7}px;height:${size * 0.7}px;border-radius:50%;background:${BIOMES[p.biome].palette.high}"></span>`;
       btn.innerHTML = `${img}<span class="node-name">${p.name}</span><span class="node-kind">${BIOMES[p.biome].kind}</span><span class="node-flags" data-flags></span>`;
       btn.addEventListener('click', () => this.travel(i));
@@ -3069,6 +3210,8 @@ class App {
   buildSystem() {
     const S = this.sys = { scene: new THREE.Scene(), holders: {}, t: 0, yaw: 0.7, pitch: 0.55, dist: 60, tdist: 60, vyaw: 0, vpitch: 0 };
     const scene = S.scene, r = rng(53), TAU = Math.PI * 2;
+    SKY_TEX = new THREE.CanvasTexture($('#sky'));
+    scene.background = SKY_TEX;
     S.cam = new THREE.PerspectiveCamera(45, 1, 0.1, 1200);
     scene.add(new THREE.AmbientLight(0xb8b0ff, 0.35));
     scene.add(new THREE.PointLight(0xfff0d8, 1.5, 0, 0));
@@ -3695,12 +3838,41 @@ class App {
     $('#stPanel').innerHTML = html;
   }
 
+  /* ---------------- First-run intro ---------------- */
+  showIntro() {
+    const el = $('#intro'); el.hidden = false; this.introAt = 0; this.introGo(0);
+    this.stopMapLoop();
+    requestAnimationFrame(() => el.classList.add('is-on'));
+    setTimeout(() => $('[data-intro-next]').focus(), 60);
+  }
+  introGo(i) {
+    this.introAt = clamp(i, 0, 2);
+    $('[data-intro-track]').style.transform = `translateX(${-this.introAt * 100}%)`;
+    $$('[data-intro-dots] i').forEach((d, k) => d.classList.toggle('on', k === this.introAt));
+    $('[data-intro-next]').textContent = this.introAt === 2 ? 'เริ่มสำรวจ' : 'ถัดไป';
+  }
+  closeIntro() {
+    const el = $('#intro');
+    this.state.intro = true; this.save();
+    el.classList.remove('is-on'); setTimeout(() => { el.hidden = true; }, 400);
+    if ($('#map').classList.contains('is-active')) this.startMapLoop();
+  }
+  bindIntro() {
+    $('[data-intro-skip]').addEventListener('click', () => this.closeIntro());
+    $('[data-intro-next]').addEventListener('click', () => { if (this.introAt >= 2) this.closeIntro(); else this.introGo(this.introAt + 1); });
+    const view = $('.intro-view');
+    let x0 = null;
+    view.addEventListener('pointerdown', e => { x0 = e.clientX; });
+    view.addEventListener('pointerup', e => { if (x0 == null) return; const dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 40) this.introGo(this.introAt + (dx < 0 ? 1 : -1)); });
+  }
+
   /* ---------------- Settings ---------------- */
   applyBg() {
     document.documentElement.dataset.bg = this.state.bg;
+    drawSky();
     this.sysBg = new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--sky-2').trim() || '#0b0915');
     $('[data-bg-icon]').textContent = { normal: '🌗', dark: '🌘', black: '🌑' }[this.state.bg];
-    $('[data-bg-toggle]').setAttribute('aria-label', `ความมืดของพื้นหลัง: ${BG_LABEL[this.state.bg]}`);
+    $('[data-bg-toggle]').setAttribute('aria-label', `โทนพื้นหลัง: ${BG_LABEL[this.state.bg]}`);
   }
   cycleBg() {
     this.state.bg = BG_MODES[(BG_MODES.indexOf(this.state.bg) + 1) % BG_MODES.length];
@@ -3855,6 +4027,7 @@ class App {
       sky.style.setProperty('--fly', (1.7 * this.flightK).toFixed(2) + 's');
       sky.style.height = Math.min(360, innerHeight * 0.42) + 'px';
       el.hidden = false;
+      this.stopMapLoop();   // the launch scene covers the map
       Sound.launch();
       requestAnimationFrame(() => el.classList.add('is-on'));
       let done = false;
@@ -4237,6 +4410,7 @@ class App {
     $$('.tab[data-tab]').forEach(t => t.addEventListener('click', () => this.setTab(t.dataset.tab)));
     this.bindStation();
     this.bindExplore();
+    this.bindIntro();
     $('#panel').addEventListener('input', e => { if (e.target.matches('[data-ctl]')) this.onSlider(e.target); });
     $('#panel').addEventListener('click', e => {
       const d = e.target.closest('[data-do]'); if (d) this.doAction(d.dataset.do);
@@ -4307,10 +4481,12 @@ class App {
       if (e.target.closest('[data-menu-back]')) this.menuPage(null);
       if (e.target.closest('[data-confirm-reset]')) this.resetAll();
       if (e.target.closest('[data-sound-toggle]')) this.toggleSound();
+      if (e.target.closest('[data-show-intro]')) { this.closeMenu(); this.showIntro(); }
     });
     addEventListener('keydown', e => {
       if (e.key !== 'Escape') return;
-      if (!$('#menu').hidden) this.closeMenu();
+      if (!$('#intro').hidden) this.closeIntro();
+      else if (!$('#menu').hidden) this.closeMenu();
       else if (this.inExplore) { if (this.xPoi != null) this.closePoi(); else this.closeExplore(); }
       else if (this.inStation) this.closeStation();
       else if (this.current >= 0) this.leaveDetail();
@@ -4382,7 +4558,7 @@ class App {
     if (!page) { main.hidden = false; pg.hidden = true; return; }
     main.hidden = true; pg.hidden = false;
     const back = '<button class="btn ghost" type="button" data-menu-back style="width:100%;margin-top:10px">กลับ</button>';
-    if (page === 'howto') pg.innerHTML = `<h3>วิธีเล่น</h3><p>1. เริ่มจากสถานีอวกาศข้างดาวฤกษ์ แตะสถานีเพื่อสำรวจและปรับแต่งโมดูล ซึ่งมีผลต่อความเร็วยาน<br>แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น กด 🛬 ลงสำรวจ เพื่อลงไปเดินดูพื้นผิวที่สร้างจากค่าที่ปรับไว้ แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงได้ในเมนู<br>ปุ่มมุมขวาล่าง: 🪐 3D สลับเป็นมุมมองระบบดาว 3 มิติ (ลากเพื่อหมุน บีบนิ้วเพื่อซูม), 1× ปรับความเร็วของอวกาศ, 🚀 ปรับความเร็วยาน, 🌘 ปรับความมืดของพื้นหลัง, วงกลม % แสดงความคืบหน้า<br>แตะดาวหรือพื้นหลังในหน้าดาวเพื่อพับแผงปรับแต่ง แล้วกดปุ่มด้านล่างเพื่อเปิดกลับ<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`;
+    if (page === 'howto') pg.innerHTML = `<h3>วิธีเล่น</h3><p>1. เริ่มจากสถานีอวกาศข้างดาวฤกษ์ แตะสถานีเพื่อสำรวจและปรับแต่งโมดูล ซึ่งมีผลต่อความเร็วยาน<br>แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น กด 🛬 ลงสำรวจ เพื่อลงไปเดินดูพื้นผิวที่สร้างจากค่าที่ปรับไว้ แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงได้ในเมนู<br>ปุ่มมุมขวาล่าง: 🪐 3D สลับเป็นมุมมองระบบดาว 3 มิติ (ลากเพื่อหมุน บีบนิ้วเพื่อซูม), 1× ปรับความเร็วของอวกาศ, 🚀 ปรับความเร็วยาน, 🌘 ปรับโทนพื้นหลัง, วงกลม % แสดงความคืบหน้า<br>แตะดาวหรือพื้นหลังในหน้าดาวเพื่อพับแผงปรับแต่ง แล้วกดปุ่มด้านล่างเพื่อเปิดกลับ<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`;
     if (page === 'model') pg.innerHTML = `<h3>ตัวเลขมาจากไหน</h3><p>ระยะห่างของดาวใช้หน่วยดาราศาสตร์ (1 หน่วย ≈ 149.6 ล้าน กม.) และคิดตอนดาวเรียงอยู่ด้านเดียวกันของดาวฤกษ์ เวลาเดินทางคิดจากยานความเร็ว ${nf.format(CONFIG.rocketKmh)} กม./ชม. ใกล้เคียงยานนิวฮอไรซันส์<br><br>อุณหภูมิ ออกซิเจน และจำนวนประชากรมาจากแบบจำลองอย่างง่ายเพื่อการเล่น ไม่ใช่การคำนวณทางวิทยาศาสตร์จริง สัดส่วนน้ำและดินนับจากจุด 2,400 จุดบนพื้นผิวดาวจริงที่เห็นบนจอ</p>${back}`;
     if (page === 'reset') pg.innerHTML = `<h3>เริ่มต้นใหม่ทั้งหมด?</h3><p>การปรับแต่ง ระบบนิเวศ สถานีอวกาศ และความคืบหน้าของทุกดาวจะหายไป</p>
       <button class="btn primary" type="button" data-confirm-reset style="background:linear-gradient(135deg,#ff4f8b,#e8457a)">ล้างข้อมูลทั้งหมด</button>${back}`;
@@ -4391,8 +4567,8 @@ class App {
   resetAll() {
     this.closeMenu();
     if (this.current >= 0) this.closeDetail();
-    const { sound, bg, speed, view, flight } = this.state;
-    this.state = Store.fresh(); Object.assign(this.state, { sound, bg, speed, view, flight }); Store.save(this.state);
+    const { sound, bg, speed, view, flight, intro } = this.state;
+    this.state = Store.fresh(); Object.assign(this.state, { sound, bg, speed, view, flight, intro }); Store.save(this.state);
     this.resetStation(true);
     // The secret planet hides again until it is earned.
     if (PLANETS.includes(SECRET)) PLANETS.splice(PLANETS.indexOf(SECRET), 1);
