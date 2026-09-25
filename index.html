@@ -81,22 +81,23 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 
 /* ------------------------------------------------------------------ Map */
 #map{overflow:hidden}
-.map-scroll{position:relative;z-index:1;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.map-scroll{position:relative;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 /* Warm near the star, cold at the edge of the system; driven by --warm and --cold on #map. */
 .map-glow{position:absolute;inset:0;z-index:0;pointer-events:none}
 .map-glow i{position:absolute;inset:0;transition:opacity .35s linear}
 .map-glow .warm{background:radial-gradient(95% 60% at 50% 0%,rgba(255,150,70,.3),rgba(255,120,60,0) 70%);opacity:var(--warm,1)}
 .map-glow .cold{background:radial-gradient(110% 65% at 50% 100%,rgba(90,170,255,.26),rgba(90,170,255,0) 70%);opacity:var(--cold,0)}
-.zone{flex:1;min-width:0;margin:0;display:flex;justify-content:center;align-items:baseline;gap:8px;font-size:13px;white-space:nowrap;transition:opacity .25s var(--ease)}
+.zone{flex:1;min-width:0;margin:0;display:flex;justify-content:center;align-items:baseline;gap:7px;font-size:12px;white-space:nowrap;transition:opacity .25s var(--ease)}
 .zone b{font-weight:500;flex:none}
-.zone small{color:var(--ink-3);font-size:12px;overflow:hidden;text-overflow:ellipsis}
+.zone small{color:var(--ink-3);font-size:11px;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:620px){.zone small{display:none}}
 .mbar{padding:calc(var(--safe-t) + 6px) 10px 6px 16px}
-.mbar .logo{font-size:18px;gap:8px}
+.mbar .logo{font-size:16px;gap:8px}
 .mbar .logo-mark{width:24px;height:24px}
 .mbar .logo-mark::after{top:8px;height:7px;left:-6px;right:-6px}
 .zone.swap{opacity:0}
-.map-head{position:sticky;top:0;z-index:3;padding-bottom:14px;background:linear-gradient(180deg,rgba(var(--head),.94) calc(100% - 14px),rgba(var(--head),0))}
+.map-head{position:sticky;top:0;z-index:3;text-shadow:0 1px 8px rgba(0,0,0,.85);pointer-events:none}
+.map-head .logo,.map-head button{pointer-events:auto}
 .journey{position:relative;margin:0 auto;max-width:480px}
 .journey svg.route{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .route path{fill:none;stroke:rgba(236,232,255,.38);stroke-width:1.6;stroke-dasharray:5 7;stroke-linecap:round}
@@ -372,8 +373,9 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <div class="journey" id="journey"></div>
   </div>
   <div class="map-dock">
-    <button class="dock-btn" type="button" data-view3d aria-pressed="false" aria-label="มุมมองระบบดาว 3 มิติ"><span data-view-label>3D</span></button>
+    <button class="dock-btn" type="button" data-view3d aria-pressed="false" aria-label="มุมมองระบบดาว 3 มิติ"><span data-view-label>🪐 3D</span></button>
     <button class="dock-btn" type="button" data-speed aria-label="ความเร็วของอวกาศ"><span data-speed-label>1×</span></button>
+    <button class="dock-btn" type="button" data-bg-toggle aria-label="ความมืดของพื้นหลัง"><span data-bg-icon>🌘</span></button>
     <button class="dock-btn ring" type="button" data-fuel-toggle aria-expanded="false" aria-controls="fuelPop" aria-label="ความคืบหน้าการสำรวจ">
       <svg viewBox="0 0 38 38" aria-hidden="true"><circle class="ring-bg" cx="19" cy="19" r="17"/><circle class="ring-fg" cx="19" cy="19" r="17" data-fuel-ring/></svg>
       <b class="num" data-fuel-pct>0%</b>
@@ -436,7 +438,6 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <div data-menu-main>
       <button class="menu-item" type="button" data-menu="howto"><span class="em">🧭</span><span>วิธีเล่น<small>บิน สำรวจ ปรับแต่ง และสร้างชีวิต</small></span></button>
       <button class="menu-item" type="button" data-sound-toggle aria-pressed="false"><span class="em" data-sound-ic>🔈</span><span>เสียง<small data-sound-label>ปิดอยู่ แตะเพื่อเปิด</small></span></button>
-      <button class="menu-item" type="button" data-bg-toggle><span class="em">🌌</span><span>ความมืดของพื้นหลัง<small data-bg-label>มืด แตะเพื่อเปลี่ยน</small></span></button>
       <button class="menu-item" type="button" data-menu="model"><span class="em">📐</span><span>ตัวเลขมาจากไหน<small>ระยะทาง เวลาเดินทาง และการคำนวณ</small></span></button>
       <button class="menu-item" type="button" data-menu="reset"><span class="em">🧹</span><span>เริ่มต้นใหม่ทั้งหมด<small>ล้างการปรับแต่งของทุกดาว</small></span></button>
     </div>
@@ -1831,7 +1832,7 @@ class App {
     if (this.noGL || !this.nodeEls || !this.stage || this.sys3d) return;
     if (this.current >= 0) return;   // the planet view owns the renderer
     const map = $('#map'), mr = map.getBoundingClientRect();
-    const clipTop = $('.map-head').getBoundingClientRect().bottom - mr.top - 14;
+    const clipTop = 0;
     this.stage.mapMode(map);
     this.stage.beginMap();
     this.nodeEls.forEach((el, i) => {
@@ -1885,8 +1886,8 @@ class App {
     const sx = ox + this.nodes[0].x, sy = oy + this.nodes[0].y;
     const onScreen = r => sy + r > -20 && sy - r < H + 20;
     // Add only the part of a circle around the star that crosses the screen (orbits can be far larger than it).
-    const visArc = r => {
-      const lo = clamp((-20 - sy) / r, -1, 1), hi = clamp((H + 20 - sy) / r, -1, 1);
+    const visArc = (r, pad = 20) => {
+      const lo = clamp((-pad - sy) / r, -1, 1), hi = clamp((H + pad - sy) / r, -1, 1);
       if (lo >= hi) return;
       const a0 = Math.asin(lo), a1 = Math.asin(hi);
       g.moveTo(sx + Math.cos(a0) * r, sy + Math.sin(a0) * r); g.arc(sx, sy, r, a0, a1);
@@ -1914,7 +1915,7 @@ class App {
     const h0 = this.orbitAt(0.95), h1 = this.orbitAt(1.4);
     if (onScreen(h1)) {
       g.strokeStyle = 'rgba(80,220,150,.06)'; g.lineWidth = h1 - h0;
-      g.beginPath(); visArc((h0 + h1) / 2); g.stroke(); g.lineWidth = 1;
+      g.beginPath(); visArc((h0 + h1) / 2, (h1 - h0) / 2 + 30); g.stroke(); g.lineWidth = 1;
       label((h0 + h1) / 2, 'เขตอาศัยได้', 'rgba(120,235,170,.7)');
     }
     const fr = this.orbitAt(2.7);
@@ -2048,7 +2049,7 @@ class App {
     $('#map').classList.toggle('sys', this.sys3d);
     const b = $('[data-view3d]');
     b.setAttribute('aria-pressed', String(this.sys3d));
-    $('[data-view-label]').textContent = this.sys3d ? '🗺️' : '3D';
+    $('[data-view-label]').textContent = this.sys3d ? '🗺️' : '🪐 3D';
     b.setAttribute('aria-label', this.sys3d ? 'กลับไปแผนที่เส้นทาง' : 'มุมมองระบบดาว 3 มิติ');
     if (this.sys3d) this.enterSystem(); else { this.drawLivePlanets(0); this.drawSpace(0); }
     this.updateZone();
@@ -2149,8 +2150,7 @@ class App {
       this.sys.holders[p.id].holder.add(body.group);
       body.group.rotation.set(0.28, 0, 0);
     });
-    const head = $('.map-head').getBoundingClientRect().bottom - $('#map').getBoundingClientRect().top;
-    $('[data-sys-hit]').style.top = Math.max(0, head - 14) + 'px';
+    $('[data-sys-hit]').style.top = '0px';   // the header's buttons sit above it
     this.drawSystem(0);
   }
 
@@ -2174,7 +2174,7 @@ class App {
     S.belt.rotation.y += dt * 0.03; S.kuiper.rotation.y += dt * 0.004; S.haze.rotation.y += dt * 0.012;
     S.swarms.forEach(w => { w.pivot.rotation.y += dt * w.w; });
     // Planets along their orbits, spinning, with moons.
-    const v = new THREE.Vector3(), clipTop = $('.map-head').getBoundingClientRect().bottom - mr.top - 14;
+    const v = new THREE.Vector3(), clipTop = 0;
     PLANETS.forEach(p => {
       const h = S.holders[p.id], body = this.bodies[p.id]; if (!h || !body) return;
       h.a += dt * h.w;
@@ -2262,11 +2262,13 @@ class App {
   /* ---------------- Settings ---------------- */
   applyBg() {
     document.documentElement.dataset.bg = this.state.bg;
-    const l = $('[data-bg-label]'); if (l) l.textContent = `${BG_LABEL[this.state.bg]} แตะเพื่อเปลี่ยน`;
+    $('[data-bg-icon]').textContent = { normal: '🌗', dark: '🌘', black: '🌑' }[this.state.bg];
+    $('[data-bg-toggle]').setAttribute('aria-label', `ความมืดของพื้นหลัง: ${BG_LABEL[this.state.bg]}`);
   }
   cycleBg() {
     this.state.bg = BG_MODES[(BG_MODES.indexOf(this.state.bg) + 1) % BG_MODES.length];
     this.applyBg(); this.save();
+    this.toast(`พื้นหลัง: ${BG_LABEL[this.state.bg]}`);
   }
   syncSpeed() {
     const s = this.state.speed;
@@ -2771,6 +2773,7 @@ class App {
     $$('[data-open-menu]').forEach(b => b.addEventListener('click', () => this.openMenu()));
     $('[data-back]').addEventListener('click', () => this.leaveDetail());
     $('[data-speed]').addEventListener('click', () => this.cycleSpeed());
+    $('[data-bg-toggle]').addEventListener('click', () => this.cycleBg());
     $('[data-view3d]').addEventListener('click', () => this.setView(this.sys3d ? 'map' : '3d'));
     $('[data-expand]').addEventListener('click', () => this.expandPanel());
     // The planet view resizes when the controls fold or unfold.
@@ -2834,7 +2837,6 @@ class App {
       if (e.target.closest('[data-menu-back]')) this.menuPage(null);
       if (e.target.closest('[data-confirm-reset]')) this.resetAll();
       if (e.target.closest('[data-sound-toggle]')) this.toggleSound();
-      if (e.target.closest('[data-bg-toggle]')) this.cycleBg();
     });
     addEventListener('keydown', e => {
       if (e.key !== 'Escape') return;
@@ -2906,7 +2908,7 @@ class App {
     if (!page) { main.hidden = false; pg.hidden = true; return; }
     main.hidden = true; pg.hidden = false;
     const back = '<button class="btn ghost" type="button" data-menu-back style="width:100%;margin-top:10px">กลับ</button>';
-    if (page === 'howto') pg.innerHTML = `<h3>วิธีเล่น</h3><p>1. แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงและปรับความมืดของพื้นหลังได้ในเมนู<br>ปุ่ม 3D มุมขวาล่างสลับเป็นมุมมองระบบดาว 3 มิติ (ลากเพื่อหมุน บีบนิ้วเพื่อซูม) ปุ่ม 1× ใช้ปรับความเร็วของอวกาศ ส่วนวงกลม % แสดงความคืบหน้า<br>แตะดาวหรือพื้นหลังในหน้าดาวเพื่อพับแผงปรับแต่ง แล้วกดปุ่มด้านล่างเพื่อเปิดกลับ<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`;
+    if (page === 'howto') pg.innerHTML = `<h3>วิธีเล่น</h3><p>1. แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงได้ในเมนู<br>ปุ่มมุมขวาล่าง: 🪐 3D สลับเป็นมุมมองระบบดาว 3 มิติ (ลากเพื่อหมุน บีบนิ้วเพื่อซูม), 1× ปรับความเร็วของอวกาศ, 🌘 ปรับความมืดของพื้นหลัง, วงกลม % แสดงความคืบหน้า<br>แตะดาวหรือพื้นหลังในหน้าดาวเพื่อพับแผงปรับแต่ง แล้วกดปุ่มด้านล่างเพื่อเปิดกลับ<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`;
     if (page === 'model') pg.innerHTML = `<h3>ตัวเลขมาจากไหน</h3><p>ระยะห่างของดาวใช้หน่วยดาราศาสตร์ (1 หน่วย ≈ 149.6 ล้าน กม.) และคิดตอนดาวเรียงอยู่ด้านเดียวกันของดาวฤกษ์ เวลาเดินทางคิดจากยานความเร็ว ${nf.format(CONFIG.rocketKmh)} กม./ชม. ใกล้เคียงยานนิวฮอไรซันส์<br><br>อุณหภูมิ ออกซิเจน และจำนวนประชากรมาจากแบบจำลองอย่างง่ายเพื่อการเล่น ไม่ใช่การคำนวณทางวิทยาศาสตร์จริง สัดส่วนน้ำและดินนับจากจุด 2,400 จุดบนพื้นผิวดาวจริงที่เห็นบนจอ</p>${back}`;
     if (page === 'reset') pg.innerHTML = `<h3>เริ่มต้นใหม่ทั้งหมด?</h3><p>การปรับแต่ง ระบบนิเวศ และความคืบหน้าของทุกดาวจะหายไป</p>
       <button class="btn primary" type="button" data-confirm-reset style="background:linear-gradient(135deg,#ff4f8b,#e8457a)">ล้างข้อมูลทั้งหมด</button>${back}`;
