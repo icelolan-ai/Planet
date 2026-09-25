@@ -118,9 +118,9 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 .sys-hit:active{cursor:grabbing}
 .sys-labels{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
 #map:not(.sys) .sys-hit,#map:not(.sys) .sys-labels{display:none}
-.sys-label{position:absolute;left:0;top:0;display:grid;justify-items:center;font-size:12.5px;line-height:1.2;white-space:nowrap;text-shadow:0 1px 6px rgba(0,0,0,.8)}
+.sys-label{position:absolute;left:0;top:0;display:grid;justify-items:center;font-size:11px;line-height:1.2;white-space:nowrap;text-shadow:0 1px 6px rgba(0,0,0,.8)}
 .sys-label b{font-family:var(--f-head);font-weight:500}
-.sys-label small{color:var(--ink-3);font-size:11px}
+.sys-label small{color:var(--ink-3);font-size:9.5px}
 .sys-label.secret b{color:#cdb8ff}
 .node:hover .pl,.node:focus-visible .pl{scale:1.06}
 .node:active .pl{scale:.96}
@@ -130,24 +130,24 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 @keyframes pop{0%{transform:scale(.3)}55%{transform:scale(1.14)}100%{transform:scale(1)}}
 .node:hover img,.node:focus-visible img{transform:scale(1.06)}
 .node:active img{transform:scale(.96)}
-.node-name{font-family:var(--f-head);font-size:15px;line-height:1.1}
-.node-kind{font-size:12px;color:var(--ink-3);margin-top:-4px}
+.node-name{font-family:var(--f-head);font-size:13px;line-height:1.1;opacity:.92}
+.node-kind{font-size:10.5px;color:var(--ink-3);margin-top:-4px}
 .node-flags{display:flex;gap:4px;justify-content:center;min-height:18px}
-.flag{font-size:11px;padding:1px 8px;border-radius:10px;background:rgba(63,214,198,.16);color:var(--teal)}
+.flag{font-size:10px;padding:0 7px;border-radius:10px;background:rgba(63,214,198,.16);color:var(--teal)}
 .flag.eco{background:rgba(255,201,74,.16);color:var(--gold)}
 .flag.new{background:rgba(154,107,255,.22);color:#cdb8ff}
 .node.secret img{filter:drop-shadow(0 0 22px rgba(120,100,255,.6))}
 .route path.secret{stroke:#9a6bff;stroke-opacity:.75}
-.stepno{position:absolute;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2);transform:translate(-50%,-50%);pointer-events:none}
+.stepno{position:absolute;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-3);transform:translate(-50%,-50%);pointer-events:none}
 .stepno i{width:10px;height:10px;border-radius:50%;border:2px solid var(--ink-2);background:var(--bg)}
 .stepno.done i{border-color:var(--teal);background:var(--teal)}
-.gap-pill{position:absolute;transform:translate(-50%,-50%);padding:4px 10px;border-radius:12px;background:rgba(38,32,60,.92);border:1px solid var(--line);
-  font-size:11.5px;line-height:1.3;color:var(--ink-2);text-align:center;white-space:nowrap;pointer-events:none}
-.gap-pill b{display:block;font-weight:500;color:var(--ink)}
+.gap-pill{position:absolute;transform:translate(-50%,-50%);padding:2px 8px;border-radius:10px;background:rgba(var(--head),.55);border:1px solid var(--line);
+  font-size:10px;line-height:1.3;color:var(--ink-3);text-align:center;white-space:nowrap;pointer-events:none}
+.gap-pill b{display:block;font-weight:400;color:var(--ink-2)}
 .star-node{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:4px;pointer-events:none}
 .star-node .sun{width:86px;height:86px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff3b0,#ffc94a 45%,#ff9a3c 80%);
   box-shadow:0 0 40px 12px rgba(255,190,80,.35),0 0 90px 30px rgba(255,150,60,.18)}
-.star-node span{font-size:12.5px;color:var(--ink-2)}
+.star-node span{font-size:11px;color:var(--ink-3)}
 .star-node .sun{pointer-events:auto;cursor:pointer}
 .star-node .sun.poke{animation:sunpoke .35s var(--ease)}
 @keyframes sunpoke{50%{transform:scale(1.08)}}
@@ -483,7 +483,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     </button>
   </header>
   <div class="stage" id="stage">
-    <div class="stage-hint" data-hint>ลากเพื่อหมุน แตะดาวเพื่อส่งคลื่น</div>
+    <div class="stage-hint" data-hint>ลากเพื่อหมุน · บีบนิ้วเพื่อซูม · แตะดาวเพื่อส่งคลื่น</div>
     <div class="stage-actions" data-actions></div>
   </div>
   <div class="dbody">
@@ -684,7 +684,7 @@ const CONFIG = {
   auKm: 149597870.7,
   rocketKmh: 58000,          // roughly the speed of the New Horizons probe
   storeKey: 'suan-dao-v1',
-  segments: PHONE ? 128 : 176,
+  segments: PHONE ? 160 : 224,
   samples: 2400,
   floraMax: MOBILE ? 380 : 620,
   idleMs: 7000               // untouched this long, the planet starts drifting on its own
@@ -1095,9 +1095,18 @@ uniform vec3 cDeep, cShallow, cLow, cHigh, cVeg, cDry, cIce, cHot, uSun;
 varying float vH; varying vec3 vP; varying vec3 vWN; varying vec3 vWorld;
 ${NOISE}
 ${RIPPLE}
+/* Bump from a per-pixel height, using screen-space derivatives (as three.js's perturbNormalArb). */
+vec3 bumpN(vec3 N, float hb, float k){
+  vec3 dpx = dFdx(vWorld), dpy = dFdy(vWorld);
+  float dhx = dFdx(hb), dhy = dFdy(hb);
+  vec3 r1 = cross(dpy, N), r2 = cross(N, dpx);
+  float det = dot(dpx, r1);
+  vec3 g = sign(det) * (dhx * r1 + dhy * r2);
+  return normalize(abs(det) * N - g * k);
+}
 void main(){
   vec3 p = normalize(vP), N = normalize(vWN), V = normalize(cameraPosition - vWorld);
-  float dif = max(dot(N, uSun), 0.0);
+  vec3 Nb = N;
   float dn = snoise(p * 9.0) * 0.5 + 0.5;
   vec3 col; float emis = 0.0, glowE = 0.0, spec = 0.0;
   if (uType > 0.5) {
@@ -1112,9 +1121,11 @@ void main(){
     float swirl = snoise(p * 12.0 + vec3(0.0, uTime * 0.3 * (0.2 + uStorm), 0.0)) * 0.5 + 0.5;
     col = mix(col, cVeg, spot * (0.55 + 0.45 * swirl) * (0.3 + uStorm));
     col = mix(col, vec3(dot(col, vec3(0.33))), (1.0 - uHumid) * 0.25);
+    // Fine turbulence inside the bands, visible when zoomed in.
+    col *= 0.94 + 0.1 * snoise(vec3(p.x * 40.0, p.y * 110.0, p.z * 40.0) + warp * 3.0);
   } else {
     // Per-pixel detail on top of the per-vertex height, so coastlines don't show the mesh's triangles.
-    float h = vH + snoise(p * 22.0) * 0.012 + snoise(p * 57.0) * 0.005;
+    float h = vH + snoise(p * 22.0) * 0.014 + snoise(p * 57.0) * 0.007 + snoise(p * 140.0) * 0.003;
     if (h < uSea) {
       float depth = clamp((uSea - h) / max(uSea, 0.05), 0.0, 1.0);
       if (uLavaSea > 0.5) {
@@ -1128,7 +1139,10 @@ void main(){
       }
     } else {
       float t = clamp((h - uSea) / max(1.0 - uSea, 0.05), 0.0, 1.0);
-      col = mix(cLow, cHigh, smoothstep(0.0, 0.85, t)) * (0.85 + 0.3 * dn);
+      // Rock grain and a bumped surface, so close-ups show detail instead of flat colour.
+      float grain = snoise(p * 90.0) * 0.5 + snoise(p * 230.0) * 0.25;
+      Nb = bumpN(N, snoise(p * 45.0) * 0.6 + snoise(p * 120.0) * 0.3 + grain * 0.2, 0.011 + t * 0.012);
+      col = mix(cLow, cHigh, smoothstep(0.0, 0.85, t)) * (0.85 + 0.3 * dn) * (0.93 + 0.1 * grain);
       col = mix(col, cDry, (1.0 - uHumid) * 0.55);
       float vm = smoothstep(0.35, 0.7, snoise(p * 3.2 + 7.0) * 0.5 + 0.5 + uVeg * 0.45);
       float veg = clamp(uVeg * 1.2, 0.0, 1.0) * vm * (1.0 - smoothstep(0.55, 0.95, t)) * smoothstep(0.05, 0.4, uHumid + uGlow);
@@ -1143,6 +1157,7 @@ void main(){
     col = mix(col, cIce, cap);
     emis *= 1.0 - cap; spec *= 1.0 - cap;
   }
+  float dif = max(dot(Nb, uSun), 0.0);
   vec3 lit = col * (0.16 + 1.0 * dif) + spec * dif;
   lit += cHot * emis * (1.0 + uFlash) + cVeg * glowE * (0.35 + 0.65 * (1.0 - dif));
   float rp = ripple(p);
@@ -1159,7 +1174,7 @@ varying vec3 vP; varying vec3 vWN;
 ${NOISE}
 void main(){
   vec3 p = normalize(vP);
-  float n = snoise(p * 2.6 + vec3(uTime * 0.03, 0.0, 0.0)) * 0.6 + snoise(p * 6.0 - vec3(0.0, uTime * 0.05, 0.0)) * 0.4;
+  float n = snoise(p * 2.6 + vec3(uTime * 0.03, 0.0, 0.0)) * 0.6 + snoise(p * 6.0 - vec3(0.0, uTime * 0.05, 0.0)) * 0.4 + snoise(p * 18.0) * 0.12 + snoise(p * 45.0) * 0.05;
   float a = smoothstep(0.7 - uCloud * 0.28, 0.96 - uCloud * 0.2, n * 0.5 + 0.5) * min(uCloud * 1.2, 1.0) * 0.75;
   float dif = max(dot(normalize(vWN), uSun), 0.0);
   gl_FragColor = vec4(cCloud * (0.3 + 0.9 * dif), a);
@@ -1250,13 +1265,13 @@ class PlanetBody {
       cVeg: { value: hex(pal.veg) }, cDry: { value: hex(pal.dry) }, cIce: { value: hex(pal.ice) }, cHot: { value: hex(pal.hot) },
       uSun: { value: SUN }
     };
-    this.mat = new THREE.ShaderMaterial({ uniforms: this.u, vertexShader: SURF_VERT, fragmentShader: SURF_FRAG });
+    this.mat = new THREE.ShaderMaterial({ uniforms: this.u, vertexShader: SURF_VERT, fragmentShader: SURF_FRAG, extensions: { derivatives: true } });
     this.disposables.push(this.mat);
     this.surface = new THREE.Mesh(this.geo, this.mat);
     this.spin.add(this.surface);
 
     if (!gas) {
-      const cg = new THREE.SphereGeometry(1.03, 96, 72);
+      const cg = new THREE.SphereGeometry(1.03, 128, 96);
       this.cloudU = { uTime: { value: 0 }, uCloud: { value: 0 }, uSun: { value: SUN }, cCloud: { value: hex(pal.cloud) } };
       const cm = new THREE.ShaderMaterial({ uniforms: this.cloudU, vertexShader: CLOUD_VERT, fragmentShader: CLOUD_FRAG, transparent: true, depthWrite: false });
       this.clouds = new THREE.Mesh(cg, cm);
@@ -1264,7 +1279,7 @@ class PlanetBody {
       this.disposables.push(cg, cm);
     }
 
-    const ag = new THREE.SphereGeometry(1.14, 96, 64);
+    const ag = new THREE.SphereGeometry(1.14, 128, 96);
     this.atmoU = { cAtmo: { value: hex(pal.atmo) }, uSun: { value: SUN }, uAtmo: { value: this.b.atmo } };
     const am = new THREE.ShaderMaterial({ uniforms: this.atmoU, vertexShader: ATMO_VERT, fragmentShader: ATMO_FRAG, transparent: true, depthWrite: false, side: THREE.BackSide, blending: THREE.AdditiveBlending });
     this.group.add(new THREE.Mesh(ag, am));
@@ -2580,7 +2595,7 @@ class App {
     this.drag = { active: false, x: 0, y: 0, vx: 0, vy: 0 };
     this.rotX = 0.3; this.rotY = 0; this.velY = 0.12; this.velX = 0;
     this.lastPoke = 0; this.touched = false; this.idleShown = false;
-    this.arrive = 1; this.spinIn = 0; this.sunTaps = [];
+    this.arrive = 1; this.spinIn = 0; this.sunTaps = []; this.zoom = 1; this.zoomT = 1;
     this.popT = 1; this.leaveT = null;
     this.spaceT = 0; this.gFrame = 0; this.mraf = null;
     this.loop = this.loop.bind(this);
@@ -3042,12 +3057,12 @@ class App {
   }
 
   /** Distance from the star in scene units: square-root scaled so the whole system fits on screen. */
-  sysRadius(au) { return 2.8 + 3.1 * Math.sqrt(au); }
+  sysRadius(au) { return 6 + 9 * Math.sqrt(au); }
 
   buildSystem() {
-    const S = this.sys = { scene: new THREE.Scene(), holders: {}, t: 0, yaw: 0.7, pitch: 0.55, dist: 34, tdist: 34, vyaw: 0, vpitch: 0 };
+    const S = this.sys = { scene: new THREE.Scene(), holders: {}, t: 0, yaw: 0.7, pitch: 0.55, dist: 60, tdist: 60, vyaw: 0, vpitch: 0 };
     const scene = S.scene, r = rng(53), TAU = Math.PI * 2;
-    S.cam = new THREE.PerspectiveCamera(45, 1, 0.1, 500);
+    S.cam = new THREE.PerspectiveCamera(45, 1, 0.1, 1200);
     scene.add(new THREE.AmbientLight(0xb8b0ff, 0.35));
     scene.add(new THREE.PointLight(0xfff0d8, 1.5, 0, 0));
     const glowTex = (inner, outer) => {
@@ -3058,20 +3073,35 @@ class App {
       return new THREE.CanvasTexture(c);
     };
     // The star, its glow and a slow pulse.
-    S.sun = new THREE.Mesh(new THREE.SphereGeometry(1.5, 48, 32), new THREE.MeshBasicMaterial({ color: 0xffc657 }));
+    // A boiling star: granulation, darker limb, slow churn.
+    S.sunMat = new THREE.ShaderMaterial({
+      uniforms: { uTime: { value: 0 } },
+      vertexShader: `varying vec3 vP; varying vec3 vN; varying vec3 vW; void main(){ vP = position; vN = normalize(mat3(modelMatrix) * normal); vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`,
+      fragmentShader: `uniform float uTime; varying vec3 vP; varying vec3 vN; varying vec3 vW;
+        ${NOISE}
+        void main(){
+          vec3 p = normalize(vP), V = normalize(cameraPosition - vW);
+          float g = snoise(p * 8.0 + vec3(uTime * 0.05)) * 0.5 + snoise(p * 22.0 - vec3(uTime * 0.08)) * 0.3 + snoise(p * 60.0 + vec3(uTime * 0.12)) * 0.2;
+          vec3 col = mix(vec3(1.0, 0.55, 0.15), vec3(1.0, 0.93, 0.62), g * 0.5 + 0.55);
+          col *= 0.55 + 0.45 * pow(max(dot(normalize(vN), V), 0.0), 0.45);   // limb darkening
+          gl_FragColor = vec4(col * 1.15, 1.0);
+        }`
+    });
+    S.sun = new THREE.Mesh(new THREE.SphereGeometry(2.2, 96, 64), S.sunMat);
     scene.add(S.sun);
     S.glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex('rgba(255,236,170,1)', 'rgba(255,170,80,.55)'), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
-    S.glow.scale.set(10, 10, 1); scene.add(S.glow);
+    S.glow.scale.set(15, 15, 1); scene.add(S.glow);
     // A far star field and a closer drifting haze of particles.
     const pts = (n, fill, color, size, opacity) => {
       const a = new Float32Array(n * 3);
       for (let i = 0; i < n; i++) fill(a, i * 3);
       const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(a, 3));
-      return new THREE.Points(g, new THREE.PointsMaterial({ color, size: size * 1.6, map: dotTex(), transparent: true, opacity, depthWrite: false, sizeAttenuation: true }));
+      // Additive, so particles only ever add light (normal blending darkened the star's glow into green specks).
+      return new THREE.Points(g, new THREE.PointsMaterial({ color, size: size * 1.6, map: dotTex(), transparent: true, opacity, depthWrite: false, sizeAttenuation: true, blending: THREE.AdditiveBlending }));
     };
     const shell = (a, k, r0, r1) => { const u = r() * 2 - 1, ph = r() * TAU, d = r0 + r() * (r1 - r0), q = Math.sqrt(1 - u * u); a[k] = Math.cos(ph) * q * d; a[k + 1] = u * d; a[k + 2] = Math.sin(ph) * q * d; };
-    scene.add(pts(PHONE ? 1400 : 2200, (a, k) => shell(a, k, 120, 200), 0xf4f1ff, 0.7, 0.9));
-    S.haze = pts(PHONE ? 900 : 1500, (a, k) => { const d = 3 + r() * 20, ph = r() * TAU; a[k] = Math.cos(ph) * d; a[k + 1] = (r() - 0.5) * 3.5 * (d / 12); a[k + 2] = Math.sin(ph) * d; }, 0xcfc4ff, 0.07, 0.55);
+    scene.add(pts(PHONE ? 1600 : 2600, (a, k) => shell(a, k, 300, 500), 0xf4f1ff, 1.4, 0.9));
+    S.haze = pts(PHONE ? 900 : 1500, (a, k) => { const d = 6 + r() * 42, ph = r() * TAU; a[k] = Math.cos(ph) * d; a[k + 1] = (r() - 0.5) * 3.5 * (d / 12); a[k + 2] = Math.sin(ph) * d; }, 0xcfc4ff, 0.07, 0.55);
     scene.add(S.haze);
     // Asteroid and Kuiper belts.
     const ring = (n, a0, a1, thick, color, size, op) => pts(n, (a, k) => { const d = this.sysRadius(a0 + r() * (a1 - a0)), ph = r() * TAU; a[k] = Math.cos(ph) * d; a[k + 1] = (r() - 0.5) * thick; a[k + 2] = Math.sin(ph) * d; }, color, size, op);
@@ -3081,7 +3111,7 @@ class App {
     S.swarms = Array.from({ length: 7 }, () => {
       const g = pts(18 + Math.floor(r() * 20), (a, k) => { a[k] = (r() - 0.5) * 1.2; a[k + 1] = (r() - 0.5) * 0.5; a[k + 2] = (r() - 0.5) * 1.2; }, 0xe6dcff, 0.1, 0.9);
       const pivot = new THREE.Group(); pivot.rotation.set((r() - 0.5) * 0.9, r() * TAU, (r() - 0.5) * 0.9);
-      g.position.x = 4 + r() * 18; pivot.add(g); scene.add(pivot);
+      g.position.x = 10 + r() * 40; g.scale.setScalar(1.6); pivot.add(g); scene.add(pivot);
       return { pivot, w: (0.03 + r() * 0.08) * (r() < 0.5 ? -1 : 1) };
     });
     S.orbitMat = new THREE.LineBasicMaterial({ color: 0xece8ff, transparent: true, opacity: 0.22 });
@@ -3106,7 +3136,8 @@ class App {
       const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
       const line = new THREE.Line(g, p.secret ? S.orbitSecret : S.orbitMat);
       plane.add(line);
-      const holder = new THREE.Group(); holder.scale.setScalar(BIOMES[p.biome].ring ? 0.5 : 0.62);
+      // Sized so neighbouring planets can't touch even when lined up (the closest orbits are ~1.75 apart).
+      const holder = new THREE.Group(); holder.scale.setScalar(BIOMES[p.biome].ring ? 0.55 : 0.7);
       plane.add(holder);
       const moons = Array.from({ length: p.moons }, (_, m) => {
         const mesh = new THREE.Mesh(S.moonGeo, S.moonMat); mesh.scale.setScalar(0.09 + (m % 2) * 0.04);
@@ -3121,12 +3152,12 @@ class App {
       S.holders[p.id] = { plane, holder, line, moons, label, R, a: rr() * TAU, w: p.secret ? 0.004 : 0.16 / Math.pow(p.au, 1.5), spin: rr() * TAU };
     });
     if (!S.station && this.station) {
-      const plane = new THREE.Group(), R = 3.6, TAU = Math.PI * 2;
+      const plane = new THREE.Group(), R = 8.4, TAU = Math.PI * 2;
       const pos = new Float32Array(129 * 3);
       for (let k = 0; k <= 128; k++) { const a = k / 128 * TAU; pos[k * 3] = Math.cos(a) * R; pos[k * 3 + 2] = Math.sin(a) * R; }
       const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
       plane.add(new THREE.Line(g, S.orbitDone));
-      const holder = new THREE.Group(); holder.scale.setScalar(0.4); plane.add(holder);
+      const holder = new THREE.Group(); holder.scale.setScalar(0.55); plane.add(holder);
       S.scene.add(plane);
       const label = document.createElement('div');
       label.className = 'sys-label'; label.innerHTML = '<b>🛰️ สถานีอวกาศ</b><small>จุดเทียบท่า</small>';
@@ -3170,7 +3201,8 @@ class App {
     cam.lookAt(0, 0, 0);
     cam.aspect = mr.width / Math.max(1, mr.height); cam.updateProjectionMatrix();
     // Star pulse, belts and swarms.
-    S.glow.scale.setScalar(10 + Math.sin(S.t * 1.3) * 0.6);
+    S.glow.scale.setScalar(15 + Math.sin(S.t * 1.3) * 0.9);
+    S.sunMat.uniforms.uTime.value = S.t;
     S.belt.rotation.y += dt * 0.03; S.kuiper.rotation.y += dt * 0.004; S.haze.rotation.y += dt * 0.012;
     S.swarms.forEach(w => { w.pivot.rotation.y += dt * w.w; });
     // Planets along their orbits, spinning, with moons.
@@ -3185,9 +3217,11 @@ class App {
       h.moons.forEach(m => { const a = m.a + S.t * m.w; m.mesh.position.set(Math.cos(a) * m.d, Math.sin(a) * m.d * m.tilt, Math.sin(a) * m.d); });
       h.line.material = p.secret ? S.orbitSecret : this.state.visited.includes(p.id) ? S.orbitDone : S.orbitMat;
       // Label under the planet.
-      h.holder.getWorldPosition(v); v.project(cam);
+      h.holder.getWorldPosition(v);
+      const depth = v.distanceTo(cam.position); v.project(cam);
       const x = (v.x + 1) / 2 * mr.width, y = (1 - v.y) / 2 * mr.height;
-      const off = 14 + 260 / S.dist * (body.cur ? body.cur.size : 1);
+      // Just below the planet's on-screen disc.
+      const off = 6 + h.holder.scale.x * (body.cur ? body.cur.size : 1) * (mr.height / 2 / Math.tan(THREE.MathUtils.degToRad(cam.fov / 2))) / depth;
       const show = v.z < 1 && y > clipTop && y < mr.height;
       h.label.style.opacity = show ? '1' : '0';
       if (show) h.label.style.transform = `translate(${x.toFixed(1)}px,${(y + off).toFixed(1)}px) translateX(-50%)`;
@@ -3233,7 +3267,7 @@ class App {
         S.vyaw = -dx * 0.36; S.vpitch = dy * 0.3;
       } else if (pts.size === 2) {
         const [a, b] = [...pts.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
-        if (pinch) S.tdist = clamp(S.tdist * pinch / d, 9, 90);
+        if (pinch) S.tdist = clamp(S.tdist * pinch / d, 8, 170);
         pinch = d; tap = null;
       }
     });
@@ -3243,7 +3277,7 @@ class App {
       if (!pts.size) { S.drag = false; tap = null; pinch = 0; }
     };
     el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
-    el.addEventListener('wheel', e => { e.preventDefault(); S.tdist = clamp(S.tdist * (1 + e.deltaY * 0.0012), 9, 90); }, { passive: false });
+    el.addEventListener('wheel', e => { e.preventDefault(); S.tdist = clamp(S.tdist * (1 + e.deltaY * 0.0012), 8, 170); }, { passive: false });
   }
 
   /**
@@ -3273,7 +3307,7 @@ class App {
       if (onLabel || (v.z < 1 && Math.hypot((v.x + 1) / 2 * mr.width - x, (1 - v.y) / 2 * mr.height - y) < 34)) { this.goStation(); return; }
     }
     v.set(0, 0, 0).project(S.cam);
-    if (Math.hypot((v.x + 1) / 2 * mr.width - x, (1 - v.y) / 2 * mr.height - y) < 1.8 * f / S.dist) this.pokeSun(null);
+    if (Math.hypot((v.x + 1) / 2 * mr.width - x, (1 - v.y) / 2 * mr.height - y) < 2.6 * f / S.dist) this.pokeSun(null);
   }
 
   /* ---------------- Surface exploration ---------------- */
@@ -3815,7 +3849,7 @@ class App {
       this.stage.scene.children.filter(o => o.isGroup).forEach(o => this.stage.scene.remove(o));
       this.stage.scene.add(body.group);
       body.group.rotation.set(0, 0, 0);
-      this.rotX = 0.3; this.rotY = -0.4; this.velY = 0.12;
+      this.rotX = 0.3; this.rotY = -0.4; this.velY = 0.12; this.zoom = this.zoomT = 1;
       this.stage.detailMode($('#stage'));
       this.stage.camZ = this.stage.fitDistance(body, this.stage.camera, 1.12);
       this.stage.camera.position.set(0, 0, this.stage.camZ * 1.35);
@@ -4120,7 +4154,8 @@ class App {
     }
     this.rotY += this.velY * dt;
     this.rotX = clamp(this.rotX + this.velX * dt, -1.1, 1.1);
-    const targetZ = this.stage.fitDistance(body, cam, 1.12);
+    this.zoom = damp(this.zoom, this.zoomT, 6, dt);
+    const targetZ = this.stage.fitDistance(body, cam, 1.12) * this.zoom;
     // Arrival: swing in from far off to one side while the planet's spin settles, then hand over to the player.
     // Grabbing the planet mid-flight ends the shot; the remaining spin is folded in so nothing jumps.
     if (this.arrive < 1 && this.drag.active) { this.arrive = 1; this.rotY -= this.spinIn; }
@@ -4186,9 +4221,14 @@ class App {
     ['pointerdown', 'input', 'keydown'].forEach(t => $('#detail').addEventListener(t, () => this.poke(), true));
 
     // Drag to rotate, with inertia. A short press without movement is a tap.
-    const stage = $('#stage');
+    const stage = $('#stage'), fingers = new Map();
+    let pinch = 0;
+    // Pinch or scroll to zoom right down to the surface.
+    stage.addEventListener('wheel', e => { if (this.current < 0) return; e.preventDefault(); this.zoomT = clamp(this.zoomT * (1 + e.deltaY * 0.0015), 0.28, 1.3); this.poke(); }, { passive: false });
     stage.addEventListener('pointerdown', e => {
       if (e.target.closest('button')) return;
+      fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (fingers.size === 2) { const [a, b] = [...fingers.values()]; pinch = Math.hypot(a.x - b.x, a.y - b.y); this.drag.active = false; return; }
       const now = performance.now();
       this.drag = { active: true, x: e.clientX, y: e.clientY, t: now, sx: e.clientX, sy: e.clientY, t0: now };
       stage.setPointerCapture(e.pointerId);
@@ -4196,18 +4236,26 @@ class App {
       $('[data-hint]').style.opacity = '0';
     });
     stage.addEventListener('pointermove', e => {
+      const f = fingers.get(e.pointerId); if (f) { f.x = e.clientX; f.y = e.clientY; }
+      if (fingers.size === 2) {
+        const [a, b] = [...fingers.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (pinch) this.zoomT = clamp(this.zoomT * pinch / d, 0.28, 1.3);
+        pinch = d; return;
+      }
       if (!this.drag.active) return;
       const now = performance.now(), dt = Math.max(1, now - this.drag.t) / 1000;
-      const dx = e.clientX - this.drag.x, dy = e.clientY - this.drag.y;
+      // Turn more slowly when zoomed in, so the surface doesn't whip past.
+      const k = 0.35 + 0.65 * clamp(this.zoom, 0, 1);
+      const dx = (e.clientX - this.drag.x) * k, dy = (e.clientY - this.drag.y) * k;
       this.rotY += dx * 0.008; this.rotX = clamp(this.rotX + dy * 0.006, -1.1, 1.1);
       this.velY = clamp(dx * 0.008 / dt, -6, 6); this.velX = clamp(dy * 0.006 / dt, -4, 4);
       this.drag.x = e.clientX; this.drag.y = e.clientY; this.drag.t = now;
     });
-    const end = () => { this.drag.active = false; };
+    const end = e => { this.drag.active = false; if (e) fingers.delete(e.pointerId); if (fingers.size < 2) pinch = 0; };
     stage.addEventListener('pointerup', e => {
       const d = this.drag;
-      if (d.active && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 8 && performance.now() - d.t0 < 350) { this.tapPlanet(e); this.collapsePanel(); }
-      end();
+      if (d.active && fingers.size < 2 && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 8 && performance.now() - d.t0 < 350) { this.tapPlanet(e); this.collapsePanel(); }
+      end(e);
     });
     stage.addEventListener('pointercancel', end);
 
@@ -4266,7 +4314,7 @@ class App {
     if (on === this.idleShown) return;
     this.idleShown = on;
     const h = $('[data-hint]');
-    h.textContent = on ? 'ปล่อยไว้แบบนี้ ดาวจะค่อย ๆ เปลี่ยนไปตามธรรมชาติ' : 'ลากเพื่อหมุน แตะดาวเพื่อส่งคลื่น';
+    h.textContent = on ? 'ปล่อยไว้แบบนี้ ดาวจะค่อย ๆ เปลี่ยนไปตามธรรมชาติ' : 'ลากเพื่อหมุน · บีบนิ้วเพื่อซูม · แตะดาวเพื่อส่งคลื่น';
     h.style.opacity = on || !this.touched ? '1' : '0';
   }
 
