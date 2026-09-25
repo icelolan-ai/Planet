@@ -250,6 +250,47 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 .swatch{display:grid;justify-items:center;gap:6px;font-size:12px;color:var(--ink-2)}
 .swatch i{width:46px;height:46px;border-radius:50%;box-shadow:inset 0 0 0 3px rgba(255,255,255,.15)}
 .swatch[aria-pressed="true"] i{box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--ink)}
+/* Surface exploration: full-screen scene with a neon holographic HUD */
+#explore{background:#000}
+.xstage{position:absolute;inset:0;touch-action:none}
+.xstage canvas{width:100%!important;height:100%!important;display:block}
+.x-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.x-label{position:absolute;left:0;top:0;display:flex;align-items:center;gap:6px;padding:3px 9px 3px 6px;border-radius:12px;font-size:12px;white-space:nowrap;
+  color:#eafcff;background:rgba(6,10,24,.55);border:1px solid var(--c,#19f0ff);box-shadow:0 0 12px -2px var(--c,#19f0ff);text-shadow:0 0 6px var(--c,#19f0ff)}
+.x-hud{position:absolute;left:0;right:0;top:0;display:flex;align-items:flex-start;gap:12px;padding:calc(var(--safe-t) + 10px) 14px 0;pointer-events:none}
+.x-hud>*{pointer-events:auto}
+.x-back{background:rgba(6,10,24,.55);border:1px solid rgba(25,240,255,.4);color:#bff8ff}
+.x-title{flex:1;min-width:0;text-align:center;text-shadow:0 1px 10px rgba(0,0,0,.9)}
+.x-title small{display:block;font-size:11px;letter-spacing:.14em;color:#19f0ff;text-transform:uppercase}
+.x-title b{display:block;font-family:var(--f-head);font-weight:500;font-size:22px}
+.x-stats{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:46%}
+.x-stats span{font-size:11.5px;padding:3px 8px;border-radius:10px;background:rgba(6,10,24,.55);border:1px solid rgba(255,43,214,.35);white-space:nowrap}
+@media (max-width:620px){.x-stats{display:none}}
+.x-bottom{position:absolute;left:50%;bottom:calc(var(--safe-b) + 14px);transform:translateX(-50%);width:min(560px,calc(100% - 28px));display:grid;gap:8px;justify-items:center}
+.x-track{position:relative;width:100%;height:4px;border-radius:4px;background:rgba(25,240,255,.18)}
+.x-track i{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:#19f0ff;box-shadow:0 0 12px #19f0ff}
+.x-track button{position:absolute;top:50%;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;font-size:13px;background:rgba(6,10,24,.75);border:1px solid var(--c)}
+.x-ctrl{display:flex;gap:8px}
+.x-ctrl button{min-height:40px;padding:0 16px;border-radius:20px;font-size:13.5px;background:rgba(6,10,24,.6);border:1px solid rgba(25,240,255,.4);color:#dffbff}
+.x-ctrl button[aria-pressed="true"]{background:rgba(25,240,255,.25)}
+.x-hint{margin:0;font-size:11.5px;color:rgba(234,252,255,.7);text-align:center;text-shadow:0 1px 6px #000}
+.x-panel{position:absolute;right:16px;top:calc(var(--safe-t) + 70px);width:min(340px,calc(100% - 32px));max-height:calc(100% - 200px);overflow:auto;padding:16px 16px 12px;
+  border-radius:6px 18px 6px 18px;color:#eafcff;background:linear-gradient(180deg,rgba(8,16,36,.82),rgba(12,8,30,.82)),repeating-linear-gradient(0deg,rgba(25,240,255,.05) 0 1px,transparent 1px 3px);
+  border:1px solid var(--c,#19f0ff);box-shadow:0 0 24px -6px var(--c,#19f0ff),inset 0 0 30px -18px var(--c,#19f0ff);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:holo .45s var(--ease)}
+.x-panel small{display:block;font-size:11px;letter-spacing:.12em;color:var(--c,#19f0ff)}
+.x-panel h2{font-size:21px;margin:4px 30px 10px 0}
+.x-panel p{font-size:13.5px;line-height:1.6;color:rgba(234,252,255,.85);margin:8px 0}
+.x-close{position:absolute;right:8px;top:8px;width:34px;height:34px;border-radius:50%;font-size:20px;color:#dffbff}
+.x-kv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.x-kv div{padding:8px 10px;border-radius:10px;background:rgba(25,240,255,.07);border:1px solid rgba(25,240,255,.18)}
+.x-kv b{display:block;font-family:var(--f-head);font-weight:500;font-size:16px}
+.x-kv span{font-size:11px;color:rgba(234,252,255,.65)}
+.x-nav{display:flex;justify-content:space-between;margin-top:10px}
+.x-nav button{font-size:13px;color:var(--c,#19f0ff);padding:6px 4px}
+@media (max-width:620px){.x-panel{left:14px;right:14px;width:auto;top:auto;bottom:calc(var(--safe-b) + 120px);max-height:48%}}
+.x-loading{position:absolute;inset:0;display:grid;place-items:center;background:#05040a;color:#19f0ff;font-size:14px;letter-spacing:.2em;transition:opacity .5s}
+.x-loading.done{opacity:0;pointer-events:none}
+.act.land{background:linear-gradient(135deg,#19c8ff,#7058ff);border-color:transparent}
 .dbody{grid-area:body;display:flex;flex-direction:column;min-height:0;background:var(--panel);border-radius:26px 26px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.25)}
 .chips{flex:none;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 16px 4px}
 .chip{background:var(--card);border-radius:16px;padding:9px 6px;text-align:center;min-width:0}
@@ -368,7 +409,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   #detail.collapsed{grid-template-columns:1fr;grid-template-rows:auto 1fr;grid-template-areas:"bar" "stage"}
 }
 @media (prefers-reduced-motion: reduce){
-  .panel>*,.launch .rocket,.puff,.xsec path,.star-node .sun.poke,.node .pl,#detail.entering .dbody,#detail.entering .dbar,#detail.expanding .dbody,#detail.collapsed .panel-pill{animation:none}
+  .x-panel,.part-card,.panel>*,.launch .rocket,.puff,.xsec path,.star-node .sun.poke,.node .pl,#detail.entering .dbody,#detail.entering .dbar,#detail.expanding .dbody,#detail.collapsed .panel-pill{animation:none}
   .zone,.map-glow i{transition:none}
   .puff{opacity:.85}
 }
@@ -461,6 +502,34 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <div class="panel" id="panel" role="tabpanel"></div>
   </div>
   <button class="panel-pill" type="button" data-expand aria-label="แสดงแผงปรับแต่ง">🎛️ <span>แผงปรับแต่ง</span><small><b class="num" data-b="temp">–</b> · O₂ <b class="num" data-b="o2">–</b></small><span aria-hidden="true">▴</span></button>
+</section>
+
+<!-- Surface exploration -->
+<section class="screen" id="explore" aria-label="สำรวจพื้นผิวดาว">
+  <div class="xstage" id="xstage"></div>
+  <div class="x-labels" data-x-labels aria-hidden="true"></div>
+  <div class="x-hud">
+    <button class="icon-btn x-back" type="button" data-x-back aria-label="กลับขึ้นยาน">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="x-title"><small>ภารกิจสำรวจพื้นผิว</small><b data-x-name></b></div>
+    <div class="x-stats" data-x-stats></div>
+  </div>
+  <div class="x-bottom">
+    <div class="x-track" data-x-track><i data-x-pos></i></div>
+    <div class="x-ctrl">
+      <button type="button" data-x-prev aria-label="จุดก่อนหน้า">‹</button>
+      <button type="button" data-x-auto aria-pressed="false">▶ ทัวร์อัตโนมัติ</button>
+      <button type="button" data-x-next aria-label="จุดถัดไป">›</button>
+    </div>
+    <p class="x-hint">เลื่อนหรือปัดขึ้นลงเพื่อเดินทาง · ลากซ้ายขวาเพื่อมองรอบ · แตะโฮโลแกรมเพื่อดูข้อมูล</p>
+  </div>
+  <aside class="x-panel" data-x-panel hidden>
+    <button class="x-close" type="button" data-x-close aria-label="ปิด">×</button>
+    <small data-xp-kicker></small><h2 data-xp-title></h2><div data-xp-body></div>
+    <div class="x-nav"><button type="button" data-xp-prev>‹ ก่อนหน้า</button><button type="button" data-xp-next>ถัดไป ›</button></div>
+  </aside>
+  <div class="x-loading" data-x-loading>กำลังลงจอด…</div>
 </section>
 
 <!-- Space station -->
@@ -1866,6 +1935,635 @@ const ROCKET_SVG = `<svg viewBox="0 0 120 120" aria-hidden="true"><g transform="
 <path d="M47 70h26l-5 12H52z" fill="#bfb8e2"/><path d="M52 82h16l-8 14z" fill="#ffb347"/></g></svg>`;
 
 /* ================================================================
+   Surface exploration: a walkable patch of the planet built from its
+   current settings, with holographic points of interest. The camera
+   glides along a looping path (scroll or swipe), looks around on drag,
+   and flies in to whatever the player taps.
+================================================================ */
+const MARK = { land: '#19f0ff', peak: '#ff7a3d', shore: '#4fb7ff', forest: '#6dffb0', species: '#ff2bd6', resource: '#ffc94a', colony: '#b78bff', storm: '#ff9ad0' };
+const FOG_VERT = `
+#include <fog_pars_vertex>
+`;   // preprocessor lines must start a line of their own
+
+let _windowTex = null;
+function windowTex() {
+  if (_windowTex) return _windowTex;
+  const c = document.createElement('canvas'); c.width = 64; c.height = 128;
+  const g = c.getContext('2d'), r = rng(4);
+  g.fillStyle = '#05040a'; g.fillRect(0, 0, 64, 128);
+  const lit = ['#ffd27a', '#ffe9b0', '#3fe6ff', '#ff4fd8', '#9a6bff'];
+  for (let y = 4; y < 124; y += 8) for (let x = 4; x < 60; x += 8) {
+    if (r() < 0.55) { g.fillStyle = lit[Math.floor(r() * (r() < 0.8 ? 2 : 5))]; g.fillRect(x, y, 5, 4); }
+  }
+  _windowTex = new THREE.CanvasTexture(c);
+  _windowTex.wrapS = _windowTex.wrapT = THREE.RepeatWrapping;
+  return _windowTex;
+}
+let _dotTex = null;
+/** Soft round dot, so points render as glows rather than squares. */
+function dotTex() {
+  if (_dotTex) return _dotTex;
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.35, 'rgba(255,255,255,.7)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  return (_dotTex = new THREE.CanvasTexture(c));
+}
+let _puffTex = null;
+function puffTex() {
+  if (_puffTex) return _puffTex;
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d'), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gr.addColorStop(0, 'rgba(255,255,255,.9)'); gr.addColorStop(0.5, 'rgba(255,255,255,.35)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  return (_puffTex = new THREE.CanvasTexture(c));
+}
+
+class ExploreWorld {
+  constructor(app, p) {
+    this.app = app; this.p = p;
+    const b = this.b = BIOMES[p.biome], st = app.state.planets[p.id];
+    this.terrain = app.terrains[p.id] || (app.terrains[p.id] = new Terrain(st.seed));
+    this.sim = simulate(p, this.terrain, st.params, st.eco); this.e = this.sim.e;
+    this.eco = st.eco; this.gas = b.type === 'gas'; this.pal = b.palette;
+    this.rand = rng(p.seed * 17 + st.seed);
+    this.scene = new THREE.Scene();
+    this.cam = new THREE.PerspectiveCamera(PHONE ? 66 : 56, 1, 0.3, 1600);
+    this.D = []; this.t = 0; this.pois = []; this.anim = [];
+    this.progress = 0; this.target = 0; this.yaw = 0; this.yawT = 0; this.auto = false; this.focus = null;
+    this.S = this.gas ? 520 : 260;
+    this.setupSky();
+    if (this.gas) this.buildGas(); else this.buildGround();
+    this.buildWeather();
+    this.buildMarkers();
+    this.buildPath();
+    this.placeCamera(0, true);
+  }
+
+  keep(x) { this.D.push(x); return x; }
+  col(k) { return new THREE.Color(this.pal[k]); }
+
+  /* ---------- sky, light, fog ---------- */
+  setupSky() {
+    const e = this.e, p = this.p, rogue = p.biome === 'rogue';
+    const light = rogue ? 0.05 : Math.min(1.4, 1 / (p.au * p.au));
+    const bright = clamp(0.25 + 0.75 * Math.min(1, light), 0.1, 1);
+    const atmo = this.col('atmo');
+    const horizon = rogue ? new THREE.Color('#1c1233') : atmo.clone().lerp(new THREE.Color('#ffffff'), 0.2).multiplyScalar(0.35 + 0.55 * bright);
+    const top = rogue ? new THREE.Color('#020108') : atmo.clone().multiplyScalar(0.12 + 0.2 * bright).lerp(new THREE.Color('#05040c'), 0.45);
+    this.horizon = horizon;
+    this.sunDir = new THREE.Vector3(Math.cos(0.8) * Math.cos(0.32), Math.sin(0.32), Math.sin(0.8) * Math.cos(0.32)).normalize();
+    const sky = new THREE.ShaderMaterial({
+      side: THREE.BackSide, depthWrite: false,
+      uniforms: { cTop: { value: top }, cHor: { value: horizon }, cSun: { value: new THREE.Color(rogue ? '#8a7cff' : '#fff1cc') }, uSun: { value: this.sunDir },
+        uSize: { value: rogue ? 0.2 : clamp(1 / p.au, 0.15, 2.2) }, uStars: { value: 1 - bright * 0.85 } },
+      vertexShader: `varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+      fragmentShader: `uniform vec3 cTop, cHor, cSun, uSun; uniform float uSize, uStars; varying vec3 vDir;
+        float hash(vec3 p){ return fract(sin(dot(p, vec3(12.9898, 78.233, 45.164))) * 43758.5453); }
+        void main(){
+          vec3 d = normalize(vDir);
+          vec3 col = mix(cHor, cTop, smoothstep(-0.05, 0.55, d.y));
+          float s = max(dot(d, uSun), 0.0);
+          col += cSun * (pow(s, 900.0 / uSize) * 3.0 + pow(s, 14.0) * 0.18 * uSize);
+          float st = step(0.9975, hash(floor(d * 260.0))) * uStars * smoothstep(0.02, 0.35, d.y);
+          col += vec3(st);
+          gl_FragColor = vec4(col, 1.0);
+        }`
+    });
+    this.keep(sky);
+    const dome = new THREE.Mesh(this.keep(new THREE.SphereGeometry(900, 32, 16)), sky);
+    dome.renderOrder = -1; this.scene.add(dome); this.dome = dome;
+    this.scene.fog = new THREE.FogExp2(horizon, (this.gas ? 0.0045 : 0.0028) + e.humidity * 0.0045);
+    const sun = new THREE.DirectionalLight(rogue ? 0x8a7cff : 0xfff0dd, 0.25 + 1.0 * Math.min(1, light));
+    sun.position.copy(this.sunDir).multiplyScalar(300); this.scene.add(sun);
+    this.scene.add(new THREE.HemisphereLight(horizon, new THREE.Color('#141020'), rogue ? 0.35 : 0.55));
+  }
+
+  /* ---------- ground: a patch of the real planet, exaggerated ---------- */
+  buildGround() {
+    const e = this.e, T = this.terrain, pal = this.pal, b = this.b, S = this.S, N = PHONE ? 128 : 176, A = 0.5;
+    // Land on a coast near the equator if there is one.
+    const cand = T.samples.filter(s => s.h > e.sea + 0.02 && s.h < e.sea + 0.16 && Math.abs(s.y) < 0.55);
+    const site = cand.length ? cand[Math.floor(cand.length * 0.37)] : T.samples[0];
+    const n = new THREE.Vector3(site.x, site.y, site.z).normalize();
+    const east = new THREE.Vector3(0, 1, 0).cross(n); if (east.lengthSq() < 1e-4) east.set(1, 0, 0); east.normalize();
+    const north = n.clone().cross(east).normalize();
+    const geo = this.keep(new THREE.PlaneGeometry(S, S, N, N)); geo.rotateX(-Math.PI / 2);
+    const pos = geo.attributes.position, cnt = pos.count, cols = new Float32Array(cnt * 3);
+    this.N = N; this.seg = S / N; this.hgrid = new Float32Array(cnt); this.vgrid = new Float32Array(cnt);
+    const lava = !!b.lavaSea, crystal = b.flora === 'crystal';
+    const cLow = this.col('low'), cHigh = this.col('high'), cDry = this.col('dry'), cVeg = this.col('veg'), cIce = this.col('ice'), cHot = this.col('hot');
+    const cSand = this.col('shallow').lerp(new THREE.Color('#2a2438'), 0.55), c = new THREE.Color(), d = new THREE.Vector3();
+    let peak = -1e9, peakI = 0;
+    for (let i = 0; i < cnt; i++) {
+      const u = pos.getX(i) / (S / 2), v = pos.getZ(i) / (S / 2);
+      d.copy(n).addScaledVector(east, u * A).addScaledVector(north, v * A).normalize();
+      const h = T.height(d.x, d.y, d.z) + T.noise(d.x * 38, d.y * 38, d.z * 38) * 0.012;
+      const y = h >= e.sea ? (h - e.sea) * 110 : (h - e.sea) * 50;
+      pos.setY(i, y); this.hgrid[i] = y;
+      if (y > peak) { peak = y; peakI = i; }
+      let veg = 0;
+      if (h < e.sea) c.copy(cSand);
+      else {
+        const t = clamp((h - e.sea) / Math.max(1 - e.sea, 0.05), 0, 1);
+        c.copy(cLow).lerp(cHigh, smooth(0, 0.85, t)).lerp(cDry, (1 - e.humidity) * 0.5);
+        const vm = smooth(0.35, 0.7, T.noise(d.x * 3.2 + 7, d.y * 3.2 + 7, d.z * 3.2 + 7) * 0.5 + 0.5 + e.veg * 0.45);
+        veg = clamp(e.veg * 1.2, 0, 1) * vm * (1 - smooth(0.55, 0.95, t)) * smooth(0.05, 0.4, e.humidity + e.glow);
+        c.lerp(cVeg, veg * 0.85);
+        if (lava || e.heat > 0.55) {
+          const crack = 1 - smooth(0, 0.05, Math.abs(T.noise(d.x * 5.5, d.y * 5.5, d.z * 5.5)));
+          if (crack > 0.05) c.lerp(cHot.clone().multiplyScalar(lava ? 1.8 : 1.2), crack * (lava ? 0.9 : 0.4) * e.heat);
+        }
+        if (Math.abs(d.y) > e.capLine - 0.04 || (t > 0.7 && this.sim.temp < 5)) c.lerp(cIce, 0.85);
+      }
+      this.vgrid[i] = veg;
+      cols[i * 3] = c.r; cols[i * 3 + 1] = c.g; cols[i * 3 + 2] = c.b;
+    }
+    geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+    geo.computeVertexNormals();
+    const mat = this.keep(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.93, metalness: 0.02 }));
+    this.scene.add(new THREE.Mesh(geo, mat));
+    this.peak = new THREE.Vector3(pos.getX(peakI), peak, pos.getZ(peakI));
+
+    // Sea (or lava sea) at height 0.
+    const sea = new THREE.ShaderMaterial({
+      transparent: true, fog: true, depthWrite: false,
+      uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, { uTime: { value: 0 }, cDeep: { value: this.col('deep') }, cShal: { value: this.col('shallow') },
+        cSky: { value: this.horizon }, uSun: { value: this.sunDir }, uLava: { value: lava ? 1 : 0 }, cHot: { value: cHot } }]),
+      vertexShader: `varying vec3 vW; ${FOG_VERT}
+        void main(){ vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; vec4 mvPosition = viewMatrix * w; gl_Position = projectionMatrix * mvPosition;
+        #include <fog_vertex>
+        }`,
+      fragmentShader: `uniform float uTime, uLava; uniform vec3 cDeep, cShal, cSky, uSun, cHot; varying vec3 vW;
+        #include <fog_pars_fragment>
+        ${NOISE}
+        void main(){
+          vec2 p = vW.xz;
+          if (uLava > 0.5) {
+            float f = snoise(vec3(p * 0.04, uTime * 0.08)) * 0.5 + 0.5, g = snoise(vec3(p * 0.15, uTime * 0.2)) * 0.5 + 0.5;
+            vec3 col = mix(cDeep, cHot * 1.6, smoothstep(0.35, 0.9, f * 0.7 + g * 0.4));
+            gl_FragColor = vec4(col, 1.0);
+          } else {
+            float w1 = snoise(vec3(p * 0.06, uTime * 0.25)), w2 = snoise(vec3(p * 0.21, uTime * 0.5));
+            vec3 N = normalize(vec3(w1 * 0.25 + w2 * 0.12, 1.0, w1 * 0.18 - w2 * 0.1));
+            vec3 V = normalize(cameraPosition - vW);
+            float fr = pow(1.0 - max(dot(N, V), 0.0), 3.0);
+            float sp = pow(max(dot(reflect(-uSun, N), V), 0.0), 80.0);
+            vec3 col = mix(mix(cDeep, cShal, 0.35 + 0.15 * w2), cSky, fr * 0.7) + vec3(sp * 0.9);
+            gl_FragColor = vec4(col, 0.88);
+          }
+          #include <fog_fragment>
+        }`
+    });
+    this.keep(sea); this.seaMat = sea;
+    const water = new THREE.Mesh(this.keep(new THREE.PlaneGeometry(S * 3, S * 3, 1, 1).rotateX(-Math.PI / 2)), sea);
+    water.position.y = 0.01; this.scene.add(water);
+
+    this.buildFlora();
+    this.buildRocks();
+    if (lava || e.eruption > 0.3) this.buildVolcano();
+    if (this.eco && this.sim.colonists > 1) this.buildColony();
+  }
+
+  /** Ground height at (x, z), bilinear on the terrain grid. */
+  groundAt(x, z) {
+    if (this.gas) return 0;
+    const N = this.N, fx = clamp((x + this.S / 2) / this.seg, 0, N - 0.001), fz = clamp((z + this.S / 2) / this.seg, 0, N - 0.001);
+    const ix = Math.floor(fx), iz = Math.floor(fz), tx = fx - ix, tz = fz - iz, g = this.hgrid, r = N + 1;
+    const a = g[iz * r + ix], b = g[iz * r + ix + 1], c = g[(iz + 1) * r + ix], d = g[(iz + 1) * r + ix + 1];
+    return lerp(lerp(a, b, tx), lerp(c, d, tx), tz);
+  }
+  vegAt(x, z) {
+    const N = this.N, ix = Math.round(clamp((x + this.S / 2) / this.seg, 0, N)), iz = Math.round(clamp((z + this.S / 2) / this.seg, 0, N));
+    return this.vgrid[iz * (N + 1) + ix];
+  }
+  /** A random spot that satisfies `ok(x, y, z)`, or null. */
+  findSpot(ok, tries = 400, spread = 0.44) {
+    for (let k = 0; k < tries; k++) {
+      const x = (this.rand() * 2 - 1) * this.S * spread, z = (this.rand() * 2 - 1) * this.S * spread, y = this.groundAt(x, z);
+      if (ok(x, y, z)) return new THREE.Vector3(x, y, z);
+    }
+    return null;
+  }
+
+  buildFlora() {
+    const kind = this.b.flora; if (!kind) return;
+    const want = Math.floor((PHONE ? 1400 : 2400) * clamp(this.sim.vegEff * 1.15, 0, 1));
+    if (want < 5) return;
+    let g;
+    if (kind === 'crystal') { g = new THREE.OctahedronGeometry(0.5, 0); g.scale(0.6, 2.2, 0.6); g.translate(0, 0.9, 0); }
+    else if (kind === 'cactus') { g = new THREE.CylinderGeometry(0.22, 0.28, 1.6, 7); g.translate(0, 0.8, 0); }
+    else if (kind === 'pine') { g = new THREE.ConeGeometry(0.42, 2.2, 7); g.translate(0, 1.1, 0); }
+    else if (kind === 'palm') { g = new THREE.ConeGeometry(0.7, 1.2, 7); g.translate(0, 0.9, 0); }
+    else { g = new THREE.ConeGeometry(0.62, 1.9, 7); g.translate(0, 0.95, 0); }
+    this.keep(g);
+    const glow = kind === 'crystal';
+    const m = this.keep(new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: glow ? 0.25 : 0.8, metalness: glow ? 0.3 : 0,
+      emissive: glow ? this.col('veg').multiplyScalar(0.25 + this.e.glow * 0.9) : new THREE.Color(0) }));
+    const mesh = new THREE.InstancedMesh(g, m, want), mat4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), v = new THREE.Vector3();
+    const cols = (this.pal.flora || [this.pal.veg]).map(h => new THREE.Color(h));
+    let n = 0;
+    for (let k = 0; k < want * 6 && n < want; k++) {
+      const x = (this.rand() * 2 - 1) * this.S * 0.48, z = (this.rand() * 2 - 1) * this.S * 0.48, y = this.groundAt(x, z);
+      if (y < 0.5 || this.rand() > this.vegAt(x, z) * 1.3) continue;
+      const sc = (glow ? 1.4 : 2.0) + this.rand() * (glow ? 2.6 : 3.2);
+      q.setFromAxisAngle(v.set(0, 1, 0), this.rand() * 6.28);
+      mat4.compose(v.set(x, y - 0.2, z), q, s.set(sc, sc * (0.8 + this.rand() * 0.5), sc));
+      mesh.setMatrixAt(n, mat4); mesh.setColorAt(n, cols[n % cols.length]); n++;
+    }
+    mesh.count = n; this.scene.add(mesh);
+    this.flora = mesh;
+  }
+
+  buildRocks() {
+    const g = this.keep(new THREE.DodecahedronGeometry(1, 0));
+    const m = this.keep(new THREE.MeshStandardMaterial({ color: this.col('high').lerp(new THREE.Color('#3a3346'), 0.5), roughness: 0.95, flatShading: true }));
+    const n = PHONE ? 160 : 260, mesh = new THREE.InstancedMesh(g, m, n), mat4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), v = new THREE.Vector3();
+    for (let i = 0; i < n; i++) {
+      const x = (this.rand() * 2 - 1) * this.S * 0.48, z = (this.rand() * 2 - 1) * this.S * 0.48, y = this.groundAt(x, z), sc = 0.5 + this.rand() * 2.4;
+      q.setFromAxisAngle(v.set(this.rand(), this.rand(), this.rand()).normalize(), this.rand() * 6);
+      mat4.compose(v.set(x, y + sc * 0.2, z), q, s.set(sc, sc * 0.7, sc)); mesh.setMatrixAt(i, mat4);
+    }
+    this.scene.add(mesh);
+  }
+
+  buildVolcano() {
+    const c = this.peak, n = 500, a = new Float32Array(n * 3);
+    this.embers = { base: c.clone(), pos: a, life: new Float32Array(n).map(() => Math.random()) };
+    for (let i = 0; i < n; i++) { a[i * 3] = c.x; a[i * 3 + 1] = c.y; a[i * 3 + 2] = c.z; }
+    const g = this.keep(new THREE.BufferGeometry()); g.setAttribute('position', new THREE.BufferAttribute(a, 3));
+    const m = this.keep(new THREE.PointsMaterial({ color: this.col('hot'), size: 1.1, map: dotTex(), transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
+    this.emberPts = new THREE.Points(g, m); this.emberPts.frustumCulled = false; this.scene.add(this.emberPts);
+    const glow = new THREE.PointLight(this.col('hot'), 2 + this.e.eruption * 3, 90, 2); glow.position.copy(c).add(new THREE.Vector3(0, 4, 0)); this.scene.add(glow);
+  }
+
+  /** Settlement: glowing towers, domes, neon rings and drones, sized by the population. */
+  buildColony() {
+    const home = this.findSpot((x, y, z) => y > 1.5 && Math.hypot(x, z) < 50 && Math.abs(this.groundAt(x + 6, z) - y) < 3 && Math.abs(this.groundAt(x, z + 6) - y) < 3, 600, 0.3)
+      || this.findSpot((x, y) => y > 1, 400) || new THREE.Vector3(0, 2, 0);
+    this.colony = home;
+    const count = Math.round(clamp(3 + Math.log10(this.sim.colonists + 1) * 1.6, 3, 14));
+    const tex = windowTex(), neon = ['#ff2bd6', '#19f0ff', this.pal.hot];
+    const hull = this.keep(new THREE.MeshStandardMaterial({ color: '#2a2438', roughness: 0.6, metalness: 0.4, emissive: new THREE.Color('#ffffff'), emissiveMap: tex, emissiveIntensity: 1.1 }));
+    const dome = this.keep(new THREE.MeshStandardMaterial({ color: '#9fe8ff', roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.55, emissive: new THREE.Color('#1a6a80') }));
+    const box = this.keep(new THREE.BoxGeometry(1, 1, 1)), half = this.keep(new THREE.SphereGeometry(1, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2));
+    for (let i = 0; i < count; i++) {
+      const a = i / count * 6.28 + this.rand() * 0.4, r = 6 + this.rand() * 16, x = home.x + Math.cos(a) * r, z = home.z + Math.sin(a) * r, y = this.groundAt(x, z);
+      if (i % 3 === 2) { const d = new THREE.Mesh(half, dome); const s = 3 + this.rand() * 3; d.scale.set(s, s * 0.8, s); d.position.set(x, y - 0.2, z); this.scene.add(d); continue; }
+      const w = 2.4 + this.rand() * 3, h = 6 + this.rand() * 20, t = new THREE.Mesh(box, hull);
+      t.scale.set(w, h, w); t.position.set(x, y + h / 2 - 0.3, z); this.scene.add(t);
+      if (i % 2 === 0) {
+        const ring = new THREE.Mesh(this.keep(new THREE.TorusGeometry(w * 0.9, 0.12, 6, 32)), this.keep(new THREE.MeshBasicMaterial({ color: neon[i % 3] })));
+        ring.rotation.x = Math.PI / 2; ring.position.set(x, y + h * (0.55 + this.rand() * 0.35), z); this.scene.add(ring);
+      }
+    }
+    const pad = new THREE.Mesh(this.keep(new THREE.CylinderGeometry(5, 5, 0.4, 32)), this.keep(new THREE.MeshStandardMaterial({ color: '#3a3452', roughness: 0.7 })));
+    pad.position.set(home.x, home.y, home.z); this.scene.add(pad);
+    const padRing = new THREE.Mesh(this.keep(new THREE.TorusGeometry(4.2, 0.1, 6, 40)), this.keep(new THREE.MeshBasicMaterial({ color: '#19f0ff' })));
+    padRing.rotation.x = Math.PI / 2; padRing.position.set(home.x, home.y + 0.25, home.z); this.scene.add(padRing);
+    // Drones on looping routes over the settlement.
+    const dg = this.keep(new THREE.SphereGeometry(0.35, 10, 8));
+    this.drones = Array.from({ length: 8 }, (_, i) => {
+      const m = new THREE.Mesh(dg, this.keep(new THREE.MeshBasicMaterial({ color: neon[i % 3] })));
+      this.scene.add(m);
+      return { m, r: 8 + this.rand() * 18, h: 10 + this.rand() * 18, w: (0.3 + this.rand() * 0.5) * (i % 2 ? 1 : -1), a: this.rand() * 6.28 };
+    });
+    const neonLight = new THREE.PointLight('#ff4fd8', 1.4, 70, 2); neonLight.position.set(home.x, home.y + 14, home.z); this.scene.add(neonLight);
+  }
+
+  /* ---------- gas giant: no ground, only cloud decks ---------- */
+  buildGas() {
+    const e = this.e, S = this.S;
+    const deck = (y, alpha, scale) => {
+      const m = new THREE.ShaderMaterial({
+        transparent: alpha < 1, fog: true, depthWrite: alpha >= 1, side: THREE.DoubleSide,
+        uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, { uTime: { value: 0 }, cA: { value: this.col('low') }, cB: { value: this.col('high') }, cC: { value: this.col('shallow') }, uStorm: { value: e.storm }, uAlpha: { value: alpha }, uScale: { value: scale } }]),
+        vertexShader: `varying vec3 vW; ${FOG_VERT}
+          void main(){ vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; vec4 mvPosition = viewMatrix * w; gl_Position = projectionMatrix * mvPosition;
+          #include <fog_vertex>
+          }`,
+        fragmentShader: `uniform float uTime, uStorm, uAlpha, uScale; uniform vec3 cA, cB, cC; varying vec3 vW;
+          #include <fog_pars_fragment>
+          ${NOISE}
+          void main(){
+            vec2 p = vW.xz * uScale;
+            float warp = snoise(vec3(p * 0.6, uTime * 0.03)) * (0.6 + uStorm);
+            float band = sin(p.y * 1.4 + warp * 2.0) * 0.5 + 0.5;
+            float n = snoise(vec3(p * 2.2 + warp, uTime * 0.05)) * 0.5 + 0.5;
+            vec3 col = mix(mix(cA, cB, band), cC, smoothstep(0.55, 0.95, n) * 0.6);
+            float a = uAlpha < 1.0 ? smoothstep(0.45, 0.8, n) * uAlpha : 1.0;
+            gl_FragColor = vec4(col * (0.75 + 0.35 * n), a);
+            #include <fog_fragment>
+          }`
+      });
+      this.keep(m); (this.decks = this.decks || []).push(m);
+      const mesh = new THREE.Mesh(this.keep(new THREE.PlaneGeometry(S * 3, S * 3, 1, 1).rotateX(-Math.PI / 2)), m);
+      mesh.position.y = y; this.scene.add(mesh);
+    };
+    deck(0, 1, 0.02); deck(38, 0.55, 0.035);
+    // Cloud puffs at many heights.
+    const pm = this.keep(new THREE.SpriteMaterial({ map: puffTex(), color: this.col('shallow').lerp(new THREE.Color('#ffffff'), 0.5), transparent: true, opacity: 0.55, depthWrite: false, fog: true }));
+    for (let i = 0; i < (PHONE ? 90 : 150); i++) {
+      const s = new THREE.Sprite(pm), sc = 14 + this.rand() * 36;
+      s.scale.set(sc, sc * 0.6, 1); s.position.set((this.rand() * 2 - 1) * S * 0.5, 4 + this.rand() * 70, (this.rand() * 2 - 1) * S * 0.5);
+      this.scene.add(s);
+    }
+    // The great storm: a slowly turning vortex.
+    const vortex = new THREE.ShaderMaterial({
+      transparent: true, depthWrite: false, side: THREE.DoubleSide,
+      uniforms: { uTime: { value: 0 }, c1: { value: this.col('veg') }, c2: { value: this.col('high') }, uStorm: { value: e.storm } },
+      vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+      fragmentShader: `uniform float uTime, uStorm; uniform vec3 c1, c2; varying vec2 vUv;
+        void main(){ vec2 d = vUv - 0.5; float r = length(d) * 2.0, a = atan(d.y, d.x);
+          float arm = sin(a * 3.0 + r * 12.0 - uTime * (0.6 + uStorm)) * 0.5 + 0.5;
+          float alpha = smoothstep(1.0, 0.2, r) * (0.35 + 0.5 * arm);
+          gl_FragColor = vec4(mix(c2, c1, arm) * (0.8 + 0.4 * (1.0 - r)), alpha); }`
+    });
+    this.keep(vortex); this.vortexMat = vortex;
+    const eye = new THREE.Vector3(S * 0.2, 1, -S * 0.15);
+    const v = new THREE.Mesh(this.keep(new THREE.CircleGeometry(40 + e.storm * 40, 64).rotateX(-Math.PI / 2)), vortex);
+    v.position.copy(eye); this.scene.add(v); this.vortex = v; this.stormEye = eye;
+    // Floating jellyfish near the middle.
+    const bell = this.keep(new THREE.SphereGeometry(1, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2));
+    const jm = this.keep(new THREE.MeshBasicMaterial({ color: '#ff9ad0', transparent: true, opacity: 0.7 }));
+    this.jellies = Array.from({ length: this.eco ? 26 : 10 }, () => {
+      const g = new THREE.Group(), b = new THREE.Mesh(bell, jm), s = 1 + this.rand() * 2.2;
+      g.add(b);
+      const tent = new Float32Array(8 * 6);
+      for (let k = 0; k < 8; k++) { const a = k / 8 * 6.28; tent.set([Math.cos(a) * 0.7, 0, Math.sin(a) * 0.7, Math.cos(a) * 0.5, -2.6, Math.sin(a) * 0.5], k * 6); }
+      const tg = this.keep(new THREE.BufferGeometry()); tg.setAttribute('position', new THREE.BufferAttribute(tent, 3));
+      g.add(new THREE.LineSegments(tg, this.keep(new THREE.LineBasicMaterial({ color: '#ffc3e0', transparent: true, opacity: 0.6 }))));
+      g.scale.setScalar(s); g.position.set((this.rand() * 2 - 1) * 90, 12 + this.rand() * 40, (this.rand() * 2 - 1) * 90);
+      this.scene.add(g);
+      return { g, y: g.position.y, ph: this.rand() * 6.28 };
+    });
+    // A helium-3 harvester platform.
+    const plat = new THREE.Group(), steel = this.keep(new THREE.MeshStandardMaterial({ color: '#c9c4d8', metalness: 0.5, roughness: 0.4 }));
+    plat.add(new THREE.Mesh(this.keep(new THREE.CylinderGeometry(9, 7, 1.6, 32)), steel));
+    const bal = this.keep(new THREE.SphereGeometry(3.2, 20, 14)), bm = this.keep(new THREE.MeshStandardMaterial({ color: this.pal.ring[0], roughness: 0.6 }));
+    for (let k = 0; k < 4; k++) { const a = k * 1.57; const s = new THREE.Mesh(bal, bm); s.position.set(Math.cos(a) * 6, 7, Math.sin(a) * 6); plat.add(s); }
+    const beacon = new THREE.Mesh(this.keep(new THREE.SphereGeometry(0.6, 12, 8)), this.keep(new THREE.MeshBasicMaterial({ color: '#ffc94a' })));
+    beacon.position.y = 3; plat.add(beacon); this.beacon = beacon;
+    this.harvester = new THREE.Vector3(-S * 0.18, 26, S * 0.12); plat.position.copy(this.harvester); this.scene.add(plat);
+    if (this.eco && this.sim.colonists > 1) {
+      // A floating city on the same kind of platform.
+      const city = new THREE.Group(), tex = windowTex();
+      const hull = this.keep(new THREE.MeshStandardMaterial({ color: '#2a2438', metalness: 0.4, roughness: 0.6, emissive: new THREE.Color('#ffffff'), emissiveMap: tex }));
+      city.add(new THREE.Mesh(this.keep(new THREE.CylinderGeometry(22, 16, 3, 40)), steel));
+      const box = this.keep(new THREE.BoxGeometry(1, 1, 1));
+      for (let k = 0; k < 9; k++) { const a = k / 9 * 6.28, r = 6 + (k % 3) * 4, h = 6 + this.rand() * 18, t = new THREE.Mesh(box, hull); t.scale.set(3, h, 3); t.position.set(Math.cos(a) * r, h / 2 + 1.5, Math.sin(a) * r); city.add(t); }
+      this.colony = new THREE.Vector3(0, 30, S * 0.25); city.position.copy(this.colony); this.scene.add(city);
+      const cityLight = new THREE.PointLight('#ff4fd8', 1.6, 90, 2); cityLight.position.copy(this.colony).add(new THREE.Vector3(0, 18, 0)); this.scene.add(cityLight);
+    }
+    this.flash = new THREE.PointLight('#dfe8ff', 0, 400, 1.5); this.flash.position.set(0, 60, 0); this.scene.add(this.flash);
+  }
+
+  /* ---------- weather that follows the camera ---------- */
+  buildWeather() {
+    const e = this.e, T = this.sim.temp, b = this.p.biome;
+    let kind = null;
+    if (this.gas) kind = 'wisp';
+    else if (b === 'lava') kind = 'ash';
+    else if (b === 'crystal' || b === 'rogue') kind = 'spore';
+    else if (T < -10 && e.humidity > 0.4) kind = 'snow';
+    else if (e.humidity > 0.68 && T > 0) kind = 'rain';
+    else if (e.humidity < 0.3) kind = 'dust';
+    else if (b === 'jungle') kind = 'firefly';
+    if (!kind) return;
+    const n = PHONE ? 900 : 1500, B = 70, a = new Float32Array(n * (kind === 'rain' ? 6 : 3));
+    const cfg = {
+      rain: { color: '#bcd7ff', size: 0, vy: -55, vx: -6 }, snow: { color: '#ffffff', size: 0.5, vy: -3, vx: 1.2 },
+      ash: { color: '#ffb07a', size: 0.4, vy: -1.5, vx: 2 }, dust: { color: '#e8c48a', size: 0.35, vy: -0.3, vx: 9 },
+      spore: { color: this.pal.veg, size: 0.55, vy: 0.6, vx: 0.8, glow: true }, firefly: { color: '#d8ff7a', size: 0.5, vy: 0.2, vx: 0.4, glow: true },
+      wisp: { color: '#ffffff', size: 0.45, vy: -0.4, vx: 6 }
+    }[kind];
+    const r = this.rand;
+    for (let i = 0; i < n; i++) {
+      const x = (r() * 2 - 1) * B, y = r() * 40 - 10, z = (r() * 2 - 1) * B;
+      if (kind === 'rain') a.set([x, y, z, x + 0.3, y + 1.8, z], i * 6); else a.set([x, y, z], i * 3);
+    }
+    const g = this.keep(new THREE.BufferGeometry()); g.setAttribute('position', new THREE.BufferAttribute(a, 3));
+    const obj = kind === 'rain'
+      ? new THREE.LineSegments(g, this.keep(new THREE.LineBasicMaterial({ color: cfg.color, transparent: true, opacity: 0.45 })))
+      : new THREE.Points(g, this.keep(new THREE.PointsMaterial({ color: cfg.color, size: cfg.size, map: dotTex(), transparent: true, opacity: 0.85, depthWrite: false, blending: cfg.glow ? THREE.AdditiveBlending : THREE.NormalBlending })));
+    obj.frustumCulled = false; this.scene.add(obj);
+    this.weather = { kind, obj, a, cfg, B, n };
+  }
+
+  /* ---------- holographic points of interest ---------- */
+  addPoi(kind, pos, info) { this.pois.push({ kind, pos: pos.clone(), color: MARK[kind] || '#19f0ff', ...info }); }
+
+  buildMarkers() {
+    const p = this.p, sim = this.sim, e = this.e, b = this.b, eco = this.eco, gas = this.gas;
+    const stat = (v, l) => [v, l];
+    const fit = f => f > 0.6 ? 'เติบโตดี' : f > 0.2 ? 'อยู่ได้' : 'ลำบาก';
+    const start = gas ? new THREE.Vector3(0, 18, 0) : (this.findSpot((x, y) => y > 0.8 && Math.hypot(x, 0) < 40, 500, 0.15) || new THREE.Vector3(0, Math.max(1, this.groundAt(0, 0)), 0));
+    this.addPoi('land', start, { icon: '🛬', kicker: 'จุดลงจอด', title: `${p.name} · จุดลงจอด`, lead: p.desc,
+      stats: [stat(Math.round(sim.temp) + '°C', 'อุณหภูมิ'), stat(sim.o2.toFixed(sim.o2 < 1 ? 1 : 0) + '%', 'ออกซิเจน'), stat((e.size * 0.95).toFixed(2) + '×', 'แรงโน้มถ่วง'), stat(sim.weather.name, 'สภาพอากาศ')],
+      text: `ยานลงจอดแล้ว ${sim.weather.detail} แสงจากดาวฤกษ์ที่นี่ ${fmtLight(p.au)}` });
+    if (gas) {
+      this.addPoi('storm', this.stormEye, { icon: '🌀', kicker: 'จุดพายุใหญ่', title: 'ตาพายุยักษ์', stats: [stat(pct(e.storm * 100), 'ความแรงพายุ'), stat(Math.round(600 + e.storm * 1500) + ' กม./ชม.', 'ลมสูงสุด')],
+        lead: 'พายุหมุนที่ใหญ่กว่าดาวดวงอื่นทั้งดวง ยิ่งปรับความแรงพายุ แขนของพายุยิ่งหมุนเร็ว', text: sim.weather.detail });
+      const r0 = sim.resources[0];
+      this.addPoi('resource', this.harvester, { icon: r0.e, kicker: 'แหล่งทรัพยากร', title: `สถานีเก็บ${r0.n}`, stats: [stat(eco ? fmtBig(r0.value * 1000) : '–', 'มูลค่าต่อปี'), stat(pct(sim.extraction * 100), 'ระดับการใช้')],
+        lead: 'แท่นลอยฟ้าที่ดูดก๊าซจากชั้นบรรยากาศ', text: eco ? `ความยั่งยืนของระบบนิเวศ ${Math.round(sim.sustain)}/100` : 'สร้างระบบนิเวศก่อน แท่นนี้จึงจะมีคนทำงาน' });
+    } else {
+      const lava = !!b.lavaSea;
+      this.addPoi('peak', this.peak, { icon: lava ? '🌋' : '⛰️', kicker: lava || e.eruption > 0.3 ? 'ปล่องภูเขาไฟ' : 'ยอดเขาสูงสุด', title: lava ? 'ปล่องภูเขาไฟหลัก' : 'ยอดเขาสูงสุดในบริเวณนี้',
+        stats: [stat((this.peak.y / 110 * 12).toFixed(1) + ' กม.', 'ความสูงจากระดับทะเล'), stat(pct(e.heat * 100), 'ความร้อนใต้พื้น')],
+        lead: lava ? `ลาวาปะทุขึ้นมาเป็นระยะ ระดับการปะทุตอนนี้ ${pct(e.eruption * 100)}` : 'จุดที่สูงที่สุดของภูมิประเทศรอบจุดลงจอด',
+        text: this.sim.temp < 5 ? 'ยอดเขาปกคลุมด้วยน้ำแข็งและหิมะ' : 'ลมบนยอดเขาแรงและอากาศเบาบาง' });
+      const shore = this.findSpot((x, y) => Math.abs(y) < 0.6 && y > -0.2, 900);
+      if (shore && sim.cover.water > 0.02) this.addPoi('shore', shore, { icon: lava ? '🔥' : '🌊', kicker: lava ? 'ชายฝั่งทะเลลาวา' : 'ชายฝั่ง', title: lava ? 'ริมทะเลลาวา' : 'ชายหาด',
+        stats: [stat(pct(lava ? sim.lavaPct : sim.waterPct), lava ? 'ทะเลลาวาบนดาว' : 'น้ำบนดาว'), stat(pct(e.humidity * 100), 'ความชื้น')],
+        lead: lava ? 'ลาวาหลอมไหลช้า ๆ ส่องแสงสีส้มทั้งคืน' : 'คลื่นซัดเข้าฝั่งอย่างสม่ำเสมอ', text: lava ? 'ไม่มีสิ่งมีชีวิตใดทนความร้อนตรงนี้ได้นาน' : 'สัตว์ที่ต้องพึ่งน้ำมักอยู่แถวนี้' });
+      const forest = sim.vegEff > 0.05 && this.findSpot((x, y, z) => y > 0.8 && this.vegAt(x, z) > 0.5, 900);
+      if (forest) this.addPoi('forest', forest, { icon: b.flora === 'crystal' ? '💎' : '🌳', kicker: p.biome === 'crystal' ? 'ทุ่งผลึก' : p.biome === 'rogue' ? 'ป่าเรืองแสง' : 'ป่า',
+        title: p.biome === 'crystal' ? 'ทุ่งผลึกเรืองแสง' : p.biome === 'rogue' ? 'ป่าเรืองแสงกลางความมืด' : 'ผืนป่า',
+        stats: [stat(pct(sim.cover.plants * 100), 'พืชปกคลุมดาว'), stat(sim.o2.toFixed(0) + '%', 'ออกซิเจน')],
+        lead: 'พืชบนดาวนี้เปลี่ยนตามแถบพืชพรรณ ความชื้น และความร้อนที่ตั้งไว้', text: 'ยิ่งพืชมาก ออกซิเจนยิ่งสูง และสัตว์ที่ต้องพึ่งป่าจะอยู่ได้' });
+    }
+    // Where each species lives.
+    sim.species.forEach(s => {
+      let spot;
+      if (gas) spot = new THREE.Vector3((this.rand() * 2 - 1) * 110, 14 + this.rand() * 30, (this.rand() * 2 - 1) * 110);
+      else spot = this.findSpot((x, y, z) => s.w ? (y > 0.2 && y < 3) : s.v ? (y > 0.8 && this.vegAt(x, z) > 0.35) : y > 0.8, 700) || this.findSpot((x, y) => y > 0.5, 300);
+      if (!spot) return;
+      this.addPoi('species', spot, { icon: s.e, kicker: 'ถิ่นที่อยู่ของสัตว์', title: s.n,
+        stats: [stat(eco ? (s.pop > 0 ? fmtBig(s.pop) : 'สูญพันธุ์') : 'ยังไม่มี', 'ประชากร'), stat(fit(s.fit), 'ความเหมาะสม')],
+        lead: s.note, text: eco ? (s.pop > 0 ? 'ประชากรเปลี่ยนตามสภาพดาวและระดับการใช้ทรัพยากร' : 'สภาพดาวตอนนี้ไม่เหมาะกับสัตว์ชนิดนี้ ลองปรับความร้อนหรือความชื้น') : 'สร้างระบบนิเวศก่อน แล้วสัตว์ชนิดนี้จะเริ่มอาศัยอยู่ที่นี่' });
+    });
+    if (!gas) {
+      const r0 = sim.top || sim.resources[0];
+      const spot = this.findSpot((x, y) => y > 1.5, 500);
+      if (spot) this.addPoi('resource', spot, { icon: r0.e, kicker: 'แหล่งทรัพยากร', title: r0.n,
+        stats: [stat(eco ? fmtBig(r0.value * 1000) : '–', 'มูลค่าต่อปี'), stat(pct(sim.extraction * 100), 'ระดับการใช้')],
+        lead: 'แหล่งทรัพยากรหลักของดาวนี้', text: eco ? `ความยั่งยืนของระบบนิเวศ ${Math.round(sim.sustain)}/100` : 'สร้างระบบนิเวศก่อน จึงจะมีคนมาทำเหมือง' });
+    }
+    if (this.colony) this.addPoi('colony', this.colony, { icon: '🏙️', kicker: 'นิคมผู้ตั้งถิ่นฐาน', title: `นิคม${p.name}`,
+      stats: [stat(fmtBig(sim.colonists), 'ผู้อยู่อาศัย'), stat(fmtBig(sim.jobs), 'ตำแหน่งงาน'), stat(fmtBig(sim.gdp), 'เศรษฐกิจต่อปี'), stat(Math.round(sim.sustain) + '/100', 'ความยั่งยืน')],
+      lead: 'เมืองที่ส่องแสงนีออนตลอดคืน ขนาดของเมืองโตตามจำนวนผู้อยู่อาศัย', text: sim.top ? `สินค้าส่งออกหลัก: ${sim.top.e} ${sim.top.n}` : '' });
+
+    // Build the holograms.
+    const lineMat = c => this.keep(new THREE.LineBasicMaterial({ color: new THREE.Color(c).multiplyScalar(1.6), transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const ico = this.keep(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(1.8, 1))), ring = this.keep(new THREE.EdgesGeometry(new THREE.TorusGeometry(2.8, 0.02, 3, 48)));
+    const beamGeo = this.keep(new THREE.CylinderGeometry(1.8, 0.2, 10, 24, 1, true).translate(0, -5, 0));
+    this.pois.forEach(poi => {
+      const g = new THREE.Group(), lm = lineMat(poi.color);
+      poi.mark = g; poi.markY = poi.pos.y + (this.gas ? 4 : 9);
+      const outer = new THREE.LineSegments(ico, lm), rg = new THREE.LineSegments(ring, lm);
+      rg.rotation.x = Math.PI / 2.3;
+      const beam = new THREE.Mesh(beamGeo, this.keep(new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+        uniforms: { uTime: { value: 0 }, c: { value: new THREE.Color(poi.color) } },
+        vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+        fragmentShader: `uniform float uTime; uniform vec3 c; varying vec2 vUv; void main(){ float s = 0.5 + 0.5 * sin(vUv.x * 50.0 + uTime); gl_FragColor = vec4(c * vUv.y * vUv.y * 0.35 * (0.5 + 0.5 * s), 1.0); }` })));
+      g.add(outer, rg, beam); g.position.set(poi.pos.x, poi.markY, poi.pos.z);
+      poi.parts = { outer, rg, beam }; this.scene.add(g);
+    });
+  }
+
+  /* ---------- the tour path ---------- */
+  buildPath() {
+    // Visit the points of interest in order of angle around the landing site.
+    const c = this.pois[0].pos;
+    const rest = this.pois.slice(1).sort((a, b) => Math.atan2(a.pos.z - c.z, a.pos.x - c.x) - Math.atan2(b.pos.z - c.z, b.pos.x - c.x));
+    this.pois = [this.pois[0], ...rest];
+    const pts = this.pois.map((poi, i) => {
+      const prev = this.pois[(i - 1 + this.pois.length) % this.pois.length].pos;
+      const back = new THREE.Vector3(prev.x - poi.pos.x, 0, prev.z - poi.pos.z);
+      if (back.lengthSq() < 1) back.set(1, 0, 0);
+      back.normalize().multiplyScalar(26);
+      const x = poi.pos.x + back.x, z = poi.pos.z + back.z;
+      return new THREE.Vector3(x, Math.max(poi.pos.y, this.groundAt(x, z)) + (this.gas ? 6 : 18), z);
+    });
+    if (pts.length < 3) pts.push(pts[0].clone().add(new THREE.Vector3(40, 0, 40)), pts[0].clone().add(new THREE.Vector3(-40, 0, 30)));
+    this.path = new THREE.CatmullRomCurve3(pts, true, 'centripetal');
+    this.length = this.path.getLength();
+    // Clear a corridor through the trees along the path so the camera never flies through trunks.
+    if (this.flora) {
+      const samples = this.path.getSpacedPoints(240), m = new THREE.Matrix4(), p = new THREE.Vector3(), zero = new THREE.Matrix4().makeScale(0, 0, 0);
+      for (let i = 0; i < this.flora.count; i++) {
+        this.flora.getMatrixAt(i, m); p.setFromMatrixPosition(m);
+        if (samples.some(q => (q.x - p.x) ** 2 + (q.z - p.z) ** 2 < 81)) this.flora.setMatrixAt(i, zero);
+      }
+      this.flora.instanceMatrix.needsUpdate = true;
+    }
+    // Where along the path each POI is best seen.
+    const tmp = new THREE.Vector3();
+    this.pois.forEach(poi => {
+      let best = 0, bd = Infinity;
+      for (let k = 0; k <= 400; k++) { const u = k / 400; this.path.getPointAt(u, tmp); const d = Math.hypot(tmp.x - poi.pos.x, tmp.z - poi.pos.z); if (d < bd) { bd = d; best = u; } }
+      poi.u = best;
+    });
+  }
+
+  /** Camera pose on the path at u, gaze eased toward nearby points of interest. */
+  pathPose(u, outPos, outLook) {
+    const w = ((u % 1) + 1) % 1;
+    this.path.getPointAt(w, outPos);
+    // Stay well above the ground (and the tallest trees), and look slightly down at the land ahead.
+    let clear = 0; for (let k = -1; k <= 1; k++) clear = Math.max(clear, this.groundAt(outPos.x + k * 6, outPos.z + k * 6));
+    outPos.y = Math.max(outPos.y, clear + (this.gas ? 5 : 15));
+    const tan = this.path.getTangentAt(w, new THREE.Vector3());
+    outLook.copy(outPos).addScaledVector(tan, 22); outLook.y -= 6;
+    for (const poi of this.pois) {
+      let d = Math.abs(w - poi.u); d = Math.min(d, 1 - d) * this.length;
+      const k = Math.exp(-((d / 22) ** 2)) * 0.55;
+      if (k > 0.002) outLook.lerp(new THREE.Vector3(poi.pos.x, poi.markY - 3, poi.pos.z), k);
+    }
+  }
+
+  placeCamera(dt, snap) {
+    const pos = new THREE.Vector3(), look = new THREE.Vector3();
+    if (this.focus) {
+      const f = this.focus;
+      f.t = Math.min(1, f.t + dt / 1.3);
+      const k = f.t < 0.5 ? 4 * f.t ** 3 : 1 - Math.pow(-2 * f.t + 2, 3) / 2;
+      pos.lerpVectors(f.fromPos, f.toPos, k); pos.y += Math.sin(k * Math.PI) * 10;   // arc over the ground
+      look.lerpVectors(f.fromLook, f.toLook, k);
+      if (f.back && f.t >= 1) this.focus = null;
+    } else {
+      this.pathPose(this.progress, pos, look);
+    }
+    // Look around: yaw the gaze about the camera.
+    const dir = look.clone().sub(pos), yaw = this.yaw;
+    dir.set(dir.x * Math.cos(yaw) - dir.z * Math.sin(yaw), dir.y, dir.x * Math.sin(yaw) + dir.z * Math.cos(yaw));
+    this.cam.position.copy(pos);
+    this.cam.lookAt(pos.clone().add(dir));
+    this.curLook = look;
+  }
+
+  flyTo(poi) {
+    const from = this.cam.position.clone(), fromLook = this.curLook ? this.curLook.clone() : poi.pos.clone();
+    const away = from.clone().sub(poi.pos); away.y = 0; if (away.lengthSq() < 1) away.set(1, 0, 0);
+    away.normalize().multiplyScalar(this.gas ? 16 : 20);
+    const to = poi.pos.clone().add(away); to.y = Math.max(poi.markY + 4, this.groundAt(to.x, to.z) + 12);
+    this.focus = { poi, t: 0, fromPos: from, fromLook, toPos: to, toLook: new THREE.Vector3(poi.pos.x, poi.markY - 2, poi.pos.z) };
+    this.yawT = 0; this.auto = false;
+  }
+  leaveFocus() {
+    const f = this.focus; if (!f) return;
+    this.progress = this.target = f.poi.u - 0.02;
+    const pos = new THREE.Vector3(), look = new THREE.Vector3(); this.pathPose(this.progress, pos, look);
+    this.focus = { poi: f.poi, t: 0, fromPos: this.cam.position.clone(), fromLook: f.toLook.clone(), toPos: pos, toLook: look, back: true };
+  }
+
+  update(dt) {
+    this.t += dt;
+    if (!this.focus) {
+      if (this.auto) this.target += dt * 0.012;
+      this.progress = damp(this.progress, this.target, 2.4, dt);
+    }
+    this.yaw = damp(this.yaw, this.yawT, 4, dt);
+    this.placeCamera(dt);
+    if (this.seaMat) this.seaMat.uniforms.uTime.value = this.t;
+    if (this.decks) this.decks.forEach(m => { m.uniforms.uTime.value = this.t; });
+    if (this.vortexMat) { this.vortexMat.uniforms.uTime.value = this.t; }
+    this.dome.position.copy(this.cam.position);
+    // Holograms turn and flicker; the one in focus pulses.
+    this.pois.forEach((poi, i) => {
+      const { outer, rg, beam } = poi.parts, on = this.focus && this.focus.poi === poi;
+      outer.rotation.y += dt * (on ? 1.2 : 0.35); outer.rotation.x += dt * 0.1; rg.rotation.z += dt * 0.2;
+      poi.mark.position.y = poi.markY + Math.sin(this.t * 0.9 + i) * 0.4;
+      outer.material.opacity = (Math.sin(this.t * 3.1 + i * 2) > 0.985 ? 0.3 : 0.9);
+      poi.mark.scale.setScalar(on ? 1.25 + Math.sin(this.t * 4) * 0.06 : 1);
+      beam.material.uniforms.uTime.value = this.t;
+    });
+    if (this.drones) this.drones.forEach(d => { d.a += dt * d.w; d.m.position.set(this.colony.x + Math.cos(d.a) * d.r, this.colony.y + d.h + Math.sin(d.a * 3) * 1.5, this.colony.z + Math.sin(d.a) * d.r); });
+    if (this.jellies) this.jellies.forEach(j => { j.g.position.y = j.y + Math.sin(this.t * 0.6 + j.ph) * 2; j.g.children[0].scale.y = 1 + Math.sin(this.t * 2 + j.ph) * 0.15; j.g.rotation.y += dt * 0.1; });
+    if (this.beacon) this.beacon.visible = Math.sin(this.t * 4) > 0;
+    if (this.flash) {
+      // Lightning in the storm bands.
+      this.flash.intensity = damp(this.flash.intensity, 0, 6, dt);
+      if (this.e.storm > 0.3 && Math.random() < dt * this.e.storm * 0.8) { this.flash.intensity = 4; this.flash.position.set((Math.random() * 2 - 1) * 150, 50, (Math.random() * 2 - 1) * 150); }
+    }
+    if (this.embers) {
+      const E = this.embers, a = E.pos, L = E.life, n = L.length, rate = 0.25 + this.e.eruption;
+      for (let i = 0; i < n; i++) {
+        L[i] += dt * 0.25 * rate;
+        if (L[i] >= 1) { L[i] = 0; a[i * 3] = E.base.x + (Math.random() - 0.5) * 3; a[i * 3 + 1] = E.base.y; a[i * 3 + 2] = E.base.z + (Math.random() - 0.5) * 3; }
+        a[i * 3] += (Math.random() - 0.5) * dt * 4; a[i * 3 + 1] += dt * (10 + rate * 14) * (1 - L[i]); a[i * 3 + 2] += (Math.random() - 0.5) * dt * 4 + dt * 2;
+      }
+      this.emberPts.geometry.attributes.position.needsUpdate = true;
+    }
+    if (this.weather) {
+      const W = this.weather, a = W.a, c = W.cfg, B = W.B, stride = W.kind === 'rain' ? 6 : 3;
+      W.obj.position.set(this.cam.position.x, this.cam.position.y, this.cam.position.z);
+      for (let i = 0; i < W.n; i++) {
+        const o = i * stride;
+        let x = a[o] + c.vx * dt + (W.kind === 'rain' ? 0 : Math.sin(this.t + i) * dt * 0.6), y = a[o + 1] + c.vy * dt, z = a[o + 2];
+        if (y < -12) y += 45; if (y > 33) y -= 45; if (x > B) x -= 2 * B; if (x < -B) x += 2 * B;
+        a[o] = x; a[o + 1] = y;
+        if (stride === 6) { a[o + 3] = x + 0.3; a[o + 4] = y + 1.8; a[o + 5] = z; }
+      }
+      W.obj.geometry.attributes.position.needsUpdate = true;
+    }
+  }
+
+  dispose() { this.D.forEach(d => d.dispose && d.dispose()); this.D = []; }
+}
+
+/* ================================================================
    App
 ================================================================ */
 class App {
@@ -1889,6 +2587,8 @@ class App {
     this.mapFrame = this.mapFrame.bind(this);
     this.stationFrame = this.stationFrame.bind(this);
     this.sraf = null; this.stTab = 'mods'; this.inStation = false;
+    this.xraf = null; this.inExplore = false;
+    this.exploreFrame = this.exploreFrame.bind(this);
     this.applyStationSpeed();
   }
 
@@ -2367,7 +3067,7 @@ class App {
       const a = new Float32Array(n * 3);
       for (let i = 0; i < n; i++) fill(a, i * 3);
       const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(a, 3));
-      return new THREE.Points(g, new THREE.PointsMaterial({ color, size, transparent: true, opacity, depthWrite: false, sizeAttenuation: true }));
+      return new THREE.Points(g, new THREE.PointsMaterial({ color, size: size * 1.6, map: dotTex(), transparent: true, opacity, depthWrite: false, sizeAttenuation: true }));
     };
     const shell = (a, k, r0, r1) => { const u = r() * 2 - 1, ph = r() * TAU, d = r0 + r() * (r1 - r0), q = Math.sqrt(1 - u * u); a[k] = Math.cos(ph) * q * d; a[k + 1] = u * d; a[k + 2] = Math.sin(ph) * q * d; };
     scene.add(pts(PHONE ? 1400 : 2200, (a, k) => shell(a, k, 120, 200), 0xf4f1ff, 0.7, 0.9));
@@ -2574,6 +3274,158 @@ class App {
     }
     v.set(0, 0, 0).project(S.cam);
     if (Math.hypot((v.x + 1) / 2 * mr.width - x, (1 - v.y) / 2 * mr.height - y) < 1.8 * f / S.dist) this.pokeSun(null);
+  }
+
+  /* ---------------- Surface exploration ---------------- */
+  openExplore() {
+    if (this.inExplore || this.current < 0) return;
+    const p = PLANETS[this.current];
+    this.inExplore = true;
+    this.stopLoop();
+    $('#detail').classList.remove('is-active');
+    const x = $('#explore'), load = $('[data-x-loading]');
+    x.classList.add('is-active'); load.classList.remove('done');
+    $('[data-x-name]').textContent = `ดาว${p.name}`;
+    $('[data-x-panel]').hidden = true;
+    Sound.launch();
+    // Build on the next frame so the landing screen shows first.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (!this.inExplore) return;
+      this.world = new ExploreWorld(this, p);
+      const w = this.world, sim = w.sim;
+      $('[data-x-stats]').innerHTML = [`🌡️ ${Math.round(sim.temp)}°C`, `${sim.weather.icon} ${sim.weather.name}`, `O₂ ${sim.o2.toFixed(sim.o2 < 1 ? 1 : 0)}%`, `☀️ ${fmtLight(p.au)}`].map(t => `<span>${t}</span>`).join('');
+      $('[data-x-labels]').innerHTML = w.pois.map((poi, i) => `<div class="x-label" data-xl="${i}" style="--c:${poi.color}"><span>${poi.icon}</span>${poi.kicker}</div>`).join('');
+      // Ticks are evenly spaced in visiting order, so close-together points stay tappable.
+      this.xTicks = w.pois.map((poi, i) => ({ i, u: poi.u })).sort((a, b) => a.u - b.u).map((o, k, arr) => ({ ...o, at: (k + 0.5) / arr.length }));
+      $('[data-x-track]').innerHTML = '<i data-x-pos></i>' + this.xTicks.map(t => { const poi = w.pois[t.i]; return `<button type="button" data-xgo="${t.i}" style="left:${(t.at * 100).toFixed(1)}%;--c:${poi.color}" aria-label="${poi.kicker}">${poi.icon}</button>`; }).join('');
+      this.xLabels = $$('[data-xl]');
+      this.stage.detailMode($('#xstage'));
+      this.startExploreLoop();
+      setTimeout(() => load.classList.add('done'), 250);
+    }));
+  }
+
+  closeExplore() {
+    if (!this.inExplore) return;
+    this.stopExploreLoop();
+    this.inExplore = false;
+    if (this.world) { this.world.dispose(); this.world = null; }
+    $('#explore').classList.remove('is-active');
+    this.openDetail(this.current);
+  }
+
+  startExploreLoop() { if (this.xraf) return; this.xlast = performance.now(); this.xraf = requestAnimationFrame(this.exploreFrame); }
+  stopExploreLoop() { cancelAnimationFrame(this.xraf); this.xraf = null; }
+  exploreFrame(now) {
+    this.xraf = requestAnimationFrame(this.exploreFrame);
+    const dt = Math.min(0.05, (now - this.xlast) / 1000 || 0.016); this.xlast = now;
+    const w = this.world; if (!w) return;
+    const host = $('#xstage'), W = host.clientWidth, H = host.clientHeight;
+    w.cam.aspect = W / Math.max(1, H); w.cam.fov = W < H ? 66 : 56; w.cam.updateProjectionMatrix();
+    w.update(dt);
+    // Labels follow their holograms; the track shows where we are on the loop.
+    const v = new THREE.Vector3();
+    w.pois.forEach((poi, i) => {
+      const el = this.xLabels[i]; if (!el) return;
+      v.set(poi.pos.x, poi.markY + 3.2, poi.pos.z).project(w.cam);
+      const on = v.z < 1 && v.x > -1.1 && v.x < 1.1 && v.y > -1.1 && v.y < 1.1;
+      el.style.opacity = on ? '1' : '0';
+      if (on) el.style.transform = `translate(${((v.x + 1) / 2 * W).toFixed(1)}px,${((1 - v.y) / 2 * H).toFixed(1)}px) translate(-50%,-100%)`;
+      poi.sx = (v.x + 1) / 2 * W; poi.sy = (1 - v.y) / 2 * H; poi.on = on;
+    });
+    const pos = $('[data-x-pos]'); if (pos) pos.style.left = (this.trackAt(((w.progress % 1) + 1) % 1) * 100).toFixed(2) + '%';
+    this.stage.renderer.render(w.scene, w.cam);
+  }
+
+  /** Where a path position falls on the evenly spaced track, between the ticks it lies between. */
+  trackAt(u) {
+    const T = this.xTicks, n = T.length; if (!n) return u;
+    for (let k = 0; k < n; k++) {
+      const a = T[k], b = T[(k + 1) % n], bu = k + 1 < n ? b.u : b.u + 1, uu = u < a.u && k === n - 1 ? u + 1 : u;
+      if (uu >= a.u && uu < bu) { const bt = k + 1 < n ? b.at : 1 + b.at; return (lerp(a.at, bt, (uu - a.u) / Math.max(1e-6, bu - a.u))) % 1; }
+    }
+    // Before the first tick: between the last tick (wrapped) and the first.
+    const a = T[n - 1], b = T[0];
+    return (lerp(a.at - 1, b.at, (u + 1 - a.u) / Math.max(1e-6, b.u + 1 - a.u)) + 1) % 1;
+  }
+
+  /** Open the holographic panel for a point of interest, with a short decoding effect on its title. */
+  openPoi(i) {
+    const w = this.world, poi = w.pois[i]; if (!poi) return;
+    this.xPoi = i;
+    w.flyTo(poi);   // also stops the auto tour
+    const auto = $('[data-x-auto]'); auto.setAttribute('aria-pressed', 'false'); auto.textContent = '▶ ทัวร์อัตโนมัติ';
+    const panel = $('[data-x-panel]');
+    panel.style.setProperty('--c', poi.color);
+    $('[data-xp-kicker]').textContent = `${poi.icon} ${poi.kicker}`;
+    $('[data-xp-body]').innerHTML = `${poi.lead ? `<p>${poi.lead}</p>` : ''}<div class="x-kv">${poi.stats.map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join('')}</div>${poi.text ? `<p>${poi.text}</p>` : ''}`;
+    panel.hidden = false; panel.style.animation = 'none'; void panel.offsetWidth; panel.style.animation = '';
+    const title = $('[data-xp-title]'), glyphs = '!<>-_/[]{}=+*^?#01', full = poi.title;
+    clearInterval(this.decodeT);
+    if (REDUCED) title.textContent = full;
+    else {
+      let k = 0;
+      this.decodeT = setInterval(() => {
+        k++;
+        const n = Math.floor(full.length * k / 12);
+        title.textContent = full.slice(0, n) + Array.from({ length: Math.max(0, Math.min(6, full.length - n)) }, () => glyphs[Math.floor(Math.random() * glyphs.length)]).join('');
+        if (k >= 12) { clearInterval(this.decodeT); title.textContent = full; }
+      }, 35);
+    }
+    Sound.tap();
+  }
+  closePoi() {
+    $('[data-x-panel]').hidden = true;
+    if (this.world) this.world.leaveFocus();
+    this.xPoi = null;
+  }
+
+  bindExplore() {
+    $('[data-x-back]').addEventListener('click', () => this.closeExplore());
+    $('[data-x-close]').addEventListener('click', () => this.closePoi());
+    const step = d => {
+      const w = this.world; if (!w) return;
+      const n = w.pois.length;
+      if (this.xPoi != null) { this.openPoi((this.xPoi + d + n) % n); return; }
+      // Next point of interest ahead of (or behind) the camera along the loop.
+      const u = ((w.target % 1) + 1) % 1, order = w.pois.map((p, i) => ({ i, du: (((p.u - u) * d) % 1 + 1) % 1 })).filter(o => o.du > 0.01).sort((a, b) => a.du - b.du);
+      if (order.length) w.target += order[0].du * d;
+    };
+    $('[data-x-prev]').addEventListener('click', () => step(-1));
+    $('[data-x-next]').addEventListener('click', () => step(1));
+    $('[data-xp-prev]').addEventListener('click', () => step(-1));
+    $('[data-xp-next]').addEventListener('click', () => step(1));
+    $('[data-x-auto]').addEventListener('click', e => {
+      const w = this.world; if (!w) return;
+      if (this.xPoi != null) this.closePoi();
+      w.auto = !w.auto; e.currentTarget.setAttribute('aria-pressed', String(w.auto));
+      e.currentTarget.textContent = w.auto ? '⏸ หยุดทัวร์' : '▶ ทัวร์อัตโนมัติ';
+    });
+    $('[data-x-track]').addEventListener('click', e => { const b = e.target.closest('[data-xgo]'); if (b) this.openPoi(+b.dataset.xgo); });
+    // Swipe or scroll to travel; drag sideways to look around; tap a hologram.
+    const el = $('#xstage');
+    let drag = null;
+    el.addEventListener('pointerdown', e => { el.setPointerCapture(e.pointerId); drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, t: performance.now(), axis: null }; });
+    el.addEventListener('pointermove', e => {
+      const w = this.world; if (!drag || !w) return;
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
+      if (!drag.axis && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8) drag.axis = Math.abs(e.clientX - drag.sx) > Math.abs(e.clientY - drag.sy) ? 'x' : 'y';
+      if (drag.axis === 'x') w.yawT = clamp(w.yawT + dx * 0.006, -1.4, 1.4);
+      if (drag.axis === 'y' && !w.focus) { w.target -= dy * 0.0009; w.auto = false; }
+    });
+    const up = e => {
+      const w = this.world;
+      if (drag && w && e.type === 'pointerup' && !drag.axis && performance.now() - drag.t < 350) {
+        const r = el.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+        let best = -1, bd = 44;
+        w.pois.forEach((poi, i) => { if (!poi.on) return; const d = Math.hypot(poi.sx - x, poi.sy - y); if (d < bd) { bd = d; best = i; } });
+        if (best >= 0) this.openPoi(best); else if (this.xPoi != null) this.closePoi();
+      }
+      if (drag && drag.axis === 'x' && w) w.yawT = damp(w.yawT, 0, 1, 0.1);
+      drag = null;
+    };
+    el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+    el.addEventListener('wheel', e => { const w = this.world; if (!w || w.focus) return; e.preventDefault(); w.target += e.deltaY * 0.00035; w.auto = false; }, { passive: false });
   }
 
   /* ---------------- Space station ---------------- */
@@ -3028,7 +3880,7 @@ class App {
 
   renderActions() {
     const p = PLANETS[this.current], b = BIOMES[p.biome], box = $('[data-actions]');
-    let html = '';
+    let html = this.noGL ? '' : '<button class="act land" type="button" data-act="land">🛬 ลงสำรวจ</button>';
     if (b.controls.includes('eruption')) html += '<button class="act hot" type="button" data-act="erupt">🌋 ปะทุ!</button>';
     if (b.controls.includes('storm')) html += '<button class="act" type="button" data-act="storm">🌀 ก่อพายุ</button>';
     box.innerHTML = html;
@@ -3302,12 +4154,13 @@ class App {
     // The planet view resizes when the controls fold or unfold.
     if (window.ResizeObserver) {
       const ro = new ResizeObserver(() => { if (this.stage && this.stage.mode === 'detail') this.stage.resize(); });
-      ro.observe($('#stage')); ro.observe($('#stationStage'));
+      ro.observe($('#stage')); ro.observe($('#stationStage')); ro.observe($('#xstage'));
     }
     $('[data-fuel-toggle]').addEventListener('click', e => { e.stopPropagation(); this.toggleFuel(); });
     $('#map').addEventListener('click', e => { if (!e.target.closest('.map-dock')) this.toggleFuel(false); });
     $$('.tab[data-tab]').forEach(t => t.addEventListener('click', () => this.setTab(t.dataset.tab)));
     this.bindStation();
+    this.bindExplore();
     $('#panel').addEventListener('input', e => { if (e.target.matches('[data-ctl]')) this.onSlider(e.target); });
     $('#panel').addEventListener('click', e => {
       const d = e.target.closest('[data-do]'); if (d) this.doAction(d.dataset.do);
@@ -3315,6 +4168,7 @@ class App {
     });
     $('[data-actions]').addEventListener('click', e => {
       const a = e.target.closest('[data-act]'); if (!a || this.noGL) return;
+      if (a.dataset.act === 'land') { this.openExplore(); return; }
       const body = this.bodies[PLANETS[this.current].id];
       if (a.dataset.act === 'erupt') {
         body.burst(); Sound.erupt();
@@ -3368,6 +4222,7 @@ class App {
     addEventListener('keydown', e => {
       if (e.key !== 'Escape') return;
       if (!$('#menu').hidden) this.closeMenu();
+      else if (this.inExplore) { if (this.xPoi != null) this.closePoi(); else this.closeExplore(); }
       else if (this.inStation) this.closeStation();
       else if (this.current >= 0) this.leaveDetail();
     });
@@ -3383,7 +4238,8 @@ class App {
       }, 150);
     });
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) { this.stopLoop(); this.stopMapLoop(); this.stopStationLoop(); }
+      if (document.hidden) { this.stopLoop(); this.stopMapLoop(); this.stopStationLoop(); this.stopExploreLoop(); }
+      else if (this.inExplore) { if (this.world) this.startExploreLoop(); }
       else if (this.inStation) { if (!this.noGL) this.startStationLoop(); }
       else if (this.current >= 0) { if (!this.noGL) this.startLoop(); }
       else if ($('#map').classList.contains('is-active')) this.startMapLoop();
@@ -3437,7 +4293,7 @@ class App {
     if (!page) { main.hidden = false; pg.hidden = true; return; }
     main.hidden = true; pg.hidden = false;
     const back = '<button class="btn ghost" type="button" data-menu-back style="width:100%;margin-top:10px">กลับ</button>';
-    if (page === 'howto') pg.innerHTML = `<h3>วิธีเล่น</h3><p>1. เริ่มจากสถานีอวกาศข้างดาวฤกษ์ แตะสถานีเพื่อสำรวจและปรับแต่งโมดูล ซึ่งมีผลต่อความเร็วยาน<br>แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงได้ในเมนู<br>ปุ่มมุมขวาล่าง: 🪐 3D สลับเป็นมุมมองระบบดาว 3 มิติ (ลากเพื่อหมุน บีบนิ้วเพื่อซูม), 1× ปรับความเร็วของอวกาศ, 🌘 ปรับความมืดของพื้นหลัง, วงกลม % แสดงความคืบหน้า<br>แตะดาวหรือพื้นหลังในหน้าดาวเพื่อพับแผงปรับแต่ง แล้วกดปุ่มด้านล่างเพื่อเปิดกลับ<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`;
+    if (page === 'howto') pg.innerHTML = `<h3>วิธีเล่น</h3><p>1. เริ่มจากสถานีอวกาศข้างดาวฤกษ์ แตะสถานีเพื่อสำรวจและปรับแต่งโมดูล ซึ่งมีผลต่อความเร็วยาน<br>แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น กด 🛬 ลงสำรวจ เพื่อลงไปเดินดูพื้นผิวที่สร้างจากค่าที่ปรับไว้ แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงได้ในเมนู<br>ปุ่มมุมขวาล่าง: 🪐 3D สลับเป็นมุมมองระบบดาว 3 มิติ (ลากเพื่อหมุน บีบนิ้วเพื่อซูม), 1× ปรับความเร็วของอวกาศ, 🌘 ปรับความมืดของพื้นหลัง, วงกลม % แสดงความคืบหน้า<br>แตะดาวหรือพื้นหลังในหน้าดาวเพื่อพับแผงปรับแต่ง แล้วกดปุ่มด้านล่างเพื่อเปิดกลับ<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`;
     if (page === 'model') pg.innerHTML = `<h3>ตัวเลขมาจากไหน</h3><p>ระยะห่างของดาวใช้หน่วยดาราศาสตร์ (1 หน่วย ≈ 149.6 ล้าน กม.) และคิดตอนดาวเรียงอยู่ด้านเดียวกันของดาวฤกษ์ เวลาเดินทางคิดจากยานความเร็ว ${nf.format(CONFIG.rocketKmh)} กม./ชม. ใกล้เคียงยานนิวฮอไรซันส์<br><br>อุณหภูมิ ออกซิเจน และจำนวนประชากรมาจากแบบจำลองอย่างง่ายเพื่อการเล่น ไม่ใช่การคำนวณทางวิทยาศาสตร์จริง สัดส่วนน้ำและดินนับจากจุด 2,400 จุดบนพื้นผิวดาวจริงที่เห็นบนจอ</p>${back}`;
     if (page === 'reset') pg.innerHTML = `<h3>เริ่มต้นใหม่ทั้งหมด?</h3><p>การปรับแต่ง ระบบนิเวศ และความคืบหน้าของทุกดาวจะหายไป</p>
       <button class="btn primary" type="button" data-confirm-reset style="background:linear-gradient(135deg,#ff4f8b,#e8457a)">ล้างข้อมูลทั้งหมด</button>${back}`;
