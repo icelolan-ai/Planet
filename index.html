@@ -52,6 +52,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 .num{font-variant-numeric:tabular-nums}
 
+#dust{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
 #sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;
   background:radial-gradient(120% 70% at 50% -10%,#4a2a6e 0%,rgba(74,42,110,0) 60%),linear-gradient(180deg,#2a1f4a,#1e1934 55%,#1a1630)}
 
@@ -101,6 +102,9 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 .node-flags{display:flex;gap:4px;justify-content:center;min-height:18px}
 .flag{font-size:11px;padding:1px 8px;border-radius:10px;background:rgba(63,214,198,.16);color:var(--teal)}
 .flag.eco{background:rgba(255,201,74,.16);color:var(--gold)}
+.flag.new{background:rgba(154,107,255,.22);color:#cdb8ff}
+.node.secret img{filter:drop-shadow(0 0 22px rgba(120,100,255,.6))}
+.route path.secret{stroke:#9a6bff;stroke-opacity:.75}
 .stepno{position:absolute;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-2);transform:translate(-50%,-50%);pointer-events:none}
 .stepno i{width:10px;height:10px;border-radius:50%;border:2px solid var(--ink-2);background:var(--bg)}
 .stepno.done i{border-color:var(--teal);background:var(--teal)}
@@ -111,6 +115,9 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 .star-node .sun{width:86px;height:86px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff3b0,#ffc94a 45%,#ff9a3c 80%);
   box-shadow:0 0 40px 12px rgba(255,190,80,.35),0 0 90px 30px rgba(255,150,60,.18)}
 .star-node span{font-size:12.5px;color:var(--ink-2)}
+.star-node .sun{pointer-events:auto;cursor:pointer}
+.star-node .sun.poke{animation:sunpoke .35s var(--ease)}
+@keyframes sunpoke{50%{transform:scale(1.08)}}
 .rocket-mark{position:absolute;left:0;top:0;width:46px;height:46px;pointer-events:none;will-change:transform;z-index:2}
 .fuel{flex:none;position:relative;z-index:3;padding:14px 22px calc(var(--safe-b) + 16px);background:var(--panel);border-top:1px solid var(--line)}
 .fuel-in{max-width:480px;margin:0 auto}
@@ -268,7 +275,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   .stage-hint{bottom:24px}
 }
 @media (prefers-reduced-motion: reduce){
-  .panel>*,.launch .rocket,.puff,.xsec path{animation:none}
+  .panel>*,.launch .rocket,.puff,.xsec path,.star-node .sun.poke{animation:none}
   .zone,.map-glow i{transition:none}
   .puff{opacity:.85}
 }
@@ -276,6 +283,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 </head>
 <body>
 <canvas id="sky" aria-hidden="true"></canvas>
+<canvas id="dust" aria-hidden="true"></canvas>
 
 <div class="boot" id="boot" role="status" aria-live="polite">
   <div class="boot-in">
@@ -595,6 +603,27 @@ const BIOMES = {
       { e: '🛢️', n: 'มีเทนแข็ง', drive: 'ice', base: 2200 }
     ]
   },
+  rogue: {
+    kind: 'ดาวเร่ร่อน', type: 'rock', relief: 0.07, flora: 'crystal', cloud: 0.55, atmo: 1.1,
+    controls: ['size', 'age', 'heat', 'glow', 'veg', 'water'], labels: { heat: 'ความร้อนจากแกนดาว', veg: 'ป่าเรืองแสง', glow: 'แสงเรืองชีวภาพ' },
+    hints: {
+      heat: 'ไม่มีดวงอาทิตย์ ความร้อนทั้งหมดมาจากแกนดาว',
+      veg: 'ป่าที่เรืองแสงได้เอง ขึ้นได้แม้อากาศหนาว',
+      glow: 'สิ่งมีชีวิตสร้างแสงเอง ยิ่งสูงดาวยิ่งสว่างในความมืด'
+    },
+    baseT: -55, heatRange: 110,
+    palette: { deep: '#061233', shallow: '#12b8a6', low: '#1b1733', high: '#3b3160', veg: '#2ed69a', dry: '#262040', ice: '#bfe6ff', hot: '#8a6bff', cloud: '#9aa8ff', atmo: '#7a66ff', ring: ['#8a6bff', '#12b8a6'], flora: ['#5dffb0', '#2fe0d0', '#b18cff'] },
+    species: [
+      { e: '🦑', n: 'หมึกแสงเหนือ', note: 'กะพริบแสงเรียกคู่ในทะเลมืด', t: [-45, 30], w: 0.2, base: 3e5 },
+      { e: '🦉', n: 'นกฮูกไร้ตะวัน', note: 'มองเห็นด้วยแสงจากป่า', t: [-50, 25], v: 0.3, g: 0.2, base: 6e4 },
+      { e: '🍄', n: 'เห็ดโคมไฟ', note: 'ดูดความร้อนจากใต้ดิน', t: [-70, 40], base: 8e6 }
+    ],
+    resources: [
+      { e: '🔮', n: 'ผลึกแสงนิรันดร์', drive: 'glow', base: 7000 },
+      { e: '♨️', n: 'ความร้อนใต้พิภพ', drive: 'heat', base: 4000 },
+      { e: '🧬', n: 'สารเรืองแสงชีวภาพ', drive: 'veg', base: 3000 }
+    ]
+  },
   crystal: {
     kind: 'ดาวผลึก', type: 'rock', relief: 0.07, flora: 'crystal', cloud: 0.5, atmo: 0.9,
     controls: ['size', 'age', 'glow', 'veg', 'water'], labels: { veg: 'ผลึกงอก' },
@@ -637,6 +666,12 @@ const PLANETS = [
     d: { size: 0.8, age: 9, glow: 0.7, veg: 0.5, water: 0.3 } }
 ];
 const STAR = { name: 'ประภา', note: 'ดาวฤกษ์ของระบบ' };
+/** Hidden planet: joins PLANETS once every other planet has life. */
+const SECRET = { id: 'ratree', name: 'ราตรี', biome: 'rogue', au: 14, seed: 97, dayH: 22, moons: 0, secret: true,
+  desc: 'ดาวเร่ร่อนที่หลุดมาจากระบบดาวอื่น ไม่ได้โคจรรอบดาวฤกษ์ดวงไหน แสงอาทิตย์แทบส่องไม่ถึง ความร้อนมาจากแกนดาวอย่างเดียว แต่ป่าและสัตว์ที่นี่สร้างแสงเองได้ ดาวทั้งดวงจึงเรืองอยู่กลางความมืด',
+  d: { size: 0.9, age: 8, heat: 0.8, glow: 0.55, veg: 0.38, water: 0.45 } };
+/** Every planet the save file knows about, including the secret one before it is revealed. */
+const allPlanets = () => PLANETS.includes(SECRET) ? PLANETS : [...PLANETS, SECRET];
 
 /** Regions of the system by distance (AU). Shown on the map as the player scrolls outward. */
 const ZONES = [
@@ -734,7 +769,7 @@ function simulate(planet, terrain, p, eco) {
     water /= n; ice /= n; soil /= n;
   }
   const tempFit = smooth(-25, 5, T) * (1 - smooth(45, 75, T));
-  const vegEff = b.type === 'gas' ? 0 : clamp(e.veg * smooth(0.05, 0.55, e.humidity + e.glow * 0.6) * (planet.biome === 'crystal' ? 1 : tempFit), 0, 1);
+  const vegEff = b.type === 'gas' ? 0 : clamp(e.veg * smooth(0.05, 0.55, e.humidity + e.glow * 0.6) * (b.flora === 'crystal' ? 1 : tempFit), 0, 1);
   const plants = soil * vegEff * 0.92;
   out.vegEff = vegEff;
   out.cover = { water, ice, plants, soil: Math.max(0, soil - plants) };
@@ -1321,7 +1356,8 @@ const Sound = {
   launch() { this.noise(1.6, { from: 300, to: 2400, gain: 0.35 }); this.tone(110, 1.5, { type: 'sawtooth', gain: 0.05, slide: 3 }); },
   life() { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => this.tone(f, 0.6, { gain: 0.2, at: i * 0.09 })); },
   erupt() { this.noise(1.1, { from: 180, to: 60, gain: 0.6, q: 0.6 }); this.tone(70, 0.8, { type: 'triangle', gain: 0.3, slide: 0.6 }); },
-  storm() { this.noise(1.4, { from: 500, to: 1600, gain: 0.3, q: 1.2 }); }
+  storm() { this.noise(1.4, { from: 500, to: 1600, gain: 0.3, q: 1.2 }); },
+  secret() { this.tone(220, 1.8, { gain: 0.22, slide: 1.5 }); this.tone(330, 1.8, { gain: 0.14, slide: 0.75, at: 0.25 }); this.tone(880, 1.2, { type: 'triangle', gain: 0.06, at: 0.5 }); }
 };
 
 /* ================================================================
@@ -1335,8 +1371,9 @@ const Store = {
     if (!s || s.v !== 1) return base;
     base.at = typeof s.at === 'number' ? s.at : -1;
     base.sound = s.sound === true;
+    base.secret = s.secret === true;
     base.visited = Array.isArray(s.visited) ? s.visited : [];
-    PLANETS.forEach(p => {
+    allPlanets().forEach(p => {
       const saved = s.planets && s.planets[p.id];
       if (!saved) return;
       Object.assign(base.planets[p.id].params, saved.params || {});
@@ -1346,7 +1383,7 @@ const Store = {
     return base;
   },
   fresh() {
-    return { v: 1, at: -1, visited: [], sound: false, planets: Object.fromEntries(PLANETS.map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
+    return { v: 1, at: -1, visited: [], sound: false, secret: false, planets: Object.fromEntries(allPlanets().map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
   },
   save(state) { try { localStorage.setItem(CONFIG.storeKey, JSON.stringify(state)); } catch (e) { /* storage may be unavailable; progress stays in memory */ } }
 };
@@ -1368,6 +1405,67 @@ function drawSky() {
   }
 }
 
+/* ================================================================
+   Dust: soft motes drifting in front of the stars, with a little
+   parallax from the pointer and the map scroll. One still frame
+   under reduced motion; paused while the page is hidden.
+================================================================ */
+const Dust = {
+  scroll: 0, tx: 0, ty: 0, px: 0, py: 0, raf: null,
+  init() {
+    this.c = $('#dust'); this.g = this.c.getContext('2d');
+    if (!this.g) return;
+    this.sprites = ['255,244,255', '140,240,225', '255,170,210'].map(rgb => {
+      const c = document.createElement('canvas'); c.width = c.height = 32;
+      const g = c.getContext('2d'), gr = g.createRadialGradient(16, 16, 0, 16, 16, 16);
+      gr.addColorStop(0, `rgba(${rgb},1)`); gr.addColorStop(0.3, `rgba(${rgb},.5)`); gr.addColorStop(1, `rgba(${rgb},0)`);
+      g.fillStyle = gr; g.fillRect(0, 0, 32, 32);
+      return c;
+    });
+    this.frame = this.frame.bind(this);
+    addEventListener('pointermove', e => { this.tx = e.clientX / innerWidth - 0.5; this.ty = e.clientY / innerHeight - 0.5; }, { passive: true });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) this.stop(); else this.start(); });
+    this.resize();
+    this.start();
+  },
+  resize() {
+    if (!this.g) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2), w = innerWidth, h = innerHeight;
+    this.w = w; this.h = h;
+    this.c.width = w * dpr; this.c.height = h * dpr; this.g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const r = rng(19), n = Math.round(clamp(w * h / 12000, 36, MOBILE ? 70 : 110));
+    this.p = Array.from({ length: n }, () => {
+      const z = 0.25 + r() * 0.75;   // depth: near motes are bigger, brighter and move more
+      const bokeh = r() < 0.07;      // a few large, faint, out-of-focus motes for depth
+      return { x: r() * w, y: r() * h, z, vx: (r() - 0.5) * 8, vy: -(3 + r() * 7), ph: r() * 6.28, tw: 0.4 + r() * 1.2,
+        sprite: r() < 0.72 ? 0 : r() < 0.5 ? 1 : 2, size: bokeh ? 14 + r() * 12 : 2.5 + z * 6, alpha: bokeh ? 0.3 : 1 };
+    });
+    if (REDUCED) this.draw(0, 0);
+  },
+  start() { if (REDUCED || this.raf || !this.g) return; this.last = performance.now(); this.raf = requestAnimationFrame(this.frame); },
+  stop() { cancelAnimationFrame(this.raf); this.raf = null; },
+  frame(now) {
+    this.raf = requestAnimationFrame(this.frame);
+    const dt = Math.min(0.05, (now - this.last) / 1000 || 0.016); this.last = now;
+    this.draw(dt, now / 1000);
+  },
+  draw(dt, t) {
+    const g = this.g, w = this.w, h = this.h, m = 20, W = w + m * 2, H = h + m * 2;
+    const wrap = (v, span) => ((v + m) % span + span) % span - m;
+    this.px = damp(this.px, this.tx, 1.5, dt); this.py = damp(this.py, this.ty, 1.5, dt);
+    g.clearRect(0, 0, w, h);
+    g.globalCompositeOperation = 'lighter';
+    for (const p of this.p) {
+      p.x = wrap(p.x + (p.vx + Math.sin(t * 0.4 + p.ph) * 5) * p.z * dt, W);
+      p.y = wrap(p.y + (p.vy + Math.cos(t * 0.3 + p.ph) * 4) * p.z * dt, H);
+      const x = wrap(p.x - this.px * 36 * p.z, W), y = wrap(p.y - this.py * 36 * p.z - this.scroll * 0.12 * p.z, H);
+      g.globalAlpha = p.alpha * (0.3 + 0.6 * p.z) * (0.6 + 0.4 * Math.sin(t * p.tw + p.ph));
+      g.drawImage(this.sprites[p.sprite], x - p.size / 2, y - p.size / 2, p.size, p.size);
+    }
+    g.globalAlpha = 1;
+  }
+};
+
 const ROCKET_SVG = `<svg viewBox="0 0 120 120" aria-hidden="true"><g transform="rotate(45 60 60)">
 <path d="M42 70 24 88l20 2z" fill="#3fd6c6"/><path d="M78 70l18 18-20 2z" fill="#3fd6c6"/>
 <path d="M60 8c17 15 23 36 21 62H39C37 44 43 23 60 8z" fill="#f4f1ff"/>
@@ -1381,6 +1479,7 @@ const ROCKET_SVG = `<svg viewBox="0 0 120 120" aria-hidden="true"><g transform="
 class App {
   constructor() {
     this.state = Store.load();
+    if (this.state.secret && !PLANETS.includes(SECRET)) PLANETS.push(SECRET);
     this.terrains = {};
     this.bodies = {};
     this.thumbs = {};
@@ -1391,12 +1490,13 @@ class App {
     this.drag = { active: false, x: 0, y: 0, vx: 0, vy: 0 };
     this.rotX = 0.3; this.rotY = 0; this.velY = 0.12; this.velX = 0;
     this.lastPoke = 0; this.touched = false; this.idleShown = false;
-    this.arrive = 1; this.spinIn = 0;
+    this.arrive = 1; this.spinIn = 0; this.sunTaps = [];
     this.loop = this.loop.bind(this);
   }
 
   async init() {
     drawSky();
+    Dust.init();
     const bar = $('[data-boot-bar]'), status = $('[data-boot-status]');
     const step = (p, text) => { bar.style.width = Math.round(p * 100) + '%'; if (text) status.textContent = text; };
     this.bindUI();
@@ -1410,15 +1510,7 @@ class App {
         const p = PLANETS[i];
         step(0.08 + i / PLANETS.length * 0.8, `กำลังสร้างดาว${p.name}`);
         await frame();
-        const st = this.state.planets[p.id];
-        const terrain = new Terrain(st.seed);
-        this.terrains[p.id] = terrain;
-        const body = new PlanetBody(p, terrain);
-        body.apply(effective(p, st.params));
-        body.snap();
-        this.bodies[p.id] = body;
-        this.thumbs[p.id] = this.stage.snapshot(body);
-        this.sims[p.id] = simulate(p, terrain, st.params, st.eco);
+        this.makeBody(p);
       }
     }
     step(1, 'พร้อมออกเดินทาง');
@@ -1429,13 +1521,52 @@ class App {
     setTimeout(() => $('#boot').remove(), 700);
   }
 
+  /** Build (or rebuild) a planet's 3D body, map thumbnail and statistics from the saved state. */
+  makeBody(p) {
+    const st = this.state.planets[p.id];
+    const terrain = this.terrains[p.id] || (this.terrains[p.id] = new Terrain(st.seed));
+    let body = this.bodies[p.id];
+    if (body) body.reseed(st.seed); else body = this.bodies[p.id] = new PlanetBody(p, terrain);
+    body.apply(effective(p, st.params));
+    body.rest();
+    this.thumbs[p.id] = this.stage.snapshot(body);
+    this.sims[p.id] = simulate(p, terrain, st.params, st.eco);
+  }
+
   webgl() { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl') || c.getContext('experimental-webgl')); } catch (e) { return false; } }
 
   save() { clearTimeout(this.saveT); this.saveT = setTimeout(() => Store.save(this.state), 350); }
 
-  toast(msg) {
+  toast(msg, ms = 2000) {
     const t = $('#toast'); t.textContent = msg; t.classList.add('is-on');
-    clearTimeout(this.toastT); this.toastT = setTimeout(() => t.classList.remove('is-on'), 2000);
+    clearTimeout(this.toastT); this.toastT = setTimeout(() => t.classList.remove('is-on'), ms);
+  }
+
+  /* ---------------- Secrets ---------------- */
+  /** Life on every planet reveals a rogue planet past the edge of the map. */
+  checkSecret() {
+    if (this.state.secret || !PLANETS.filter(p => !p.secret).every(p => this.state.planets[p.id].eco)) return;
+    this.state.secret = true; this.save();
+    if (!PLANETS.includes(SECRET)) PLANETS.push(SECRET);
+    if (!this.noGL) this.makeBody(SECRET);
+    this.buildMap();
+    Sound.secret();
+    this.toast('📡 ได้รับสัญญาณลึกลับจากนอกระบบ ลองเลื่อนไปดูปลายแผนที่', 4200);
+  }
+
+  /** Tapping the star five times in a row makes it whisper a hint. */
+  pokeSun(el) {
+    el.classList.remove('poke'); void el.offsetWidth; el.classList.add('poke');
+    Sound.tap();
+    const now = performance.now();
+    this.sunTaps = this.sunTaps.filter(t => now - t < 3000).concat(now);
+    if (this.sunTaps.length < 5) return;
+    this.sunTaps = [];
+    const base = PLANETS.filter(p => !p.secret), alive = base.filter(p => this.state.planets[p.id].eco).length;
+    this.toast(this.state.secret
+      ? `☀️ ${STAR.name}กระซิบ: ราตรีไม่เคยเห็นแสงของฉันเลย แต่ชีวิตบนนั้นสร้างแสงได้เอง`
+      : `☀️ ${STAR.name}กระซิบ: มีดาวดวงหนึ่งล่องลอยอยู่ในความมืด จะปรากฏเมื่อทุกดาวมีชีวิต (${alive}/${base.length})`, 4200);
+    Sound.secret();
   }
 
   /* ---------------- Map ---------------- */
@@ -1460,6 +1591,7 @@ class App {
       const path = document.createElementNS(svgNS, 'path');
       const dy = (b.y - a.y) * 0.55;
       path.setAttribute('d', `M${a.x} ${a.y + (i === 0 ? 46 : 58)} C${a.x} ${a.y + dy} ${b.x} ${b.y - dy} ${b.x} ${b.y - 62}`);
+      if (PLANETS[i].secret) path.setAttribute('class', 'secret');
       svg.appendChild(path);
       this.segPaths.push(path);
       const mid = path.getPointAtLength(path.getTotalLength() * 0.5);
@@ -1474,14 +1606,15 @@ class App {
     const star = document.createElement('div');
     star.className = 'star-node';
     star.style.left = this.nodes[0].x + 'px'; star.style.top = this.nodes[0].y + 'px';
-    star.innerHTML = `<div class="sun"></div><span>${STAR.note} “${STAR.name}”</span>`;
+    star.innerHTML = `<button class="sun" type="button" aria-label="ดาวฤกษ์${STAR.name}"></button><span>${STAR.note} “${STAR.name}”</span>`;
+    star.querySelector('.sun').addEventListener('click', e => this.pokeSun(e.currentTarget));
     j.appendChild(star);
 
     this.nodeEls = PLANETS.map((p, i) => {
       const n = this.nodes[i + 1];
       const size = Math.round((BIOMES[p.biome].ring ? 150 : 104) * (0.75 + (this.state.planets[p.id].params.size || 1) * 0.28));
       const btn = document.createElement('button');
-      btn.type = 'button'; btn.className = 'node';
+      btn.type = 'button'; btn.className = p.secret ? 'node secret' : 'node';
       btn.style.left = n.x + 'px'; btn.style.top = n.y + 'px';
       btn.setAttribute('aria-label', `บินไปดาว${p.name}, ${BIOMES[p.biome].kind}`);
       const img = this.thumbs[p.id] ? `<img src="${this.thumbs[p.id]}" width="${size}" height="${size}" alt="">` :
@@ -1575,7 +1708,8 @@ class App {
     PLANETS.forEach((p, i) => {
       const el = this.nodeEls[i];
       const visited = st.visited.includes(p.id), eco = st.planets[p.id].eco;
-      el.btn.querySelector('[data-flags]').innerHTML = (visited ? '<span class="flag">สำรวจแล้ว</span>' : '') + (eco ? '<span class="flag eco">มีชีวิต</span>' : '');
+      el.btn.querySelector('[data-flags]').innerHTML = (p.secret && !visited ? '<span class="flag new">สัญญาณลึกลับ</span>' : '') +
+        (visited ? '<span class="flag">สำรวจแล้ว</span>' : '') + (eco ? '<span class="flag eco">มีชีวิต</span>' : '');
       el.no.classList.toggle('done', visited);
       if (this.segPaths[i]) this.segPaths[i].classList.toggle('done', visited && (i === 0 || st.visited.includes(PLANETS[i - 1].id)));
       const img = el.btn.querySelector('img');
@@ -1697,7 +1831,7 @@ class App {
     const p = (value - c.min) / (c.max - c.min) * 100;
     return `<div class="ctl"><div class="ctl-top"><span class="ctl-ic" aria-hidden="true">${c.icon}</span><label for="c-${key}">${label}</label><output class="num" data-out="${key}">${c.fmt(value)}</output></div>
       <input id="c-${key}" type="range" min="${c.min}" max="${c.max}" step="${c.step}" value="${value}" data-ctl="${key}" style="--p:${p}%">
-      <p class="ctl-hint">${c.hint}</p></div>`;
+      <p class="ctl-hint">${(b.hints && b.hints[key]) || c.hint}</p></div>`;
   }
 
   tab_custom(p, st) {
@@ -1765,7 +1899,7 @@ class App {
         <div><dt>ห่างจากดาวฤกษ์</dt><dd>${fmtKm(kmStar)}<br><small style="color:var(--ink-3);font-weight:400">${p.au} หน่วยดาราศาสตร์, บินนาน ${fmtTravel(kmStar)}</small></dd></div>
         <div><dt>แสงจากดาวฤกษ์</dt><dd>${fmtLight(p.au)}</dd></div>
         ${leg(prev, 'ถึง')}${leg(next, 'ถึง')}
-        <div><dt>1 ปีบนดาวนี้</dt><dd>${(Math.pow(p.au, 1.5)).toFixed(2)} ปีโลก</dd></div>
+        <div><dt>1 ปีบนดาวนี้</dt><dd>${p.secret ? 'ไม่มี เพราะไม่ได้โคจรรอบดาวฤกษ์' : (Math.pow(p.au, 1.5)).toFixed(2) + ' ปีโลก'}</dd></div>
         <div><dt>1 วันบนดาวนี้</dt><dd>${p.dayH} ชั่วโมง</dd></div>
         <div><dt>แรงโน้มถ่วง</dt><dd class="num" data-b="gravity"></dd></div>
         <div><dt>อายุดาว</dt><dd class="num" data-b="age"></dd></div>
@@ -1867,6 +2001,7 @@ class App {
     if (what === 'eco') {
       st.eco = true; this.save();
       Sound.life();
+      setTimeout(() => this.checkSecret(), 1800);
       this.toast('สร้างระบบนิเวศแล้ว สิ่งมีชีวิตเริ่มอาศัยอยู่');
       this.setTab('eco');
       if (!this.noGL) { const b = this.bodies[p.id]; b.flash = 0.4; }
@@ -1947,7 +2082,10 @@ class App {
     });
 
     let zr = 0;
-    $('#mapScroll').addEventListener('scroll', () => { if (!zr) zr = requestAnimationFrame(() => { zr = 0; this.updateZone(); }); }, { passive: true });
+    $('#mapScroll').addEventListener('scroll', e => {
+      Dust.scroll = e.currentTarget.scrollTop;
+      if (!zr) zr = requestAnimationFrame(() => { zr = 0; this.updateZone(); });
+    }, { passive: true });
 
     // Any touch on the planet view resets the idle timer.
     ['pointerdown', 'input', 'keydown'].forEach(t => $('#detail').addEventListener(t, () => this.poke(), true));
@@ -1996,7 +2134,7 @@ class App {
     addEventListener('resize', () => {
       clearTimeout(rt);
       rt = setTimeout(() => {
-        drawSky();
+        drawSky(); Dust.resize();
         if (this.stage && this.current >= 0) this.stage.resize();
         if (this.nodes) { const top = $('#mapScroll').scrollTop; this.buildMap(); $('#mapScroll').scrollTop = top; }
       }, 150);
@@ -2060,8 +2198,12 @@ class App {
   }
 
   resetAll() {
+    this.closeMenu();
+    if (this.current >= 0) this.closeDetail();
     const sound = this.state.sound;
     this.state = Store.fresh(); this.state.sound = sound; Store.save(this.state);
+    // The secret planet hides again until it is earned.
+    if (PLANETS.includes(SECRET)) PLANETS.splice(PLANETS.indexOf(SECRET), 1);
     if (!this.noGL) {
       PLANETS.forEach(p => {
         const body = this.bodies[p.id];
@@ -2069,8 +2211,6 @@ class App {
         this.thumbs[p.id] = this.stage.snapshot(body);
       });
     }
-    this.closeMenu();
-    if (this.current >= 0) this.closeDetail();
     this.buildMap();
     $('#mapScroll').scrollTop = 0;
     this.toast('เริ่มต้นใหม่แล้ว');
