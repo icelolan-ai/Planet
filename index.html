@@ -65,6 +65,10 @@ h1,h2,h3{font-family:var(--f-head);font-weight:600;margin:0;line-height:1.2}
 #sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;
   background:radial-gradient(120% 70% at 50% -10%,var(--sky-a) 0%,transparent 60%),linear-gradient(180deg,var(--sky-1),var(--sky-2) 55%,var(--sky-3))}
 
+/* Fine print grain over everything; the texture is generated at start-up. */
+#grain{position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.55;background-size:180px 180px}
+[data-bg="black"] #grain{opacity:.35}
+
 /* ------------------------------------------------------------------ Boot */
 .boot{position:fixed;inset:0;z-index:60;display:grid;place-items:center;overflow:hidden;transition:opacity .6s var(--ease);
   background:radial-gradient(60% 45% at 85% 12%,rgba(255,79,216,.35),transparent 70%),radial-gradient(55% 45% at 10% 90%,rgba(51,225,255,.22),transparent 70%),linear-gradient(170deg,#4a1fc0,#2a1178 55%,#170a4a)}
@@ -471,6 +475,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 </head>
 <body>
 <canvas id="sky" aria-hidden="true"></canvas>
+<div id="grain" aria-hidden="true"></div>
 <canvas id="dust" aria-hidden="true"></canvas>
 
 <div class="boot" id="boot" role="status" aria-live="polite">
@@ -1178,6 +1183,8 @@ vec2 craters(vec3 p){
   }
   return vec2(bowl, rim);
 }
+/* Weight for a noise term of frequency f: 1 while it spans several pixels, fading to 0 before it would alias. */
+float fa(float f, float px){ return 1.0 - smoothstep(0.05, 0.16, f * px); }
 /* Bump from a per-pixel height, using screen-space derivatives (as three.js's perturbNormalArb). */
 vec3 bumpN(vec3 N, float hb, float k){
   vec3 dpx = dFdx(vWorld), dpy = dFdy(vWorld);
@@ -1210,8 +1217,7 @@ void main(){
     // Per-pixel detail on top of the per-vertex height, so coastlines don't show the mesh's triangles.
     // Fade out detail finer than a pixel, so distant views stay clean and close-ups stay sharp.
     float px = length(fwidth(p));
-    float aa1 = 1.0 - smoothstep(0.004, 0.012, px), aa2 = 1.0 - smoothstep(0.0015, 0.005, px);
-    float h = vH + snoise(p * 22.0) * 0.014 + snoise(p * 57.0) * 0.007 * aa1 + snoise(p * 140.0) * 0.003 * aa2;
+    float h = vH + snoise(p * 22.0) * 0.014 * fa(22.0, px) + snoise(p * 57.0) * 0.007 * fa(57.0, px) + snoise(p * 140.0) * 0.003 * fa(140.0, px);
     if (h < uSea) {
       float depth = clamp((uSea - h) / max(uSea, 0.05), 0.0, 1.0);
       if (uLavaSea > 0.5) {
@@ -1226,9 +1232,9 @@ void main(){
     } else {
       float t = clamp((h - uSea) / max(1.0 - uSea, 0.05), 0.0, 1.0);
       // Rock grain and a bumped surface, so close-ups show detail instead of flat colour.
-      float grain = snoise(p * 90.0) * 0.5 * aa1 + snoise(p * 230.0) * 0.25 * aa2;
+      float grain = snoise(p * 90.0) * 0.5 * fa(90.0, px) + snoise(p * 230.0) * 0.25 * fa(230.0, px);
       vec2 cr = uCrater > 0.01 ? craters(p) * uCrater : vec2(0.0);
-      Nb = bumpN(N, snoise(p * 45.0) * 0.6 + snoise(p * 120.0) * 0.3 * aa1 + grain * 0.2 + (cr.y - cr.x) * 1.4, (0.011 + t * 0.012) * (0.4 + 0.6 * aa1));
+      Nb = bumpN(N, snoise(p * 45.0) * 0.6 * fa(45.0, px) + snoise(p * 120.0) * 0.3 * fa(120.0, px) + grain * 0.2 + (cr.y - cr.x) * 1.4 * fa(60.0, px), 0.011 + t * 0.012);
       col = mix(cLow, cHigh, smoothstep(0.0, 0.85, t)) * (0.85 + 0.3 * dn) * (0.93 + 0.1 * grain);
       col = col * (1.0 - cr.x * 0.28) + cr.y * 0.12;
       col = mix(col, cDry, (1.0 - uHumid) * 0.55);
@@ -1245,14 +1251,18 @@ void main(){
     col = mix(col, cIce, cap);
     emis *= 1.0 - cap; spec *= 1.0 - cap;
   }
-  float dif = max(dot(Nb, uSun), 0.0);
+  float dif = max(dot(Nb, uSun), 0.0), difS = max(dot(N, uSun), 0.0);
   // Illustrated look: a soft two-step terminator, a coloured rim light and a glossy highlight.
-  float cel = smoothstep(0.0, 0.2, dif) * 0.62 + smoothstep(0.35, 0.85, dif) * 0.38;
+  // The steps follow the smooth normal (bumps flipping them made blocky specks at the terminator);
+  // the bumps only shade the surface a little lighter or darker.
+  float cel = smoothstep(0.0, 0.2, difS) * 0.62 + smoothstep(0.35, 0.85, difS) * 0.38;
+  cel *= clamp(1.0 + (dot(Nb, uSun) - dot(N, uSun)) * 1.6, 0.6, 1.3);
   float rim = pow(1.0 - max(dot(N, V), 0.0), 2.6);
   float gloss = pow(max(dot(reflect(-uSun, Nb), V), 0.0), 26.0) * 0.22;
   col = mix(vec3(dot(col, vec3(0.3, 0.59, 0.11))), col, 1.18);   // a touch more saturation
   vec3 lit = col * (0.2 + 0.95 * cel) + spec * dif + vec3(gloss) * cel;
   lit += cRim * rim * (0.28 + 0.5 * cel);
+  lit += vec3(1.0, 0.32, 0.85) * rim * (1.0 - cel) * 0.42;   // pink print-style rim on the night side
   lit += cHot * emis * (1.0 + uFlash) + cVeg * glowE * (0.35 + 0.65 * (1.0 - dif));
   float rp = ripple(p);
   lit = lit * (1.0 + min(rp, 0.0) * 0.45) + mix(vec3(1.0), cShallow, 0.4) * max(rp, 0.0) * 0.7 * (0.5 + 0.5 * dif);
@@ -1968,6 +1978,17 @@ const Store = {
 ================================================================ */
 let SKY_TEX = null;   // the 3D system view reuses the painted sky as its backdrop
 /** Illustrated sky for the current darkness mode: gradient, soft colour glows, wavy contour rings and sparkles. */
+function drawGrain() {
+  const c = document.createElement('canvas'); c.width = c.height = 180;
+  const g = c.getContext('2d'), img = g.createImageData(180, 180), d = img.data, r = rng(11);
+  for (let i = 0; i < d.length; i += 4) {
+    const v = r() < 0.5 ? 0 : 255;
+    d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = r() * r() * 34;
+  }
+  g.putImageData(img, 0, 0);
+  $('#grain').style.backgroundImage = `url(${c.toDataURL()})`;
+}
+
 function drawSky() {
   const c = $('#sky'), w = innerWidth, h = innerHeight;
   c.width = Math.round(w * DPR); c.height = Math.round(h * DPR);
@@ -1987,14 +2008,46 @@ function drawSky() {
   glow(w * 0.85, h * 0.08, M * 0.55, tint[0], 0.35 * vivid);
   glow(w * 0.1, h * 0.55, M * 0.45, tint[1], 0.16 * vivid);
   glow(w * 0.7, h * 1.02, M * 0.5, tint[2], 0.14 * vivid);
-  // Wavy contour rings, like ink swirls.
   const r = rng(7), k = Math.min(w, h) / 800;
+  // A milky-way band across the sky: soft violet and blue clouds packed with fine stars.
+  const mw = (u, off) => [u * w * 1.3 - w * 0.15, h * 0.95 - u * h * 0.85 + off];
+  for (let i = 0; i < 26; i++) {
+    const u = i / 25, [x, y] = mw(u, (r() - 0.5) * 60 * k);
+    glow(x, y, (90 + r() * 110) * k, i % 3 ? '150,110,255' : '90,150,255', (0.07 + r() * 0.05) * vivid);
+  }
+  g.fillStyle = 'rgba(255,255,255,.55)';
+  for (let i = 0; i < Math.round(w * h / 900); i++) {
+    const u = r(), spread = (r() + r() + r() - 1.5) * 95 * k, [x, y] = mw(u, spread);
+    g.fillRect(x, y, 0.8, 0.8);
+  }
+  // Star chart: a faint polar grid and gold great circles with beads on them.
+  const cx = w * 0.5, cy = h * 1.35, R0 = Math.hypot(w, h);
+  g.strokeStyle = `rgba(214,200,255,${(0.05 + 0.03 * vivid).toFixed(3)})`; g.lineWidth = 1;
+  g.beginPath();
+  for (let i = 1; i <= 7; i++) { const rr = R0 * i / 6.5; g.moveTo(cx + rr, cy); g.arc(cx, cy, rr, 0, 6.283); }
+  for (let i = 0; i < 24; i++) { const a = Math.PI + i / 23 * Math.PI; g.moveTo(cx, cy); g.lineTo(cx + Math.cos(a) * R0 * 1.2, cy + Math.sin(a) * R0 * 1.2); }
+  g.stroke();
+  const gold = `rgba(255,200,110,${(0.22 + 0.2 * vivid).toFixed(2)})`;
+  const chartArc = (x, y, rad, a0, a1, dash) => {
+    g.strokeStyle = gold; g.lineWidth = 1.2; g.setLineDash(dash ? [14 * k + 6, 12 * k + 6] : []);
+    g.beginPath(); g.arc(x, y, rad, a0, a1); g.stroke(); g.setLineDash([]);
+    g.fillStyle = gold;
+    for (let i = 0; i < 3; i++) {
+      const a = a0 + (a1 - a0) * (0.15 + r() * 0.7), s2 = 2 + r() * 2;
+      g.beginPath(); g.arc(x + Math.cos(a) * rad, y + Math.sin(a) * rad, s2, 0, 6.283); g.fill();
+    }
+  };
+  chartArc(w * 0.5, h * 1.1, Math.max(w, h) * 0.75, Math.PI * 1.05, Math.PI * 1.95, false);
+  chartArc(-w * 0.1, h * 0.25, M * 0.62, -0.9, 1.2, false);
+  chartArc(w * 1.2, h * 0.05, M * 0.7, 1.7, 3.1, true);
+  chartArc(w * 0.05, h * 0.05, 110 * k + 40, 0, 6.283, false);
+  // Wavy contour rings, like ink swirls.
   g.lineWidth = 1.3;
-  [[0.12, 0.22], [0.92, 0.38], [0.28, 0.88], [0.8, 0.92], [0.55, 0.6]].forEach(([cx, cy], n) => {
+  [[0.92, 0.38], [0.28, 0.88], [0.8, 0.92]].forEach(([cx, cy], n) => {
     const ph = r() * 6.28, ps = r() * 6.28;
     for (let i = 0; i < 7; i++) {
       const rad = (46 + i * 28) * k * (0.8 + (n % 3) * 0.25);
-      g.strokeStyle = `rgba(255,255,255,${((0.05 + 0.02 * (i % 2)) * vivid + 0.015).toFixed(3)})`;
+      g.strokeStyle = `rgba(255,255,255,${((0.035 + 0.015 * (i % 2)) * vivid + 0.012).toFixed(3)})`;
       g.beginPath();
       for (let a = 0; a <= 6.3; a += 0.05) {
         const rr = rad * (1 + 0.09 * Math.sin(3 * a + ph + i * 0.35) + 0.05 * Math.sin(5 * a + ps));
@@ -2014,15 +2067,25 @@ function drawSky() {
   const dots = ['51,225,255', '255,79,216', '255,177,61', '125,255,106'];
   for (let i = 0; i < 16; i++) {
     const x = r() * w, y = r() * h, sz = 2 + r() * 3.5;
+    if (y < 72) continue;
     g.fillStyle = `rgba(${dots[i % 4]},${(0.35 + 0.35 * vivid).toFixed(2)})`;
     g.beginPath(); g.arc(x, y, sz, 0, 6.283); g.fill();
   }
   g.fillStyle = 'rgba(255,255,255,.85)';
   for (let i = 0; i < 14; i++) {
     const x = r() * w, y = r() * h, sz = 3 + r() * 5;
+    if (y < 72) continue;   // keep the header text clean
     g.beginPath(); g.moveTo(x, y - sz);
     g.quadraticCurveTo(x, y, x + sz, y); g.quadraticCurveTo(x, y, x, y + sz);
     g.quadraticCurveTo(x, y, x - sz, y); g.quadraticCurveTo(x, y, x, y - sz); g.fill();
+  }
+  // A few five-point stars.
+  for (let i = 0; i < 8; i++) {
+    const x = r() * w, y = r() * h, R = 4 + r() * 4, rot = r();
+    if (y < 72) continue;
+    g.beginPath();
+    for (let j = 0; j < 10; j++) { const a = rot + j * Math.PI / 5 - Math.PI / 2, rr = j % 2 ? R * 0.45 : R; g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
+    g.closePath(); g.fill();
   }
   if (SKY_TEX) SKY_TEX.needsUpdate = true;
 }
@@ -2755,7 +2818,7 @@ class App {
   }
 
   async init() {
-    drawSky();
+    drawSky(); drawGrain();
     Dust.init();
     const bar = $('[data-boot-bar]'), status = $('[data-boot-status]');
     const step = (p, text) => { bar.style.width = Math.round(p * 100) + '%'; if (text) status.textContent = text; };
@@ -3008,6 +3071,23 @@ class App {
     this.motes = Array.from({ length: PHONE ? 220 : 360 }, () => ({ x: r(), y: r(), z: Math.floor(r() * 3), vx: (r() - 0.5) * 10, vy: (r() - 0.5) * 6, s: 0.5 + r() * 1.1 }));
     this.comets = []; this.meteors = [];
     this.cometT = 4; this.meteorT = 1.5;
+    // Glossy little balls floating in front of the orbits, with a pink/cyan print offset.
+    const ball = hex => {
+      const c = document.createElement('canvas'); c.width = c.height = 48;
+      const g = c.getContext('2d');
+      g.globalAlpha = 0.75;
+      g.fillStyle = '#ff4fd8'; g.beginPath(); g.arc(21, 24, 17, 0, 6.283); g.fill();
+      g.fillStyle = '#33e1ff'; g.beginPath(); g.arc(27, 24, 17, 0, 6.283); g.fill();
+      g.globalAlpha = 1;
+      const gr = g.createRadialGradient(18, 17, 1, 24, 24, 18);
+      gr.addColorStop(0, '#ffffff'); gr.addColorStop(0.22, hex); gr.addColorStop(1, mixHex(hex, '#1a0840', 0.55));
+      g.fillStyle = gr; g.beginPath(); g.arc(24, 24, 16, 0, 6.283); g.fill();
+      return c;
+    };
+    const tones = ['#ff5fa8', '#ff3b5c', '#33e1ff', '#2fe0b5', '#f4efff', '#ffc23d', '#b04dff'];
+    this.ballImgs = tones.map(ball);
+    this.balls = Array.from({ length: PHONE ? 14 : 22 }, (_, i) => ({ x: r(), y: r(), z: r(), vx: (r() - 0.5) * 8, vy: (r() - 0.5) * 6, s: 2.5 + r() * 5.5, img: i % tones.length }));
+    this.trailRGB = {};
   }
 
   resizeSpace() {
@@ -3074,15 +3154,57 @@ class App {
       label(fr, 'แนวหิมะ', 'rgba(160,210,255,.75)');
     }
 
-    // Planet orbits: fine dashes that creep around the star.
-    g.lineWidth = 1; g.setLineDash([2, 7]); g.lineDashOffset = -t * 8;
+    // Layered discs around the star: every other gap between orbits is a shade darker.
+    g.fillStyle = 'rgba(14,4,46,.13)';
+    g.beginPath();
+    for (let i = 0; i + 1 < this.orbitR.length; i += 2) {
+      const r0 = this.orbitR[i], r1 = this.orbitR[i + 1];
+      if (!onScreen(r1)) continue;
+      g.moveTo(sx + r1, sy); g.arc(sx, sy, r1, 0, TAU); g.moveTo(sx + r0, sy); g.arc(sx, sy, r0, TAU, 0, true);
+    }
+    g.fill();
+
+    // Planet orbits: thin gold lines with beads creeping along them.
+    g.lineWidth = 1;
     this.orbitR.forEach((r, i) => {
       if (!onScreen(r)) return;
-      const p = PLANETS[i];
-      g.strokeStyle = p.secret ? 'rgba(154,107,255,.3)' : this.state.visited.includes(p.id) ? 'rgba(63,214,198,.3)' : 'rgba(236,232,255,.16)';
+      const p = PLANETS[i], seen = this.state.visited.includes(p.id);
+      g.strokeStyle = p.secret ? 'rgba(154,107,255,.35)' : seen ? 'rgba(63,214,198,.38)' : 'rgba(255,206,130,.28)';
       g.beginPath(); visArc(r); g.stroke();
+      g.fillStyle = p.secret ? 'rgba(190,150,255,.8)' : seen ? 'rgba(110,235,220,.85)' : 'rgba(255,206,130,.85)';
+      g.beginPath();
+      for (let k = 0; k < 4; k++) {
+        const a = k * 1.571 + i * 0.7 + t * 1.2 / Math.sqrt(r), x = sx + Math.cos(a) * r, y = sy + Math.sin(a) * r;
+        if (x < -6 || x > W + 6 || y < -6 || y > H + 6) continue;
+        g.moveTo(x + 2.4, y); g.arc(x, y, 2.4, 0, TAU);
+      }
+      g.fill();
     });
-    g.setLineDash([]); g.lineDashOffset = 0;
+
+    // A glowing trail along the orbit behind each planet, fading towards its tail, with a spark running up it.
+    this.orbitR.forEach((r, i) => {
+      const el = this.nodeEls[i]; if (!el) return;
+      const nx = ox + this.nodes[i + 1].x, ny = oy + this.nodes[i + 1].y;
+      if (ny < -300 || ny > H + 300) return;
+      const p = PLANETS[i], hex = BIOMES[p.biome].palette.atmo;
+      const rgb = this.trailRGB[hex] || (this.trailRGB[hex] = [1, 3, 5].map(k => parseInt(hex.slice(k, k + 2), 16)).join(','));
+      const a1 = Math.atan2(ny - sy, nx - sx), L = Math.min(1.35, 250 / r) * (0.93 + 0.07 * Math.sin(t * 0.7 + i)), N = 16;
+      const wMax = el.size * 0.3;
+      for (let j = 0; j < N; j++) {
+        const u = (j + 0.5) / N, b0 = a1 - L * (1 - j / N), b1 = a1 - L * (1 - (j + 1) / N);
+        g.strokeStyle = `rgba(${rgb},${(u * u * 0.34).toFixed(3)})`; g.lineWidth = 1 + wMax * u;
+        g.beginPath(); g.arc(sx, sy, r, b0, b1); g.stroke();
+        g.strokeStyle = `rgba(255,255,255,${(u * 0.55).toFixed(3)})`; g.lineWidth = 0.6 + u * 1.2;
+        g.beginPath(); g.arc(sx, sy, r, b0, b1); g.stroke();
+      }
+      g.lineWidth = 1;
+      const tail = a1 - L;
+      g.fillStyle = `rgba(${rgb},.9)`;
+      g.beginPath(); g.arc(sx + Math.cos(tail) * r, sy + Math.sin(tail) * r, 3, 0, TAU); g.fill();
+      const su = (t * 0.25 + i * 0.37) % 1, sa = a1 - L * (1 - su);
+      g.fillStyle = `rgba(255,255,255,${(Math.sin(su * Math.PI) * 0.9).toFixed(2)})`;
+      g.beginPath(); g.arc(sx + Math.cos(sa) * r, sy + Math.sin(sa) * r, 1.8, 0, TAU); g.fill();
+    });
 
     // Asteroid and Kuiper belts; inner rocks go round faster (Kepler).
     const b0 = this.orbitAt(2.2), b1 = this.orbitAt(3.2), last = this.orbitR[this.orbitR.length - 1];
@@ -3148,6 +3270,17 @@ class App {
       }
     }
     g.fill();
+    // Glossy balls, nearer ones drifting faster and moving more with the scroll.
+    for (const b of this.balls) {
+      const d = 0.4 + b.z;
+      b.x += b.vx * d * dt / W; b.y += b.vy * d * dt / H;
+      const x = ((b.x % 1) + 1) % 1 * (W + 40) - 20, y = ((((b.y * H - sc * (0.1 + b.z * 0.25)) % (H + 40)) + H + 40) % (H + 40)) - 20;
+      const sz = b.s * (0.7 + b.z * 0.6), fade = clamp((y - 60) / 70, 0, 1);   // keep the header clear
+      if (!fade) continue;
+      g.globalAlpha = fade;
+      g.drawImage(this.ballImgs[b.img], x - sz * 1.5, y - sz * 1.5, sz * 3, sz * 3);
+    }
+    g.globalAlpha = 1;
 
     // Comets: slow, with a tail that always points away from the star.
     this.cometT -= dt;
@@ -3264,9 +3397,59 @@ class App {
       g.position.x = 10 + r() * 40; g.scale.setScalar(1.6); pivot.add(g); scene.add(pivot);
       return { pivot, w: (0.03 + r() * 0.08) * (r() < 0.5 ? -1 : 1) };
     });
-    S.orbitMat = new THREE.LineBasicMaterial({ color: 0xece8ff, transparent: true, opacity: 0.22 });
-    S.orbitDone = new THREE.LineBasicMaterial({ color: 0x3fd6c6, transparent: true, opacity: 0.4 });
-    S.orbitSecret = new THREE.LineBasicMaterial({ color: 0x9a6bff, transparent: true, opacity: 0.45 });
+    // A clay-like matcap: soft top-left highlight, a pink rim, so small props read as toys from any side.
+    S.clay = (() => {
+      const c = document.createElement('canvas'); c.width = c.height = 256;
+      const g = c.getContext('2d');
+      let gr = g.createRadialGradient(96, 88, 4, 128, 128, 128);
+      gr.addColorStop(0, '#ffffff'); gr.addColorStop(0.18, '#f1ecfa'); gr.addColorStop(0.62, '#a79cc4'); gr.addColorStop(1, '#4a3a72');
+      g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
+      gr = g.createRadialGradient(128, 128, 96, 128, 128, 128);
+      gr.addColorStop(0, 'rgba(255,90,210,0)'); gr.addColorStop(1, 'rgba(255,90,210,.55)');
+      g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
+      return new THREE.CanvasTexture(c);
+    })();
+    // Lumpy rocks in the asteroid belt and bigger ones out in the Kuiper belt.
+    const rockGeo = new THREE.IcosahedronGeometry(1, 1), rp = rockGeo.attributes.position;
+    for (let k = 0; k < rp.count; k++) {
+      const x = rp.getX(k), y = rp.getY(k), z = rp.getZ(k);
+      const f = 1 + 0.22 * Math.sin(x * 5.1 + y * 3.3) * Math.cos(z * 4.7 - y * 2.1) + 0.12 * Math.sin(z * 9.3 + x * 7.7);
+      rp.setXYZ(k, x * f, y * f * 0.8, z * f);
+    }
+    rockGeo.computeVertexNormals();
+    const rockMat = new THREE.MeshMatcapMaterial({ color: 0xb8b0cc, matcap: S.clay, flatShading: true });
+    const rocks = (n, a0, a1, thick, s0, s1) => {
+      const m = new THREE.InstancedMesh(rockGeo, rockMat, n), o = new THREE.Object3D();
+      for (let k = 0; k < n; k++) {
+        const d = this.sysRadius(a0 + r() * (a1 - a0)), ph = r() * TAU;
+        o.position.set(Math.cos(ph) * d, (r() - 0.5) * thick, Math.sin(ph) * d);
+        o.rotation.set(r() * TAU, r() * TAU, r() * TAU); o.scale.setScalar(s0 + r() * (s1 - s0));
+        o.updateMatrix(); m.setMatrixAt(k, o.matrix);
+      }
+      return m;
+    };
+    S.belt.add(rocks(PHONE ? 40 : 70, 2.25, 3.15, 0.5, 0.07, 0.2));
+    S.kuiper.add(rocks(PHONE ? 26 : 40, 31, 44, 1.6, 0.25, 0.6));
+    // Glossy coloured balls floating above and below the orbit plane.
+    const tones = [0xff5fa8, 0xff3b5c, 0x33e1ff, 0x2fe0b5, 0xf4efff, 0xffc23d, 0xb04dff];
+    const nb = PHONE ? 70 : 120;
+    S.balls = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 16, 12), new THREE.MeshMatcapMaterial({ color: 0xffffff, matcap: S.clay }), nb);
+    { const o = new THREE.Object3D(), col = new THREE.Color();
+      for (let k = 0; k < nb; k++) {
+        const d = 22 + r() * 170, ph = r() * TAU, side = r() < 0.5 ? -1 : 1;
+        o.position.set(Math.cos(ph) * d, side * (5 + r() * 34 + d * 0.08), Math.sin(ph) * d);
+        o.scale.setScalar(0.12 + r() * 0.36); o.updateMatrix(); S.balls.setMatrixAt(k, o.matrix);
+        S.balls.setColorAt(k, col.setHex(tones[k % tones.length]));
+      } }
+    scene.add(S.balls);
+    // Orbits are glossy tubes; each planet drags a fading trail of its own colour along its orbit.
+    S.orbitMat = new THREE.MeshMatcapMaterial({ color: 0xc58ef0, matcap: S.clay });
+    S.orbitDone = new THREE.MeshMatcapMaterial({ color: 0x6fe6d6, matcap: S.clay });
+    S.orbitSecret = new THREE.MeshMatcapMaterial({ color: 0x9a70f0, matcap: S.clay });
+    { const c = document.createElement('canvas'); c.width = 256; c.height = 4;
+      const g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 256, 0);
+      gr.addColorStop(0, '#000'); gr.addColorStop(0.55, '#333'); gr.addColorStop(1, '#fff');
+      g.fillStyle = gr; g.fillRect(0, 0, 256, 4); S.trailFade = new THREE.CanvasTexture(c); }
     S.moonGeo = new THREE.SphereGeometry(1, 16, 12);
     S.moonMat = new THREE.MeshLambertMaterial({ color: 0xcfc8dd });
     S.ray = new THREE.Raycaster();
@@ -3281,11 +3464,13 @@ class App {
       const rr = rng(p.seed * 3 + 1), R = this.sysRadius(p.au);
       const plane = new THREE.Group();
       plane.rotation.set(p.secret ? 0.5 : (rr() - 0.5) * 0.08, 0, p.secret ? 0.2 : (rr() - 0.5) * 0.08);
-      const pos = new Float32Array(129 * 3);
-      for (let k = 0; k <= 128; k++) { const a = k / 128 * TAU; pos[k * 3] = Math.cos(a) * R; pos[k * 3 + 2] = Math.sin(a) * R; }
-      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-      const line = new THREE.Line(g, p.secret ? S.orbitSecret : S.orbitMat);
+      const tube = 0.035 + R * 0.0009;
+      const line = new THREE.Mesh(new THREE.TorusGeometry(R, tube, 6, 360), p.secret ? S.orbitSecret : S.orbitMat);
+      line.rotation.x = Math.PI / 2;
       plane.add(line);
+      const arc = Math.min(1.4, 10 / R), trail = new THREE.Group(), tm = new THREE.Mesh(new THREE.TorusGeometry(R, tube * 2.2, 8, 96, arc),
+        new THREE.MeshBasicMaterial({ color: BIOMES[p.biome].palette.atmo, alphaMap: S.trailFade, transparent: true, depthWrite: false }));
+      tm.rotation.x = Math.PI / 2; trail.add(tm); plane.add(trail);
       // Sized so neighbouring planets can't touch even when lined up (the closest orbits are ~1.75 apart).
       const holder = new THREE.Group(); holder.scale.setScalar(BIOMES[p.biome].ring ? 0.55 : 0.7);
       plane.add(holder);
@@ -3299,14 +3484,12 @@ class App {
       label.innerHTML = `<b>${p.name}</b><small>${BIOMES[p.biome].kind}</small>`;
       labels.appendChild(label);
       // Orbital speed falls off with distance (Kepler); the rogue planet crawls on its tilted path.
-      S.holders[p.id] = { plane, holder, line, moons, label, R, a: rr() * TAU, w: p.secret ? 0.002 : 0.06 / Math.pow(p.au, 1.5), spin: rr() * TAU };
+      S.holders[p.id] = { plane, holder, line, trail, arc, moons, label, R, a: rr() * TAU, w: p.secret ? 0.002 : 0.06 / Math.pow(p.au, 1.5), spin: rr() * TAU };
     });
     if (!S.station && this.station) {
-      const plane = new THREE.Group(), R = 8.4, TAU = Math.PI * 2;
-      const pos = new Float32Array(129 * 3);
-      for (let k = 0; k <= 128; k++) { const a = k / 128 * TAU; pos[k * 3] = Math.cos(a) * R; pos[k * 3 + 2] = Math.sin(a) * R; }
-      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-      plane.add(new THREE.Line(g, S.orbitDone));
+      const plane = new THREE.Group(), R = 8.4;
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(R, 0.04, 6, 200), S.orbitDone);
+      ring.rotation.x = Math.PI / 2; plane.add(ring);
       const holder = new THREE.Group(); holder.scale.setScalar(0.55); plane.add(holder);
       S.scene.add(plane);
       const label = document.createElement('div');
@@ -3355,12 +3538,14 @@ class App {
     S.sunMat.uniforms.uTime.value = S.t;
     S.belt.rotation.y += dt * 0.03; S.kuiper.rotation.y += dt * 0.004; S.haze.rotation.y += dt * 0.012;
     S.swarms.forEach(w => { w.pivot.rotation.y += dt * w.w; });
+    S.balls.rotation.y -= dt * 0.006;
     // Planets along their orbits, spinning, with moons.
     const v = new THREE.Vector3(), clipTop = 0;
     PLANETS.forEach(p => {
       const h = S.holders[p.id], body = this.bodies[p.id]; if (!h || !body) return;
       h.a += dt * h.w;
       h.holder.position.set(Math.cos(h.a) * h.R, 0, Math.sin(h.a) * h.R);
+      h.trail.rotation.y = h.arc - h.a;
       if (dt) body.update(dt);
       h.spin += dt * (2 * Math.PI / (p.dayH * 1.3));
       body.spin.rotation.y = h.spin; if (body.clouds) body.clouds.rotation.y = h.spin * 1.05;
