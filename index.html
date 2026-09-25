@@ -81,7 +81,7 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 
 /* ------------------------------------------------------------------ Map */
 #map{overflow:hidden}
-.map-scroll{position:relative;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.map-scroll{position:relative;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-top:calc(var(--safe-t) + 56px)}
 /* Warm near the star, cold at the edge of the system; driven by --warm and --cold on #map. */
 .map-glow{position:absolute;inset:0;z-index:0;pointer-events:none}
 .map-glow i{position:absolute;inset:0;transition:opacity .35s linear}
@@ -96,7 +96,8 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 .mbar .logo-mark{width:24px;height:24px}
 .mbar .logo-mark::after{top:8px;height:7px;left:-6px;right:-6px}
 .zone.swap{opacity:0}
-.map-head{position:sticky;top:0;z-index:3;text-shadow:0 1px 8px rgba(0,0,0,.85);pointer-events:none}
+/* Pinned outside the scroller, so neither scrolling nor iOS rubber-banding moves it. */
+.map-head{position:absolute;left:0;right:0;top:0;z-index:5;text-shadow:0 1px 8px rgba(0,0,0,.85);pointer-events:none}
 .map-head .logo,.map-head button{pointer-events:auto}
 .journey{position:relative;margin:0 auto;max-width:480px}
 .journey svg.route{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
@@ -174,9 +175,9 @@ h1,h2,h3{font-family:var(--f-head);font-weight:500;margin:0;line-height:1.2}
 .launch.is-on{opacity:1}
 .launch h2{font-size:34px}
 .launch-sky{position:relative;width:100%;max-width:420px}
-.launch .rocket{position:absolute;left:50%;top:44%;width:120px;height:120px;margin:-60px 0 0 -60px;animation:lift 1.7s var(--ease) both}
+.launch .rocket{position:absolute;left:50%;top:44%;width:120px;height:120px;margin:-60px 0 0 -60px;animation:lift var(--fly,1.7s) var(--ease) both}
 @keyframes lift{0%{transform:translate(-70px,120px) scale(.9)}60%{transform:translate(10px,-10px)}100%{transform:translate(160px,-260px) scale(.8)}}
-.puff{position:absolute;border-radius:50%;background:#e9dff2;opacity:0;animation:puff 1.7s ease-out both}
+.puff{position:absolute;border-radius:50%;background:#e9dff2;opacity:0;animation:puff var(--fly,1.7s) ease-out both}
 @keyframes puff{0%{opacity:0;transform:scale(.2)}20%{opacity:.95}100%{opacity:.85;transform:scale(1)}}
 .trip{margin:0;text-align:center;color:var(--ink-2);font-size:14.5px;line-height:1.7}
 .trip b{color:var(--ink);font-weight:500}
@@ -434,16 +435,16 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   <div class="sys-labels" data-sys-labels aria-hidden="true"></div>
   <div class="sys-hit" data-sys-hit></div>
   <div class="map-scroll" id="mapScroll">
-    <div class="map-head">
-      <header class="bar mbar">
-        <div class="logo"><span class="logo-mark" aria-hidden="true"></span>สวนดาว</div>
-        <p class="zone" data-zone><b data-zone-name></b><small data-zone-note></small></p>
-        <button class="icon-btn" type="button" data-open-menu aria-label="เปิดเมนู">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-        </button>
-      </header>
-    </div>
     <div class="journey" id="journey"></div>
+  </div>
+  <div class="map-head">
+    <header class="bar mbar">
+      <div class="logo"><span class="logo-mark" aria-hidden="true"></span>สวนดาว</div>
+      <p class="zone" data-zone><b data-zone-name></b><small data-zone-note></small></p>
+      <button class="icon-btn" type="button" data-open-menu aria-label="เปิดเมนู">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </header>
   </div>
   <div class="map-dock">
     <button class="dock-btn" type="button" data-view3d aria-pressed="false" aria-label="มุมมองระบบดาว 3 มิติ"><span data-view-label>🪐 3D</span></button>
@@ -564,6 +565,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <div class="grab" aria-hidden="true"></div>
     <div data-menu-main>
       <button class="menu-item" type="button" data-menu="howto"><span class="em">🧭</span><span>วิธีเล่น<small>บิน สำรวจ ปรับแต่ง และสร้างชีวิต</small></span></button>
+      <button class="menu-item" type="button" data-flight-toggle><span class="em">🚀</span><span>ความเร็วยานอวกาศ<small data-flight-label>ปกติ แตะเพื่อเปลี่ยน</small></span></button>
       <button class="menu-item" type="button" data-sound-toggle aria-pressed="false"><span class="em" data-sound-ic>🔈</span><span>เสียง<small data-sound-label>ปิดอยู่ แตะเพื่อเปิด</small></span></button>
       <button class="menu-item" type="button" data-menu="model"><span class="em">📐</span><span>ตัวเลขมาจากไหน<small>ระยะทาง เวลาเดินทาง และการคำนวณ</small></span></button>
       <button class="menu-item" type="button" data-menu="reset"><span class="em">🧹</span><span>เริ่มต้นใหม่ทั้งหมด<small>ล้างการปรับแต่งของทุกดาว</small></span></button>
@@ -1830,6 +1832,8 @@ const Sound = {
 const BG_MODES = ['normal', 'dark', 'black'];
 const BG_LABEL = { normal: 'ปกติ', dark: 'มืด', black: 'มืดสนิท' };
 const SPEEDS = [0, 0.5, 1, 2, 4];
+/** How long the ship's flights take on screen (multiplier on the animation time). */
+const FLIGHTS = { slow: [2.6, 'ช้า'], normal: [1.6, 'ปกติ'], fast: [0.8, 'เร็ว'] };
 
 /* ================================================================
    Persistence
@@ -1846,6 +1850,7 @@ const Store = {
     if (BG_MODES.includes(s.bg)) base.bg = s.bg;
     if (SPEEDS.includes(s.speed)) base.speed = s.speed;
     if (s.view === '3d') base.view = '3d';
+    if (FLIGHTS[s.flight]) base.flight = s.flight;
     base.station = cleanStation(s.station);
     base.visited = Array.isArray(s.visited) ? s.visited : [];
     allPlanets().forEach(p => {
@@ -1858,7 +1863,7 @@ const Store = {
     return base;
   },
   fresh() {
-    return { v: 1, at: -1, visited: [], sound: false, secret: false, bg: 'dark', speed: REDUCED ? 0 : 1, view: 'map', station: cleanStation(null), planets: Object.fromEntries(allPlanets().map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
+    return { v: 1, at: -1, visited: [], sound: false, secret: false, bg: 'dark', speed: REDUCED ? 0 : 1, view: 'map', flight: 'normal', station: cleanStation(null), planets: Object.fromEntries(allPlanets().map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
   },
   save(state) { try { localStorage.setItem(CONFIG.storeKey, JSON.stringify(state)); } catch (e) { /* storage may be unavailable; progress stays in memory */ } }
 };
@@ -2614,7 +2619,7 @@ class App {
     const step = (p, text) => { bar.style.width = Math.round(p * 100) + '%'; if (text) status.textContent = text; };
     this.bindUI();
     Sound.on = this.state.sound; this.syncSound();
-    this.applyBg(); this.syncSpeed();
+    this.applyBg(); this.syncSpeed(); this.syncFlight();
     this.initSpace();
     if (typeof THREE === 'undefined' || !this.webgl()) {
       step(1, 'อุปกรณ์นี้ไม่รองรับกราฟิก 3 มิติ จึงแสดงแผนที่แบบภาพนิ่ง');
@@ -3149,7 +3154,7 @@ class App {
       label.innerHTML = `<b>${p.name}</b><small>${BIOMES[p.biome].kind}</small>`;
       labels.appendChild(label);
       // Orbital speed falls off with distance (Kepler); the rogue planet crawls on its tilted path.
-      S.holders[p.id] = { plane, holder, line, moons, label, R, a: rr() * TAU, w: p.secret ? 0.004 : 0.16 / Math.pow(p.au, 1.5), spin: rr() * TAU };
+      S.holders[p.id] = { plane, holder, line, moons, label, R, a: rr() * TAU, w: p.secret ? 0.002 : 0.06 / Math.pow(p.au, 1.5), spin: rr() * TAU };
     });
     if (!S.station && this.station) {
       const plane = new THREE.Group(), R = 8.4, TAU = Math.PI * 2;
@@ -3162,7 +3167,7 @@ class App {
       const label = document.createElement('div');
       label.className = 'sys-label'; label.innerHTML = '<b>🛰️ สถานีอวกาศ</b><small>จุดเทียบท่า</small>';
       labels.appendChild(label);
-      S.station = { plane, holder, label, R, a: 1.2, w: 0.25, spin: 0 };
+      S.station = { plane, holder, label, R, a: 1.2, w: 0.07, spin: 0 };
     }
     // A planet hidden again by "reset all" loses its orbit.
     Object.keys(S.holders).forEach(id => {
@@ -3534,6 +3539,14 @@ class App {
       if (inc) this.changeModule(inc.dataset.inc, 1);
       if (dec) this.changeModule(dec.dataset.dec, -1);
       if (paint) this.setPaint(paint.dataset.paint);
+      const reset = e.target.closest('[data-st-reset]');
+      if (reset) {
+        // Two taps: the first asks, the second resets.
+        if (!reset.dataset.armed) {
+          reset.dataset.armed = '1'; reset.textContent = 'แตะอีกครั้งเพื่อยืนยันการคืนค่า';
+          setTimeout(() => { if (reset.isConnected) { delete reset.dataset.armed; reset.textContent = '↺ คืนค่าเริ่มต้นของสถานี'; } }, 3000);
+        } else this.resetStation();
+      }
     });
     // Drag to turn the station, pinch or scroll to zoom, tap a part to inspect it.
     const el = $('#stationStage'), pts = new Map();
@@ -3620,6 +3633,14 @@ class App {
     this.renderStation(); panel.scrollTop = top;
   }
 
+  resetStation(quiet) {
+    this.state.station = cleanStation(null);
+    this.save();
+    this.applyStationSpeed();
+    if (this.station) { this.clearPart(); this.station.build(this.state.station.mods, this.state.station.paint); }
+    if (!quiet) { this.renderStation(); this.toast('คืนค่าสถานีอวกาศแล้ว'); }
+  }
+
   setPaint(key) {
     if (!PAINTS[key]) return;
     this.state.station.paint = key; this.save();
@@ -3642,7 +3663,8 @@ class App {
         Object.entries(MODULES).map(([k, M]) => `<div class="mod" data-mod="${k}"><span class="em" aria-hidden="true">${M.icon}</span>
           <div><strong>${M.name}</strong><small>${M.desc}</small><div class="mod-stats">${this.modChips(M)}</div></div>
           <div class="stepper"><button type="button" data-dec="${k}" aria-label="ลด${M.name}" ${mods[k] <= (M.min || 0) ? 'disabled' : ''}>−</button>
-          <b class="num">${mods[k]}</b><button type="button" data-inc="${k}" aria-label="เพิ่ม${M.name}" ${mods[k] >= M.max ? 'disabled' : ''}>+</button></div></div>`).join('');
+          <b class="num">${mods[k]}</b><button type="button" data-inc="${k}" aria-label="เพิ่ม${M.name}" ${mods[k] >= M.max ? 'disabled' : ''}>+</button></div></div>`).join('') +
+        `<button class="btn ghost" type="button" data-st-reset style="width:100%;margin-top:6px">↺ คืนค่าเริ่มต้นของสถานี</button>`;
     } else if (tab === 'eng') {
       const far = PLANETS.filter(p => !p.secret).slice(-1)[0], farKm = far.au * CONFIG.auKm;
       const bar = (label, a, b, text, bad) => `<div class="card"><div class="eng-row"><span>${label}</span><b class="num">${text}</b></div>
@@ -3678,6 +3700,16 @@ class App {
     this.state.bg = BG_MODES[(BG_MODES.indexOf(this.state.bg) + 1) % BG_MODES.length];
     this.applyBg(); this.save();
     this.toast(`พื้นหลัง: ${BG_LABEL[this.state.bg]}`);
+  }
+  get flightK() { return FLIGHTS[this.state.flight][0]; }
+  syncFlight() {
+    const l = $('[data-flight-label]'); if (l) l.textContent = `${FLIGHTS[this.state.flight][1]} แตะเพื่อเปลี่ยน`;
+  }
+  cycleFlight() {
+    const keys = Object.keys(FLIGHTS);
+    this.state.flight = keys[(keys.indexOf(this.state.flight) + 1) % keys.length];
+    this.syncFlight(); this.save();
+    this.toast(`ความเร็วยานอวกาศ: ${FLIGHTS[this.state.flight][1]}`);
   }
   syncSpeed() {
     const s = this.state.speed;
@@ -3745,7 +3777,7 @@ class App {
         for (let s = 0; s <= 24; s++) { const t = dir > 0 ? s / 24 : 1 - s / 24; pts.push(seg.getPointAtLength(L * t)); }
       }
       const end = this.rocketSpot(to); pts.push({ x: end.x, y: end.y });
-      const dur = Math.min(1400, 450 + pts.length * 12), t0 = performance.now();
+      const dur = Math.min(1400, 450 + pts.length * 12) * this.flightK, t0 = performance.now();
       const scroller = $('#mapScroll');
       const stepFn = now => {
         const t = clamp((now - t0) / dur, 0, 1), e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
@@ -3813,6 +3845,7 @@ class App {
         puffs += `<span class="puff" style="width:${s}px;height:${s}px;left:${-10 + r() * 45}%;top:${55 + r() * 45}%;animation-delay:${(k * 0.06).toFixed(2)}s"></span>`;
       }
       sky.innerHTML = puffs + `<div class="rocket">${ROCKET_SVG}</div>`;
+      sky.style.setProperty('--fly', (1.7 * this.flightK).toFixed(2) + 's');
       sky.style.height = Math.min(360, innerHeight * 0.42) + 'px';
       el.hidden = false;
       Sound.launch();
@@ -3826,7 +3859,7 @@ class App {
         resolve();
       };
       el.addEventListener('click', finish);
-      setTimeout(finish, REDUCED ? 700 : 1900);
+      setTimeout(finish, REDUCED ? 700 : 1900 * this.flightK);
     });
   }
 
@@ -4266,6 +4299,7 @@ class App {
       if (e.target.closest('[data-menu-back]')) this.menuPage(null);
       if (e.target.closest('[data-confirm-reset]')) this.resetAll();
       if (e.target.closest('[data-sound-toggle]')) this.toggleSound();
+      if (e.target.closest('[data-flight-toggle]')) this.cycleFlight();
     });
     addEventListener('keydown', e => {
       if (e.key !== 'Escape') return;
@@ -4343,15 +4377,16 @@ class App {
     const back = '<button class="btn ghost" type="button" data-menu-back style="width:100%;margin-top:10px">กลับ</button>';
     if (page === 'howto') pg.innerHTML = `<h3>วิธีเล่น</h3><p>1. เริ่มจากสถานีอวกาศข้างดาวฤกษ์ แตะสถานีเพื่อสำรวจและปรับแต่งโมดูล ซึ่งมีผลต่อความเร็วยาน<br>แตะดาวบนแผนที่ ยานจะบินไปตามเส้นประ<br>2. ลากดาวเพื่อหมุนดู แตะดาวเพื่อส่งคลื่น กด 🛬 ลงสำรวจ เพื่อลงไปเดินดูพื้นผิวที่สร้างจากค่าที่ปรับไว้ แล้วเลื่อนแถบในแท็บ “ปรับแต่ง” เพื่อเปลี่ยนความร้อน น้ำ พืช และอื่น ๆ<br>3. กด “สร้างระบบนิเวศ” เพื่อให้มีสัตว์และผู้คน<br>4. ดูแลเศรษฐกิจให้โตโดยไม่ทำลายธรรมชาติ<br>ถ้าปล่อยดาวไว้เฉย ๆ สักพัก ดาวจะค่อย ๆ เปลี่ยนไปเอง เปิดเสียงได้ในเมนู<br>ปุ่มมุมขวาล่าง: 🪐 3D สลับเป็นมุมมองระบบดาว 3 มิติ (ลากเพื่อหมุน บีบนิ้วเพื่อซูม), 1× ปรับความเร็วของอวกาศ, 🌘 ปรับความมืดของพื้นหลัง, วงกลม % แสดงความคืบหน้า<br>แตะดาวหรือพื้นหลังในหน้าดาวเพื่อพับแผงปรับแต่ง แล้วกดปุ่มด้านล่างเพื่อเปิดกลับ<br>สำรวจและสร้างชีวิตให้ครบทุกดวงเพื่อเติมแถบความคืบหน้าให้เต็ม</p>${back}`;
     if (page === 'model') pg.innerHTML = `<h3>ตัวเลขมาจากไหน</h3><p>ระยะห่างของดาวใช้หน่วยดาราศาสตร์ (1 หน่วย ≈ 149.6 ล้าน กม.) และคิดตอนดาวเรียงอยู่ด้านเดียวกันของดาวฤกษ์ เวลาเดินทางคิดจากยานความเร็ว ${nf.format(CONFIG.rocketKmh)} กม./ชม. ใกล้เคียงยานนิวฮอไรซันส์<br><br>อุณหภูมิ ออกซิเจน และจำนวนประชากรมาจากแบบจำลองอย่างง่ายเพื่อการเล่น ไม่ใช่การคำนวณทางวิทยาศาสตร์จริง สัดส่วนน้ำและดินนับจากจุด 2,400 จุดบนพื้นผิวดาวจริงที่เห็นบนจอ</p>${back}`;
-    if (page === 'reset') pg.innerHTML = `<h3>เริ่มต้นใหม่ทั้งหมด?</h3><p>การปรับแต่ง ระบบนิเวศ และความคืบหน้าของทุกดาวจะหายไป</p>
+    if (page === 'reset') pg.innerHTML = `<h3>เริ่มต้นใหม่ทั้งหมด?</h3><p>การปรับแต่ง ระบบนิเวศ สถานีอวกาศ และความคืบหน้าของทุกดาวจะหายไป</p>
       <button class="btn primary" type="button" data-confirm-reset style="background:linear-gradient(135deg,#ff4f8b,#e8457a)">ล้างข้อมูลทั้งหมด</button>${back}`;
   }
 
   resetAll() {
     this.closeMenu();
     if (this.current >= 0) this.closeDetail();
-    const { sound, bg, speed, view, station } = this.state;
-    this.state = Store.fresh(); Object.assign(this.state, { sound, bg, speed, view, station }); Store.save(this.state);
+    const { sound, bg, speed, view, flight } = this.state;
+    this.state = Store.fresh(); Object.assign(this.state, { sound, bg, speed, view, flight }); Store.save(this.state);
+    this.resetStation(true);
     // The secret planet hides again until it is earned.
     if (PLANETS.includes(SECRET)) PLANETS.splice(PLANETS.indexOf(SECRET), 1);
     if (!this.noGL) {
