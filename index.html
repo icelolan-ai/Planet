@@ -1411,8 +1411,11 @@ class PlanetBody {
     this.idle = 0; this.ripT = -1;
 
     const seg = CONFIG.segments;
-    this.geo = new THREE.SphereGeometry(1, seg, Math.round(seg * 0.75));
-    this.disposables.push(this.geo);
+    // Two meshes: a dense one for the planet's own close-up, a light one for the map and the 3D system view.
+    this.geoHi = new THREE.SphereGeometry(1, seg, Math.round(seg * 0.75));
+    this.geoLo = new THREE.SphereGeometry(1, 128, 96);
+    this.geo = this.geoLo;
+    this.disposables.push(this.geoHi, this.geoLo);
     this.fillHeights();
     this.u = {
       uType: { value: gas ? 1 : 0 }, uSea: { value: 0.5 }, uRelief: { value: this.b.relief }, uVeg: { value: 0 },
@@ -1462,15 +1465,18 @@ class PlanetBody {
   }
 
   fillHeights() {
-    const pos = this.geo.attributes.position, n = pos.count;
-    const h = this.aH || new Float32Array(n);
-    for (let i = 0; i < n; i++) {
-      const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i), l = Math.hypot(x, y, z) || 1;
-      h[i] = this.terrain.height(x / l, y / l, z / l);
+    for (const g of [this.geoHi, this.geoLo]) {
+      const pos = g.attributes.position, n = pos.count, old = g.attributes.aH;
+      const h = old ? old.array : new Float32Array(n);
+      for (let i = 0; i < n; i++) {
+        const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i), l = Math.hypot(x, y, z) || 1;
+        h[i] = this.terrain.height(x / l, y / l, z / l);
+      }
+      if (!old) g.setAttribute('aH', new THREE.BufferAttribute(h, 1)); else old.needsUpdate = true;
     }
-    if (!this.aH) { this.aH = h; this.geo.setAttribute('aH', new THREE.BufferAttribute(h, 1)); }
-    else this.geo.attributes.aH.needsUpdate = true;
   }
+  /** Use the dense mesh (planet close-up) or the light one (map and system view). */
+  lod(hi) { this.geo = hi ? this.geoHi : this.geoLo; if (this.surface) this.surface.geometry = this.geo; }
 
   pickFloraSites() {
     const r = rng(this.terrain.seed * 13 + 1);
@@ -2366,7 +2372,8 @@ const Dust = {
       const x = wrap(d.x - (this.px * 50 + this.pan) * d.z, W), y = wrap(d.y - (this.py * 50 + this.tilt) * d.z - this.scroll * 0.2 * d.z, H);
       const tw = 0.55 + 0.45 * Math.sin(t * d.tw + d.ph), s = d.size * (d.kind ? 0.6 + 0.4 * tw : 1);
       g.globalAlpha = (0.45 + 0.55 * d.z) * (d.kind ? 0.5 + 0.5 * tw : 0.75 + 0.25 * tw);
-      if (d.kind) { g.setTransform(this.dpr, 0, 0, this.dpr, x * this.dpr, y * this.dpr); g.rotate(d.kind === 2 ? d.rot : d.rot * 0.2); g.drawImage(this.decoImgs[d.img], -s / 2, -s / 2, s, s); g.setTransform(this.dpr, 0, 0, this.dpr, 0, 0); }
+      // Only the five-point stars turn; dots and sparkles are drawn straight (cheaper).
+      if (d.kind === 2) { const cs = Math.cos(d.rot) * this.dpr, sn = Math.sin(d.rot) * this.dpr; g.setTransform(cs, sn, -sn, cs, x * this.dpr, y * this.dpr); g.drawImage(this.decoImgs[d.img], -s / 2, -s / 2, s, s); g.setTransform(this.dpr, 0, 0, this.dpr, 0, 0); }
       else g.drawImage(this.decoImgs[d.img], x - s / 2, y - s / 2, s, s);
     }
     g.globalAlpha = 1;
@@ -2423,17 +2430,6 @@ const PROPS = (() => {
     out.setAttribute('color', new THREE.BufferAttribute(col, 3));
     return out;
   }
-  /** A smooth sphere pushed in and out by noise (indexed, so normals stay smooth). */
-  function blob(ws, hs, amt, f, seed) {
-    const g = new THREE.SphereGeometry(1, ws, hs), p = g.attributes.position;
-    for (let i = 0; i < p.count; i++) {
-      const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
-      const d = 1 + amt * (noise(x * f + seed * 7.1, y * f, z * f) + 0.5 * noise(x * f * 2.3, y * f * 2.3 + seed, z * f * 2.3));
-      p.setXYZ(i, x * d, y * d, z * d);
-    }
-    g.computeVertexNormals();
-    return g;
-  }
   /** A cylinder from a to b (Vector3s). */
   function limb(a, b, r0, r1, seg = 6) {
     const d = b.clone().sub(a), L = d.length();
@@ -2444,59 +2440,117 @@ const PROPS = (() => {
     return g;
   }
   const V = (x, y, z) => new THREE.Vector3(x, y, z);
-  const bark = '#6b4a33';
+  /** Flat, three-tone shading for faceted props: light tops, mid and darker sides, dark undersides. */
+  const facet = (g, hex, k = 1) => {
+    const col = C(hex);
+    return paint(g, (c, x, y, z, nx, ny, nz) => c.copy(col).multiplyScalar(k * (ny > 0.5 ? 1.12 : ny < -0.5 ? 0.55 : 0.8 + 0.1 * nx - 0.05 * nz)));
+  };
+  /** A box w x h x d standing on (x, y, z). */
+  const B = (w, h, d, x, y, z) => { const g = new THREE.BoxGeometry(w, h, d); g.translate(x, y + h / 2, z); return g; };
 
-  function canopy(hex, blobs, seed, flat = 1) {
-    const col = C(hex), light = col.clone().lerp(C('#fff6c0'), 0.25);
-    return blobs.map(([x, y, z, rad], k) => {
-      const g = blob(13, 10, 0.15, 2.0, seed * 10 + k); g.scale(rad, rad * flat, rad); g.translate(x, y, z);
-      return paint(g, (c, px, py, pz, nx, ny) => c.copy(col).lerp(light, Math.max(0, ny) * 0.5).multiplyScalar(lerp(0.5, 1.12, ny * 0.5 + 0.5) * (1 + 0.14 * noise(px * 5, py * 5, pz * 5))));
-    });
-  }
   return {
-    broadleaf(hex, seed) {
-      const r = rng(seed * 31 + 5), j = () => (r() - 0.5) * 0.18;
-      const parts = [shade(limb(V(0, 0, 0), V(0.04, 1.25, 0), 0.13, 0.07, 7), bark, 0.6, 1)];
-      parts.push(shade(limb(V(0.02, 0.9, 0), V(0.36, 1.3, 0.12), 0.05, 0.03, 5), bark, 0.6, 1));
-      parts.push(shade(limb(V(0.02, 0.95, 0), V(-0.32, 1.35, -0.1), 0.05, 0.03, 5), bark, 0.6, 1));
-      parts.push(...canopy(hex, [[j(), 1.62, j(), 0.6], [0.38 + j(), 1.4, 0.16, 0.44], [-0.36, 1.45 + j(), -0.1, 0.46], [0.04, 1.36, -0.38 + j(), 0.4], [-0.08, 1.92, 0.12, 0.36]], seed));
+    /** Voxel tree: square trunk, a big cube canopy and a couple of smaller cubes (after a voxel diorama). */
+    voxelTree(hex, seed) {
+      const r = rng(seed * 17 + 3), parts = [facet(B(0.24, 1.35, 0.24, 0, 0, 0), '#a0643a')];
+      parts.push(facet(B(0.18, 0.12, 0.5, 0, 1.05, 0.2), '#8a5530'));
+      parts.push(facet(B(1.1, 0.9, 1.05, 0, 1.25, 0), hex));
+      const side = r() < 0.5 ? -1 : 1;
+      parts.push(facet(B(0.62, 0.62, 0.62, side * 0.62, 1.4, 0.25), hex, 0.92));
+      if (r() < 0.7) parts.push(facet(B(0.55, 0.45, 0.55, -side * 0.2, 2.1, -0.15), hex, 1.05));
+      for (let k = 0; k < 5; k++) parts.push(facet(B(0.07, 0.07, 0.02, (r() - 0.5) * 0.8, 1.35 + r() * 0.6, 0.53), hex, 0.7));
       return merge(parts);
     },
-    emergent(hex) {
-      const parts = [shade(limb(V(0, 0, 0), V(0, 2.3, 0), 0.16, 0.08, 7), '#7a5a40', 0.6, 1)];
-      parts.push(shade(limb(V(0, 1.9, 0), V(0.5, 2.3, 0.1), 0.06, 0.04, 5), bark), shade(limb(V(0, 1.95, 0), V(-0.45, 2.35, -0.15), 0.06, 0.04, 5), bark));
-      parts.push(...canopy(hex, [[0, 2.45, 0, 0.75], [0.55, 2.35, 0.1, 0.5], [-0.5, 2.4, -0.15, 0.52], [0.1, 2.35, 0.5, 0.45], [-0.1, 2.35, -0.5, 0.45]], 9, 0.5));
+    /** Tall slim voxel tree. */
+    voxelColumn(hex) {
+      return merge([facet(B(0.2, 1.0, 0.2, 0, 0, 0), '#a0643a'), facet(B(0.72, 1.45, 0.72, 0, 0.9, 0), hex), facet(B(0.08, 0.08, 0.02, 0.15, 1.6, 0.37), hex, 0.7)]);
+    },
+    voxelBush(hex) {
+      return merge([facet(B(0.72, 0.55, 0.62, 0, 0, 0), hex), facet(B(0.42, 0.42, 0.45, 0.4, 0, 0.18), hex, 0.9), facet(B(0.3, 0.3, 0.3, -0.35, 0, -0.12), hex, 1.05)]);
+    },
+    /** A heap of stone cubes. */
+    voxelRock(hex, seed) {
+      const r = rng(seed * 5 + 1), parts = [facet(B(0.8, 0.55, 0.72, 0, 0, 0), hex)];
+      parts.push(facet(B(0.5, 0.45, 0.5, 0.12 + r() * 0.1, 0.55, -0.08), hex, 1.05), facet(B(0.34, 0.3, 0.34, -0.5, 0, 0.3), hex, 0.95));
+      parts.push(facet(B(0.26, 0.22, 0.26, 0.52, 0, 0.36), hex, 0.9), facet(B(0.3, 0.26, 0.3, -0.2, 0.55, 0.2), hex, 1.1));
       return merge(parts);
     },
-    bush(hex, seed) {
-      return merge(canopy(hex, [[0, 0.32, 0, 0.42], [0.3, 0.25, 0.12, 0.3], [-0.26, 0.24, -0.1, 0.32], [0.05, 0.22, -0.3, 0.28]], seed));
-    },
-    fern(hex) {
-      const col = C(hex), parts = [];
-      for (let k = 0; k < 8; k++) {
-        const g = new THREE.PlaneGeometry(0.16, 0.9, 1, 5), p = g.attributes.position;
-        for (let i = 0; i < p.count; i++) { const v = p.getY(i) + 0.45; p.setXYZ(i, p.getX(i) * (1 - v * 0.8), v * 0.8, -v * v * 0.45); }
-        g.computeVertexNormals(); g.rotateY(k / 8 * 6.283 + 0.3);
-        parts.push(paint(g, (c, x, y) => c.copy(col).multiplyScalar(0.55 + y * 0.9)));
+    /** Little cube sprouts, with a white flower now and then. */
+    sprouts(hex, flowers) {
+      const r = rng(hex.length * 11 + (flowers ? 7 : 1)), parts = [];
+      for (let k = 0; k < 4; k++) {
+        const x = (r() - 0.5) * 1.2, z = (r() - 0.5) * 1.2, h = 0.1 + r() * 0.12;
+        parts.push(facet(B(0.07, h, 0.07, x, 0, z), hex));
+        if (flowers && k % 2 === 0) parts.push(facet(B(0.12, 0.08, 0.12, x, h, z), k ? '#fff6d8' : '#ffd23d'));
       }
       return merge(parts);
     },
-    grass(hex) {
-      const col = C(hex), parts = [], r = rng(hex.length * 7 + 3);
-      for (let k = 0; k < 7; k++) {
-        const g = new THREE.BufferGeometry(), a = r() * 6.283, h = 0.45 + r() * 0.5, lean = (r() - 0.5) * 0.3, ox = (r() - 0.5) * 0.3, oz = (r() - 0.5) * 0.3;
-        g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([-0.035, 0, 0, 0.035, 0, 0, lean, h, 0.06]), 3));
-        g.computeVertexNormals(); g.rotateY(a); g.translate(ox, 0, oz);
-        parts.push(paint(g, (c, x, y) => c.copy(col).multiplyScalar(0.5 + y * 1.2)));
+    /** Faceted pastel tree (after an isometric fantasy set): crooked dark branches holding gem-cut canopies. */
+    gemTree(hex, seed) {
+      const r = rng(seed * 29 + 7), trunk = '#5a3a55', parts = [];
+      parts.push(facet(limb(V(0, 0, 0), V(0.05, 0.9, 0), 0.09, 0.06, 5), trunk));
+      const tops = [[0, 1.55, 0, 0.62], [0.52, 1.25, 0.12, 0.42], [-0.45, 1.3, -0.1, 0.4]].slice(0, 2 + (r() < 0.6 ? 1 : 0));
+      tops.forEach(([x, y, z, rad], k) => {
+        if (k) parts.push(facet(limb(V(0.03, 0.75, 0), V(x * 0.8, y - rad * 0.4, z * 0.8), 0.045, 0.03, 4), trunk));
+        const g = new THREE.IcosahedronGeometry(rad, 0); g.scale(1.05, 0.8, 1); g.rotateY(r() * 6.28); g.translate(x, y, z);
+        const col = C(hex), light = col.clone().lerp(C('#ffffff'), 0.35);
+        parts.push(paint(g, (c, px, py, pz, nx, ny) => c.copy(col).lerp(light, Math.max(0, ny) * 0.8).multiplyScalar(ny < -0.3 ? 0.7 : 1)));
+      });
+      return merge(parts);
+    },
+    /** Faceted snow pine: stacked six-sided cones with snowy tops. */
+    snowPine(hex, seed) {
+      const r = rng(seed * 3 + 5), col = C(hex), snow = C('#f6f8ff'), parts = [facet(B(0.16, 0.45, 0.16, 0, 0, 0), '#6a4a36')];
+      for (let k = 0; k < 3; k++) {
+        const rad = 0.62 - k * 0.16, h = 0.7 - k * 0.1, y = 0.35 + k * 0.5, g = new THREE.ConeGeometry(rad, h, 6);
+        g.rotateY(r() * 1.05); g.translate(0, y + h / 2, 0);
+        parts.push(paint(g, (c, x, y2, z, nx, ny) => c.copy(col).multiplyScalar(0.75 + 0.12 * nx).lerp(snow, ny > 0.45 ? 0.85 : 0)));
       }
       return merge(parts);
     },
-    flower(hex) {
-      const parts = [shade(limb(V(0, 0, 0), V(0.03, 0.45, 0), 0.02, 0.015, 4), '#3f8a3a')];
-      const head = new THREE.SphereGeometry(0.09, 8, 6); head.scale(1, 0.6, 1); head.translate(0.03, 0.47, 0);
-      parts.push(shade(head, hex, 0.8, 1.2));
-      const leaf = new THREE.SphereGeometry(0.08, 6, 4); leaf.scale(1.4, 0.3, 0.6); leaf.translate(0.08, 0.15, 0);
-      parts.push(shade(leaf, '#3f8a3a'));
+    /** Hex-prism cactus with an arm or two. */
+    hexCactus(hex, seed) {
+      const r = rng(seed * 7 + 2), parts = [];
+      const prism = (h, rad, x, y, z) => { const g = new THREE.CylinderGeometry(rad * 0.92, rad, h, 6); g.translate(x, y + h / 2, z); const cap = new THREE.ConeGeometry(rad * 0.92, rad * 0.8, 6); cap.translate(x, y + h + rad * 0.4, z); return [facet(g, hex), facet(cap, hex, 1.1)]; };
+      parts.push(...prism(1.7, 0.18, 0, 0, 0));
+      const arms = 1 + Math.floor(r() * 2);
+      for (let k = 0; k < arms; k++) {
+        const sd = k ? -1 : 1, y0 = 0.6 + r() * 0.4;
+        parts.push(facet(B(0.34, 0.16, 0.16, sd * 0.3, y0, 0), hex, 0.95), ...prism(0.5 + r() * 0.3, 0.12, sd * 0.42, y0, 0));
+      }
+      if (r() < 0.5) parts.push(facet(B(0.12, 0.1, 0.12, 0, 1.9, 0), '#ff5fa8'));
+      return merge(parts);
+    },
+    /** Layered sandstone mesa. */
+    mesa(hex) {
+      const light = mixHex(hex, '#fff0d0', 0.25);
+      return merge([facet(B(1.3, 0.5, 1.1, 0, 0, 0), hex), facet(B(1.05, 0.45, 0.9, 0.08, 0.5, 0), light), facet(B(0.8, 0.45, 0.72, -0.04, 0.95, 0.05), hex), facet(B(0.55, 0.35, 0.5, 0.06, 1.4, -0.02), light)]);
+    },
+    /** Ice blocks stacked like a small berg: snowy tops, clear blue sides. */
+    iceBlocks(seed) {
+      const r = rng(seed * 13 + 1), parts = [];
+      const block = (w, h, d, x, y, z) => paint(B(w, h, d, x, y, z), (c, px, py, pz, nx, ny, nz) => c.set(ny > 0.5 ? '#f6f8f4' : '#a6d6f6').multiplyScalar(ny > 0.5 ? 1 : 0.86 + 0.12 * nx - 0.05 * nz));
+      parts.push(block(1.0, 1.1 + r() * 0.8, 0.9, 0, 0, 0), block(0.7, 0.6 + r() * 0.5, 0.75, -0.62, 0, 0.18), block(1.1, 0.3, 1.0, 0.3, 0, 0.75));
+      if (r() < 0.6) parts.push(block(0.45, 0.4, 0.45, 0.55, 0, -0.45));
+      return merge(parts);
+    },
+    /** A penguin: round black body, white front, orange beak and feet. */
+    penguin() {
+      const body = new THREE.SphereGeometry(0.28, 12, 10); body.scale(1, 1.5, 0.9); body.translate(0, 0.44, 0);
+      const belly = new THREE.SphereGeometry(0.22, 12, 10); belly.scale(0.95, 1.35, 0.6); belly.translate(0, 0.4, 0.12);
+      const beak = new THREE.ConeGeometry(0.05, 0.14, 6); beak.rotateX(Math.PI / 2); beak.translate(0, 0.7, 0.3);
+      const eyeL = new THREE.SphereGeometry(0.035, 6, 5); eyeL.translate(-0.08, 0.76, 0.21);
+      const eyeR = new THREE.SphereGeometry(0.035, 6, 5); eyeR.translate(0.08, 0.76, 0.21);
+      return merge([paint(body, c => c.set('#1d2230')), paint(belly, c => c.set('#f4f4f0')), paint(beak, c => c.set('#ff7a3d')),
+        paint(eyeL, c => c.set('#ffffff')), paint(eyeR, c => c.set('#ffffff')), facet(B(0.1, 0.04, 0.14, -0.1, 0, 0.1), '#ff7a3d'), facet(B(0.1, 0.04, 0.14, 0.1, 0, 0.1), '#ff7a3d')]);
+    },
+    /** Flat stepping stones for shallow water. */
+    stones(hex) {
+      const r = rng(hex.length * 5 + 2), parts = [];
+      for (let k = 0; k < 4; k++) {
+        const rad = 0.16 + r() * 0.22, g = new THREE.CylinderGeometry(rad, rad * 1.1, 0.12, 7);
+        g.rotateY(r() * 6); g.translate((r() - 0.5) * 1.3, 0.02, (r() - 0.5) * 1.3);
+        parts.push(facet(g, hex));
+      }
       return merge(parts);
     },
     palm(hex, seed) {
@@ -2517,55 +2571,6 @@ const PROPS = (() => {
         parts.push(paint(g, (c, x, y, z) => c.copy(col).multiplyScalar(0.62 + 0.5 * clamp((y - top.y + 0.7), 0, 1))));
       }
       for (let k = 0; k < 3; k++) { const n = new THREE.SphereGeometry(0.07, 7, 5); n.translate(top.x + Math.cos(k * 2.1) * 0.09, top.y - 0.08, Math.sin(k * 2.1) * 0.09); parts.push(shade(n, '#6b4a2a')); }
-      return merge(parts);
-    },
-    saguaro(hex, seed) {
-      const r = rng(seed * 7 + 2), col = C(hex), parts = [];
-      const ribbed = (g) => paint(g, (c, x, y, z, nx, ny) => c.copy(col).multiplyScalar((0.72 + 0.28 * (0.5 + 0.5 * Math.cos(Math.atan2(z, x) * 12))) * lerp(0.7, 1.1, ny * 0.5 + 0.5)));
-      const column = (h, rad) => { const g = new THREE.CylinderGeometry(rad, rad * 1.1, h, 16, 3); g.translate(0, h / 2, 0); const cap = new THREE.SphereGeometry(rad, 16, 6, 0, 6.283, 0, Math.PI / 2); cap.translate(0, h, 0); return [ribbed(g), ribbed(cap)]; };
-      parts.push(...column(2.0, 0.17));
-      const arms = 1 + Math.floor(r() * 2.2);
-      for (let k = 0; k < arms; k++) {
-        const side = k % 2 ? -1 : 1, y0 = 0.7 + r() * 0.5, len = 0.26 + r() * 0.12, rise = 0.45 + r() * 0.4;
-        const elbow = new THREE.CylinderGeometry(0.1, 0.1, len, 12); elbow.rotateZ(Math.PI / 2); elbow.translate(side * (0.17 + len / 2), y0, 0);
-        const joint = new THREE.SphereGeometry(0.1, 12, 8); joint.translate(side * (0.17 + len), y0, 0);
-        const up2 = column(rise, 0.1); up2.forEach(g => g.translate(side * (0.17 + len), y0, 0));
-        const all = [ribbed(elbow), ribbed(joint), ...up2];
-        const a = r() * 6.283; all.forEach(g => g.rotateY(a)); parts.push(...all);
-      }
-      return merge(parts);
-    },
-    barrel(hex) {
-      const col = C(hex), g = new THREE.SphereGeometry(0.35, 18, 10); g.scale(1, 0.85, 1); g.translate(0, 0.25, 0);
-      const parts = [paint(g, (c, x, y, z, nx, ny) => c.copy(col).multiplyScalar((0.72 + 0.28 * (0.5 + 0.5 * Math.cos(Math.atan2(z, x) * 14))) * lerp(0.65, 1.1, ny * 0.5 + 0.5)))];
-      for (let k = 0; k < 5; k++) { const f = new THREE.SphereGeometry(0.05, 6, 4); f.translate(Math.cos(k * 1.26) * 0.1, 0.54, Math.sin(k * 1.26) * 0.1); parts.push(shade(f, k % 2 ? '#ff5fa8' : '#ffd23d', 0.9, 1.2)); }
-      return merge(parts);
-    },
-    shrub(hex) {
-      const parts = [];
-      [[0, 0.22, 0, 0.3], [0.2, 0.18, 0.1, 0.22], [-0.18, 0.17, -0.08, 0.24]].forEach(([x, y, z, rad], k) => {
-        const g = blob(7, 5, 0.45, 3.5, 40 + k); g.scale(rad, rad * 0.8, rad); g.translate(x, y, z); parts.push(shade(g, hex, 0.45, 1.05, 0.3));
-      });
-      return merge(parts);
-    },
-    conifer(hex, seed) {
-      const r = rng(seed * 5 + 9), col = C(hex), snow = C('#f4f8ff'), parts = [shade(limb(V(0, 0, 0), V(0, 0.5, 0), 0.09, 0.07, 6), '#5a4030')];
-      const tiers = 4 + Math.floor(r() * 2);
-      for (let k = 0; k < tiers; k++) {
-        const t = k / tiers, rad = 0.62 * (1 - t * 0.72), h = 0.75 * (1 - t * 0.35), y = 0.35 + t * 1.55;
-        const g = new THREE.ConeGeometry(rad, h, 11, 2, true), p = g.attributes.position;
-        for (let i = 0; i < p.count; i++) { const x = p.getX(i), z = p.getZ(i); if (p.getY(i) < 0) p.setY(i, p.getY(i) - 0.08 * Math.sin(Math.atan2(z, x) * 11) ** 2); }
-        g.computeVertexNormals(); g.translate(0, y + h / 2, 0);
-        parts.push(paint(g, (c, x, y2, z, nx, ny) => c.copy(col).multiplyScalar(lerp(0.5, 1.05, ny * 0.5 + 0.5)).lerp(snow, clamp((ny - 0.35) * 2.2, 0, 0.9))));
-      }
-      return merge(parts);
-    },
-    iceSpire() {
-      const parts = [], ice = C('#bfe8ff');
-      [[0, 0, 0, 0.22, 1.9, 0], [0.22, 0, 0.1, 0.13, 1.1, 0.35], [-0.2, 0, -0.08, 0.14, 1.2, -0.3]].forEach(([x, y, z, rad, h, tilt]) => {
-        const g = new THREE.ConeGeometry(rad, h, 6); g.translate(0, h / 2, 0); g.rotateZ(tilt); g.translate(x, y, z);
-        parts.push(paint(g, (c, px, py) => c.copy(ice).multiplyScalar(0.7 + py * 0.25)));
-      });
       return merge(parts);
     },
     crystals(hex, seed) {
@@ -2606,24 +2611,8 @@ const PROPS = (() => {
         parts.push(shade(g, hex, 0.6, 1.4));
       });
       return merge(parts);
-    },
-    boulder(hex, seed, moss) {
-      const g = blob(16, 11, 0.3, 1.4, seed * 5 + 1); g.scale(1, 0.72, 1);
-      const col = C(hex), m = moss ? C(moss) : null;
-      return paint(g, (c, x, y, z, nx, ny) => {
-        c.copy(col).multiplyScalar((0.72 + 0.28 * (ny * 0.5 + 0.5)) * (1 + 0.16 * noise(x * 4, y * 4, z * 4) + 0.07 * noise(x * 14, y * 14, z * 14)));
-        if (m) c.lerp(m, clamp((ny - 0.45) * 2.2 + noise(x * 3, y * 3, z * 3) * 0.6, 0, 0.8));
-      });
-    },
-    pebbles(hex) {
-      const parts = [], r = rng(99), col = C(hex);
-      for (let k = 0; k < 7; k++) {
-        const g = blob(7, 5, 0.25, 2, 60 + k), s = 0.06 + r() * 0.12; g.scale(s, s * 0.6, s);
-        g.translate((r() - 0.5) * 1.1, s * 0.3, (r() - 0.5) * 1.1);
-        parts.push(paint(g, (c, x, y, z, nx, ny) => c.copy(col).multiplyScalar(lerp(0.6, 1.1, ny * 0.5 + 0.5) * (0.85 + 0.3 * r()))));
-      }
-      return merge(parts);
     }
+
   };
 })();
 
@@ -2721,36 +2710,55 @@ class ExploreWorld {
     const dome = new THREE.Mesh(this.keep(new THREE.SphereGeometry(900, 32, 16)), sky);
     dome.renderOrder = -1; this.scene.add(dome); this.dome = dome;
     this.scene.fog = new THREE.FogExp2(horizon, (this.gas ? 0.0045 : 0.0028) + e.humidity * 0.0045);
-    const sun = new THREE.DirectionalLight(rogue ? 0x8a7cff : 0xfff0dd, 0.25 + 1.0 * Math.min(1, light));
+    // Diorama lighting: even the far, dim worlds stay readable (the sky and fog still show how little light arrives).
+    const sun = new THREE.DirectionalLight(rogue ? 0x8a7cff : 0xfff0dd, (rogue ? 0.35 : 0.6) + 0.55 * Math.min(1, light));
     sun.position.copy(this.sunDir).multiplyScalar(300); this.scene.add(sun);
-    this.scene.add(new THREE.HemisphereLight(horizon, new THREE.Color('#141020'), rogue ? 0.35 : 0.55));
+    this.scene.add(new THREE.HemisphereLight(horizon.clone().lerp(new THREE.Color('#ffffff'), 0.45), new THREE.Color('#3a3060'), rogue ? 0.5 : 0.8));
   }
 
   /* ---------- ground: a patch of the real planet, exaggerated ---------- */
   buildGround() {
-    const e = this.e, T = this.terrain, pal = this.pal, b = this.b, S = this.S, N = PHONE ? 128 : 176, A = 0.5;
+    const e = this.e, T = this.terrain, b = this.b, S = this.S, A = 0.5;
     // Land on a coast near the equator if there is one.
     const cand = T.samples.filter(s => s.h > e.sea + 0.02 && s.h < e.sea + 0.16 && Math.abs(s.y) < 0.55);
     const site = cand.length ? cand[Math.floor(cand.length * 0.37)] : T.samples[0];
     const n = new THREE.Vector3(site.x, site.y, site.z).normalize();
     const east = new THREE.Vector3(0, 1, 0).cross(n); if (east.lengthSq() < 1e-4) east.set(1, 0, 0); east.normalize();
     const north = n.clone().cross(east).normalize();
-    const geo = this.keep(new THREE.PlaneGeometry(S, S, N, N)); geo.rotateX(-Math.PI / 2);
-    const pos = geo.attributes.position, cnt = pos.count, cols = new Float32Array(cnt * 3);
-    this.N = N; this.seg = S / N; this.hgrid = new Float32Array(cnt); this.vgrid = new Float32Array(cnt);
+    // Terraced tiles, like a diorama: square columns snapped to height steps, grass on top, layered earth down the sides.
+    const TN = PHONE ? 56 : 68, TS = S / TN, STEP = 2.2, BASE = -30;
+    this.TN = TN; this.TS = TS; this.tileY = new Float32Array(TN * TN); this.tileVeg = new Float32Array(TN * TN);
     const lava = !!b.lavaSea, crystal = b.flora === 'crystal';
     const cLow = this.col('low'), cHigh = this.col('high'), cDry = this.col('dry'), cVeg = this.col('veg'), cIce = this.col('ice'), cHot = this.col('hot');
-    const cSand = this.col('shallow').lerp(new THREE.Color('#2a2438'), 0.55), c = new THREE.Color(), d = new THREE.Vector3();
-    let peak = -1e9, peakI = 0;
-    for (let i = 0; i < cnt; i++) {
-      const u = pos.getX(i) / (S / 2), v = pos.getZ(i) / (S / 2);
-      d.copy(n).addScaledVector(east, u * A).addScaledVector(north, v * A).normalize();
+    const cSand = this.col('shallow').lerp(new THREE.Color('#e8e0ff'), 0.25), c = new THREE.Color(), d = new THREE.Vector3();
+    const snow = new THREE.Color('#f2f6ff'), pastel = this.p.biome === 'crystal' ? new THREE.Color('#7a5ad8') : null;   // violet tiles, as in a gem-forest set
+    const boxG = new THREE.BoxGeometry(1, 1, 1).toNonIndexed(), bn = boxG.attributes.normal, bc = new Float32Array(bn.count * 3);
+    for (let i = 0; i < bn.count; i++) { const ny = bn.getY(i), k = ny > 0.5 ? 1 : ny < -0.5 ? 0.45 : 0.8 + 0.08 * bn.getX(i); bc[i * 3] = bc[i * 3 + 1] = bc[i * 3 + 2] = k; }
+    boxG.setAttribute('color', new THREE.BufferAttribute(bc, 3)); this.keep(boxG);
+    const dirt = new THREE.Color(({ lava: '#2a1d26', jungle: '#8a5a36', ocean: '#86603f', desert: '#c27a46', ice: '#9cc6e6', crystal: '#3b2c6e', rogue: '#231a3a' })[this.p.biome] || '#6a5040');
+    const mat = this.keep(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92, metalness: 0, flatShading: true }));
+    mat.onBeforeCompile = sh => {
+      sh.uniforms.uDirt = { value: dirt };
+      sh.vertexShader = 'varying float vWY; varying float vDepth; varying float vSide;\n' + sh.vertexShader.replace('#include <project_vertex>', `#include <project_vertex>
+        vec4 wpS = modelMatrix * instanceMatrix * vec4(transformed, 1.0);
+        vWY = wpS.y; vDepth = (modelMatrix * instanceMatrix * vec4(0.0, 0.5, 0.0, 1.0)).y - wpS.y; vSide = 1.0 - abs(normal.y);`);
+      // Below a thin lip of the top colour, the sides show the ground's strata.
+      sh.fragmentShader = 'uniform vec3 uDirt; varying float vWY; varying float vDepth; varying float vSide;\n' + sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
+        if (vSide > 0.5 && vDepth > 0.5) diffuseColor.rgb = uDirt * (0.86 + 0.14 * step(0.5, fract(vWY / 3.3))) * (0.62 + 0.38 * smoothstep(-30.0, 2.0, vWY)) * (0.9 + 0.1 * diffuseColor.r);`);
+    };
+    const tiles = new THREE.InstancedMesh(boxG, mat, TN * TN), m4 = new THREE.Matrix4(), q0 = new THREE.Quaternion(), sv = new THREE.Vector3(), pv = new THREE.Vector3();
+    let peak = -1e9, peakP = new THREE.Vector3();
+    for (let iz = 0; iz < TN; iz++) for (let ix = 0; ix < TN; ix++) {
+      const i = iz * TN + ix, cx = -S / 2 + (ix + 0.5) * TS, cz = -S / 2 + (iz + 0.5) * TS;
+      d.copy(n).addScaledVector(east, cx / (S / 2) * A).addScaledVector(north, cz / (S / 2) * A).normalize();
       const h = T.height(d.x, d.y, d.z) + T.noise(d.x * 38, d.y * 38, d.z * 38) * 0.012;
       const y = h >= e.sea ? (h - e.sea) * 110 : (h - e.sea) * 50;
-      pos.setY(i, y); this.hgrid[i] = y;
-      if (y > peak) { peak = y; peakI = i; }
+      // Land always sits a step above the water; sea floor a step below.
+      const top = h >= e.sea ? Math.floor(y / STEP) * STEP + 0.8 : Math.min(-0.9, Math.ceil(y / STEP) * STEP - 0.9);
+      this.tileY[i] = top;
+      if (top > peak) { peak = top; peakP.set(cx, top, cz); }
       let veg = 0;
-      if (h < e.sea) c.copy(cSand);
+      if (h < e.sea) c.copy(cSand).multiplyScalar(0.85 + 0.15 * clamp(1 + y / 30, 0, 1));
       else {
         const t = clamp((h - e.sea) / Math.max(1 - e.sea, 0.05), 0, 1);
         c.copy(cLow).lerp(cHigh, smooth(0, 0.85, t)).lerp(cDry, (1 - e.humidity) * 0.5);
@@ -2762,15 +2770,16 @@ class ExploreWorld {
           if (crack > 0.05) c.lerp(cHot.clone().multiplyScalar(lava ? 1.8 : 1.2), crack * (lava ? 0.9 : 0.4) * e.heat);
         }
         if (Math.abs(d.y) > e.capLine - 0.04 || (t > 0.7 && this.sim.temp < 5)) c.lerp(cIce, 0.85);
+        else if (this.sim.temp < -5) c.lerp(snow, clamp((-this.sim.temp - 5) / 30, 0, 0.85) * (1 - veg * 0.6));   // frozen worlds lie under snow
       }
-      this.vgrid[i] = veg;
-      cols[i * 3] = c.r; cols[i * 3 + 1] = c.g; cols[i * 3 + 2] = c.b;
+      if (pastel) c.lerp(pastel, h < e.sea ? 0.25 : 0.55);
+      c.multiplyScalar((ix + iz) % 2 ? 1 : 0.94);   // a soft checker, so the tiles read
+      this.tileVeg[i] = veg;
+      m4.compose(pv.set(cx, (top + BASE) / 2, cz), q0, sv.set(TS, top - BASE, TS));
+      tiles.setMatrixAt(i, m4); tiles.setColorAt(i, c);
     }
-    geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
-    geo.computeVertexNormals();
-    const mat = this.keep(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.93, metalness: 0.02 }));
-    this.scene.add(new THREE.Mesh(geo, mat));
-    this.peak = new THREE.Vector3(pos.getX(peakI), peak, pos.getZ(peakI));
+    this.scene.add(tiles);
+    this.peak = peakP;
 
     // Sea (or lava sea) at height 0.
     const sea = new THREE.ShaderMaterial({
@@ -2803,25 +2812,32 @@ class ExploreWorld {
         }`
     });
     this.keep(sea); this.seaMat = sea;
-    const water = new THREE.Mesh(this.keep(new THREE.PlaneGeometry(S * 3, S * 3, 1, 1).rotateX(-Math.PI / 2)), sea);
+    const water = new THREE.Mesh(this.keep(new THREE.PlaneGeometry(S, S, 1, 1).rotateX(-Math.PI / 2)), sea);
     water.position.y = 0.01; this.scene.add(water);
+    // The island floats: the sea ends in a clear wall at its edges.
+    const wallM = this.keep(new THREE.MeshBasicMaterial({ color: lava ? this.col('hot') : this.col('shallow').lerp(this.col('deep'), 0.4), transparent: true, opacity: lava ? 0.75 : 0.42, side: THREE.DoubleSide, depthWrite: false, fog: true }));
+    const wallG = this.keep(new THREE.PlaneGeometry(S, 30));
+    [[0, -S / 2, 0], [0, S / 2, 0], [-S / 2, 0, Math.PI / 2], [S / 2, 0, Math.PI / 2]].forEach(([x, z, r]) => {
+      const w = new THREE.Mesh(wallG, wallM); w.position.set(x, -15, z); w.rotation.y = r; this.scene.add(w);
+    });
 
     this.buildFlora();
     if (lava || e.eruption > 0.3) this.buildVolcano();
     if (this.eco && this.sim.colonists > 1) this.buildColony();
   }
 
-  /** Ground height at (x, z), bilinear on the terrain grid. */
-  groundAt(x, z) {
-    if (this.gas) return 0;
-    const N = this.N, fx = clamp((x + this.S / 2) / this.seg, 0, N - 0.001), fz = clamp((z + this.S / 2) / this.seg, 0, N - 0.001);
-    const ix = Math.floor(fx), iz = Math.floor(fz), tx = fx - ix, tz = fz - iz, g = this.hgrid, r = N + 1;
-    const a = g[iz * r + ix], b = g[iz * r + ix + 1], c = g[(iz + 1) * r + ix], d = g[(iz + 1) * r + ix + 1];
-    return lerp(lerp(a, b, tx), lerp(c, d, tx), tz);
+  /** Tile index under (x, z). */
+  tileAt(x, z) {
+    const N = this.TN, ix = clamp(Math.floor((x + this.S / 2) / this.TS), 0, N - 1), iz = clamp(Math.floor((z + this.S / 2) / this.TS), 0, N - 1);
+    return iz * N + ix;
   }
-  vegAt(x, z) {
-    const N = this.N, ix = Math.round(clamp((x + this.S / 2) / this.seg, 0, N)), iz = Math.round(clamp((z + this.S / 2) / this.seg, 0, N));
-    return this.vgrid[iz * (N + 1) + ix];
+  /** Ground height at (x, z): the top of the tile there. */
+  groundAt(x, z) { return this.gas ? 0 : this.tileY[this.tileAt(x, z)]; }
+  vegAt(x, z) { return this.tileVeg[this.tileAt(x, z)]; }
+  /** True when (x, z) is well inside a tile, so a prop won't hang over a step. */
+  inTile(x, z, m = 0.18) {
+    const fx = ((x + this.S / 2) / this.TS) % 1, fz = ((z + this.S / 2) / this.TS) % 1;
+    return fx > m && fx < 1 - m && fz > m && fz < 1 - m;
   }
   /** A random spot that satisfies `ok(x, y, z)`, or null. */
   findSpot(ok, tries = 400, spread = 0.44) {
@@ -2842,56 +2858,65 @@ class ExploreWorld {
     const greens = (pal.flora || [pal.veg]);
     const g0 = greens[0], g1 = greens[1 % greens.length], g2 = greens[2 % greens.length];
     const specs = [];
-    // spec: geometry, how many, scale range, where it may stand (y, vegetation, slope), and material options
-    const onLand = (need) => (x, y, z) => y > 0.6 && (!need || r() < this.vegAt(x, z) * 1.4) && this.slopeAt(x, z) < 0.9;
+    // spec: geometry, how many, scale range, where it may stand, material; `sea` props float at the waterline.
+    const onLand = (need) => (x, y, z) => y > 0.6 && (!need || r() < this.vegAt(x, z) * 1.4);
+    const shallow = (x, y) => y < -0.5 && y > -5;
+    const rockCol = this.b.lavaSea ? '#3a2f3a' : kind === 'pine' ? '#c8d6e6' : kind === 'cactus' ? '#c98a55' : kind === 'crystal' ? '#8a7ab8' : '#9a96a4';
     if (kind === 'tree') {
-      specs.push({ geo: P.broadleaf(g0, 1), n: 420 * veg, sc: [2.2, 4.4], ok: onLand(true), tall: true });
-      specs.push({ geo: P.broadleaf(g1, 2), n: 300 * veg, sc: [1.8, 3.6], ok: onLand(true), tall: true });
-      specs.push({ geo: P.emergent(g2), n: 90 * veg, sc: [3.4, 5.5], ok: onLand(true), tall: true });
-      specs.push({ geo: P.bush(g1, 3), n: 700 * veg, sc: [0.8, 1.8], ok: onLand(true) });
-      specs.push({ geo: P.fern(g0), n: 800 * veg, sc: [0.7, 1.5], ok: onLand(true), mat: 'blade' });
-      specs.push({ geo: P.grass(mixHex(g1, '#b7d86a', 0.35)), n: 2600 * veg, sc: [0.6, 1.2], ok: onLand(false), mat: 'blade' });
-      if (this.eco) specs.push({ geo: P.flower(['#ff5fa8', '#ffd23d', '#ff7a3d'][Math.floor(r() * 3)]), n: 500 * veg, sc: [0.5, 0.9], ok: onLand(true) });
+      // Voxel woodland: cube-canopy trees, slim column trees, bushes, sprouts and flowers.
+      specs.push({ geo: P.voxelTree(g1, 1), n: 360 * veg, sc: [2.4, 4.2], ok: onLand(true), tall: true });
+      specs.push({ geo: P.voxelTree(g0, 2), n: 260 * veg, sc: [2.2, 3.8], ok: onLand(true), tall: true });
+      specs.push({ geo: P.voxelColumn(mixHex(g1, '#c8f04a', 0.4)), n: 200 * veg, sc: [2.2, 3.8], ok: onLand(true), tall: true });
+      specs.push({ geo: P.voxelBush(g2), n: 420 * veg, sc: [1.1, 2.0], ok: onLand(true) });
+      specs.push({ geo: P.sprouts(mixHex(g1, '#7ccf3a', 0.5), this.eco), n: 1600 * veg, sc: [1.2, 1.8], ok: onLand(false) });
     } else if (kind === 'palm') {
-      specs.push({ geo: P.palm(g0, 1), n: 420 * veg, sc: [2.2, 4.2], ok: (x, y, z) => y > 0.3 && y < 14 && this.slopeAt(x, z) < 0.8, tall: true, mat: 'blade' });
-      specs.push({ geo: P.palm(g1, 2), n: 300 * veg, sc: [1.8, 3.4], ok: (x, y, z) => y > 0.3 && y < 18 && this.slopeAt(x, z) < 0.8, tall: true, mat: 'blade' });
-      specs.push({ geo: P.broadleaf(g2, 4), n: 260 * veg, sc: [1.8, 3.2], ok: (x, y, z) => y > 8 && r() < this.vegAt(x, z) * 1.4, tall: true });
-      specs.push({ geo: P.bush(g1, 5), n: 600 * veg, sc: [0.7, 1.5], ok: onLand(true) });
-      specs.push({ geo: P.grass(mixHex(g0, '#d8e27a', 0.45)), n: 2200 * veg, sc: [0.6, 1.1], ok: onLand(false), mat: 'blade' });
+      specs.push({ geo: P.palm(g0, 1), n: 380 * veg, sc: [2.2, 4.2], ok: (x, y) => y > 0.3 && y < 14, tall: true, mat: 'blade' });
+      specs.push({ geo: P.palm(g1, 2), n: 260 * veg, sc: [1.8, 3.4], ok: (x, y) => y > 0.3 && y < 18, tall: true, mat: 'blade' });
+      specs.push({ geo: P.voxelTree(g2, 4), n: 160 * veg, sc: [1.8, 3.2], ok: (x, y, z) => y > 6 && r() < this.vegAt(x, z) * 1.4, tall: true });
+      specs.push({ geo: P.voxelBush(g1), n: 420 * veg, sc: [0.9, 1.7], ok: onLand(true) });
+      specs.push({ geo: P.sprouts(mixHex(g0, '#d8e27a', 0.45), false), n: 1200 * veg, sc: [1.1, 1.6], ok: onLand(false) });
+      specs.push({ geo: P.stones('#e8e2f4'), n: 260, sc: [1.4, 2.6], ok: shallow, sea: true });
     } else if (kind === 'cactus') {
-      const dry = Math.max(0.25, veg);
-      specs.push({ geo: P.saguaro(g0, 1), n: 170 * dry, sc: [1.6, 3.2], ok: onLand(false), tall: true });
-      specs.push({ geo: P.saguaro(g1, 2), n: 120 * dry, sc: [1.4, 2.6], ok: onLand(false), tall: true });
-      specs.push({ geo: P.barrel(g0), n: 360 * dry, sc: [0.5, 1.1], ok: onLand(false) });
-      specs.push({ geo: P.shrub('#8a7a4a'), n: 600 * dry, sc: [0.5, 1.3], ok: onLand(false) });
-      specs.push({ geo: P.grass('#d9c27a'), n: 900 * dry, sc: [0.5, 1.0], ok: onLand(false), mat: 'blade' });
+      const dry = Math.max(0.3, veg);
+      specs.push({ geo: P.hexCactus(g0, 1), n: 200 * dry, sc: [1.6, 3.0], ok: onLand(false), tall: true });
+      specs.push({ geo: P.hexCactus(g1, 2), n: 140 * dry, sc: [1.2, 2.4], ok: onLand(false), tall: true });
+      specs.push({ geo: P.mesa('#d08a50'), n: 60, sc: [2.4, 5.0], ok: onLand(false), tall: true });
+      specs.push({ geo: P.voxelBush('#9a8a52'), n: 260 * dry, sc: [0.6, 1.2], ok: onLand(false) });
+      specs.push({ geo: P.sprouts('#d9c27a', false), n: 600 * dry, sc: [1.0, 1.5], ok: onLand(false) });
     } else if (kind === 'pine') {
-      specs.push({ geo: P.conifer(g0, 1), n: 650 * veg, sc: [2.2, 4.6], ok: onLand(true), tall: true });
-      specs.push({ geo: P.conifer(g1, 2), n: 450 * veg, sc: [1.2, 2.4], ok: onLand(true), tall: true });
-      specs.push({ geo: P.iceSpire(), n: 120, sc: [1.2, 3.6], ok: (x, y, z) => y > 0.8 && this.slopeAt(x, z) < 1.2, mat: 'ice', tall: true });
-      specs.push({ geo: P.shrub('#6f8a86'), n: 500 * veg, sc: [0.5, 1.1], ok: onLand(true) });
-      specs.push({ geo: P.grass('#b9c9b0'), n: 900 * veg, sc: [0.5, 0.9], ok: onLand(false), mat: 'blade' });
+      // Ice world: snowy faceted pines, stacked ice blocks on land and afloat, and penguins by the shore.
+      specs.push({ geo: P.snowPine(g0, 1), n: 420 * veg, sc: [2.2, 4.2], ok: onLand(true), tall: true });
+      specs.push({ geo: P.snowPine(g1, 2), n: 300 * veg, sc: [1.3, 2.4], ok: onLand(true), tall: true });
+      specs.push({ geo: P.iceBlocks(1), n: 70, sc: [2.0, 4.5], ok: (x, y) => y > 0.6, tall: true });
+      specs.push({ geo: P.iceBlocks(2), n: 90, sc: [1.5, 3.5], ok: shallow, sea: true, tall: true });
+      specs.push({ geo: P.penguin(), n: this.eco ? 70 : 30, sc: [1.9, 2.5], ok: (x, y) => y > 0.6 && y < 7, mat: 'smooth' });
     } else if (kind === 'crystal') {
-      specs.push({ geo: P.crystals(g0, 1), n: 380 * Math.max(0.3, veg), sc: [0.9, 2.6], ok: onLand(false), mat: 'glow', tall: true });
-      specs.push({ geo: P.crystals(g1, 2), n: 260 * Math.max(0.3, veg), sc: [0.6, 1.8], ok: onLand(false), mat: 'glow' });
-      specs.push({ geo: P.mushroom(g2), n: 500 * veg, sc: [0.5, 1.6], ok: onLand(true), mat: 'glow' });
-      specs.push({ geo: P.grass(mixHex(g0, '#3a2f5a', 0.4)), n: 1200 * veg, sc: [0.5, 1.0], ok: onLand(false), mat: 'glow' });
+      // Gem-cut pastel trees, crystal clusters and pale stepping stones (on the dark rogue world they glow).
+      const rogue = this.p.biome === 'rogue', tm = rogue ? 'glowFlat' : 'flat';
+      const pink = rogue ? g0 : '#f2a3e6', blue = rogue ? g1 : '#7d8cff', violet = rogue ? g2 : '#b890ff';
+      specs.push({ geo: P.gemTree(pink, 1), n: 300 * Math.max(0.3, veg), sc: [2.0, 3.6], ok: onLand(false), tall: true, mat: tm });
+      specs.push({ geo: P.gemTree(blue, 2), n: 300 * Math.max(0.3, veg), sc: [1.8, 3.4], ok: onLand(false), tall: true, mat: tm });
+      specs.push({ geo: P.gemTree(violet, 3), n: 160 * Math.max(0.3, veg), sc: [1.2, 2.2], ok: onLand(false), mat: tm });
+      specs.push({ geo: P.crystals(rogue ? g0 : '#6fd8ff', 1), n: 200, sc: [0.8, 2.0], ok: onLand(false), mat: 'glowFlat', tall: true });
+      specs.push({ geo: P.crystals(rogue ? g1 : '#ff8ad8', 2), n: 120, sc: [0.6, 1.4], ok: onLand(false), mat: 'glowFlat' });
+      specs.push({ geo: P.mushroom(g2), n: 220 * veg, sc: [0.6, 1.4], ok: onLand(true), mat: 'glow' });
+      specs.push({ geo: P.stones('#d8ccf6'), n: 220, sc: [1.4, 2.6], ok: shallow, sea: true });
     }
-    if (this.b.lavaSea || e.heat > 0.6) {
-      specs.push({ geo: P.basalt(), n: 90, sc: [1.2, 3.2], ok: (x, y, z) => y > 0.5, tall: true });
-      specs.push({ geo: P.shard('#1a1320'), n: 220, sc: [0.5, 1.4], ok: (x, y, z) => y > 0.3, mat: 'obsidian' });
+    if (this.b.lavaSea || e.heat > 0.85) {
+      specs.push({ geo: P.basalt(), n: 90, sc: [1.2, 3.2], ok: (x, y) => y > 0.5, tall: true, mat: 'flat' });
+      specs.push({ geo: P.shard('#1a1320'), n: 200, sc: [0.6, 1.4], ok: (x, y) => y > 0.3, mat: 'obsidian' });
     }
-    // Boulders and pebbles on every rocky world.
-    const rockCol = this.b.lavaSea ? '#2b2228' : kind === 'pine' ? '#aebfd0' : kind === 'cactus' ? mixHex(pal.high, '#c98a55', 0.5) : mixHex(pal.high, '#5a5266', 0.45);
-    specs.push({ geo: P.boulder(rockCol, 1, kind === 'tree' || kind === 'palm' ? pal.veg : null), n: 160, sc: [0.8, 2.6], ok: (x, y, z) => y > -1, mat: kind === 'pine' ? 'frost' : null, tall: true, rock: true });
-    specs.push({ geo: P.boulder(mixHex(rockCol, '#ffffff', 0.12), 2, null), n: 120, sc: [0.5, 1.6], ok: (x, y, z) => y > -1, mat: kind === 'pine' ? 'frost' : null, rock: true });
-    specs.push({ geo: P.pebbles(rockCol), n: 700, sc: [0.4, 1.0], ok: (x, y, z) => y > -0.5, rock: true });
+    // Heaps of stone cubes on every rocky world.
+    specs.push({ geo: P.voxelRock(rockCol, 1), n: 130, sc: [1.2, 2.8], ok: (x, y) => y > 0.3, tall: true, rock: true });
+    specs.push({ geo: P.voxelRock(mixHex(rockCol, '#ffffff', 0.12), 2), n: 160, sc: [0.5, 1.2], ok: (x, y) => y > 0.3, rock: true });
 
     this.floraMeshes = [];
     const glowCol = this.col('veg').multiplyScalar(0.25 + e.glow * 0.9);
     const mats = {
-      base: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.82, metalness: 0 }),
-      blade: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.75, metalness: 0, side: THREE.DoubleSide }),
+      flat: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, metalness: 0, flatShading: true }),
+      smooth: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6, metalness: 0 }),
+      blade: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.75, metalness: 0, side: THREE.DoubleSide, flatShading: true }),
+      glowFlat: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.35, metalness: 0.1, emissive: glowCol, flatShading: true }),
       glow: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.3, metalness: 0.2, emissive: glowCol, side: THREE.DoubleSide }),
       ice: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.12, metalness: 0.1, transparent: true, opacity: 0.8, emissive: new THREE.Color('#1c4a66') }),
       frost: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.45, metalness: 0.05 }),
@@ -2899,23 +2924,20 @@ class ExploreWorld {
     };
     Object.values(mats).forEach(m => this.keep(m));
     this.floraMat = mats.glow;
-    const mat4 = new THREE.Matrix4(), q = new THREE.Quaternion(), q2 = new THREE.Quaternion(), sv = new THREE.Vector3(), v = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0), tint = new THREE.Color();
+    const mat4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sv = new THREE.Vector3(), v = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0), tint = new THREE.Color();
     for (const sp of specs) {
       const want = Math.floor(sp.n * dens);
       if (want < 3) continue;
       this.keep(sp.geo);
-      const mesh = new THREE.InstancedMesh(sp.geo, mats[sp.mat || 'base'], want);
+      const mesh = new THREE.InstancedMesh(sp.geo, mats[sp.mat || 'flat'], want);
       let n = 0;
       for (let k = 0; k < want * 6 && n < want; k++) {
         const x = (r() * 2 - 1) * this.S * 0.48, z = (r() * 2 - 1) * this.S * 0.48, y = this.groundAt(x, z);
-        if (!sp.ok(x, y, z)) continue;
+        if (!sp.ok(x, y, z) || !this.inTile(x, z, sp.tall ? 0.22 : 0.08)) continue;
         const sc = lerp(sp.sc[0], sp.sc[1], Math.pow(r(), 1.6));
-        q.setFromAxisAngle(up, r() * 6.28);
-        // Rocks tumble freely; plants lean a little with the ground.
-        if (sp.rock) q2.setFromAxisAngle(v.set(r() - 0.5, 0, r() - 0.5).normalize(), (r() - 0.5) * 0.9);
-        else q2.setFromAxisAngle(v.set(r() - 0.5, 0, r() - 0.5).normalize(), (r() - 0.5) * 0.14);
-        q.premultiply(q2);
-        mat4.compose(v.set(x, y - (sp.rock ? sc * 0.25 : 0.08), z), q, sv.set(sc, sc * (0.85 + r() * 0.3), sc));
+        // Everything stands upright on its tile, like pieces on a diorama; only the heading varies.
+        q.setFromAxisAngle(up, sp.rock || sp.sea ? Math.floor(r() * 4) * Math.PI / 2 + (r() - 0.5) * 0.3 : r() * 6.28);
+        mat4.compose(v.set(x, sp.sea ? (sp.tall ? -0.6 : -0.02) : y - 0.02, z), q, sv.set(sc, sc * (0.9 + r() * 0.2), sc));
         mesh.setMatrixAt(n, mat4);
         const b = 0.86 + r() * 0.24; mesh.setColorAt(n, tint.setRGB(b, b * (0.96 + r() * 0.08), b * (0.94 + r() * 0.08)));
         n++;
@@ -3730,7 +3752,7 @@ class App {
       g.fill();
     });
 
-    // A glowing trail along the orbit behind each planet, fading towards its tail, with a spark running up it.
+    // A thin trail along the orbit behind each planet, fading towards its tail, with a spark running up it.
     this.orbitR.forEach((r, i) => {
       const el = this.nodeEls[i]; if (!el) return;
       const nx = ox + this.nodes[i + 1].x, ny = oy + this.nodes[i + 1].y;
@@ -3738,11 +3760,8 @@ class App {
       const p = PLANETS[i], hex = BIOMES[p.biome].palette.atmo;
       const rgb = this.trailRGB[hex] || (this.trailRGB[hex] = [1, 3, 5].map(k => parseInt(hex.slice(k, k + 2), 16)).join(','));
       const a1 = Math.atan2(ny - sy, nx - sx), L = Math.min(1.35, 250 / r) * (0.93 + 0.07 * Math.sin(t * 0.7 + i)), N = 16;
-      const wMax = el.size * 0.3;
       for (let j = 0; j < N; j++) {
         const u = (j + 0.5) / N, b0 = a1 - L * (1 - j / N), b1 = a1 - L * (1 - (j + 1) / N);
-        g.strokeStyle = `rgba(${rgb},${(u * u * 0.34).toFixed(3)})`; g.lineWidth = 1 + wMax * u;
-        g.beginPath(); g.arc(sx, sy, r, b0, b1); g.stroke();
         g.strokeStyle = `rgba(255,255,255,${(u * 0.55).toFixed(3)})`; g.lineWidth = 0.6 + u * 1.2;
         g.beginPath(); g.arc(sx, sy, r, b0, b1); g.stroke();
       }
@@ -4871,6 +4890,7 @@ class App {
     if (!REDUCED) { d.classList.remove('entering'); void d.offsetWidth; d.classList.add('entering'); clearTimeout(this.enterT); this.enterT = setTimeout(() => d.classList.remove('entering'), 700); }
     if (!this.noGL) {
       const body = this.bodies[p.id];
+      body.lod(true);
       this.stage.scene.children.filter(o => o.isGroup).forEach(o => this.stage.scene.remove(o));
       this.stage.scene.add(body.group);
       body.group.rotation.set(0, 0, 0);
@@ -4891,7 +4911,7 @@ class App {
     this.stopLoop();
     if (p && !this.noGL) {
       const body = this.bodies[p.id];
-      body.rest();
+      body.rest(); body.lod(false);
       this.thumbs[p.id] = this.stage.snapshot(body);
     }
     $('#detail').classList.remove('is-active');
