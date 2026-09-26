@@ -62,6 +62,8 @@ h1,h2,h3{font-family:var(--f-head);font-weight:600;margin:0;line-height:1.2}
 .num{font-variant-numeric:tabular-nums}
 
 #dust{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#grav{position:fixed;inset:0;width:100%;height:100%;z-index:56;pointer-events:none}
+#map,#title{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 #sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;
   background:radial-gradient(120% 70% at 50% -10%,var(--sky-a) 0%,transparent 60%),linear-gradient(180deg,var(--sky-1),var(--sky-2) 55%,var(--sky-3))}
 
@@ -580,6 +582,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 <canvas id="sky" aria-hidden="true"></canvas>
 <div id="grain" aria-hidden="true"></div>
 <canvas id="dust" aria-hidden="true"></canvas>
+<canvas id="grav" aria-hidden="true"></canvas>
 
 <section class="title" id="title" aria-label="หน้าเริ่มต้น" hidden>
   <video class="title-bg" data-title-video muted loop playsinline webkit-playsinline preload="auto" disablepictureinpicture aria-hidden="true">
@@ -2522,10 +2525,12 @@ const Dust = {
     this.px = damp(this.px, this.tx, 1.5, dt); this.py = damp(this.py, this.ty, 1.5, dt);
     g.clearRect(0, 0, w, h);
     g.globalCompositeOperation = 'lighter';
+    const gdt = Grav.step('dust');
     for (const p of this.p) {
       p.x = wrap(p.x + (p.vx + Math.sin(t * 0.4 + p.ph) * 5) * p.z * dt, W);
       p.y = wrap(p.y + (p.vy + Math.cos(t * 0.3 + p.ph) * 4) * p.z * dt, H);
-      const x = wrap(p.x - this.px * 36 * p.z, W), y = wrap(p.y - this.py * 36 * p.z - this.scroll * 0.12 * p.z, H);
+      let x = wrap(p.x - this.px * 36 * p.z, W), y = wrap(p.y - this.py * 36 * p.z - this.scroll * 0.12 * p.z, H);
+      Grav.push(p, x, y, gdt, 0.3 + p.z); x += p.gx; y += p.gy;
       g.globalAlpha = p.alpha * (0.3 + 0.6 * p.z) * (0.6 + 0.4 * Math.sin(t * p.tw + p.ph));
       g.drawImage(this.sprites[p.sprite], x - p.size / 2, y - p.size / 2, p.size, p.size);
     }
@@ -2534,7 +2539,9 @@ const Dust = {
       d.x = wrap(d.x + (d.vx + Math.sin(t * 0.25 + d.ph) * 4) * d.z * dt, W);
       d.y = wrap(d.y + (d.vy + Math.cos(t * 0.2 + d.ph) * 3) * d.z * dt, H);
       d.rot += d.spin * dt;
-      const x = wrap(d.x - (this.px * 50 + this.pan) * d.z, W), y = wrap(d.y - (this.py * 50 + this.tilt) * d.z - this.scroll * 0.2 * d.z, H);
+      let x = wrap(d.x - (this.px * 50 + this.pan) * d.z, W), y = wrap(d.y - (this.py * 50 + this.tilt) * d.z - this.scroll * 0.2 * d.z, H);
+      Grav.push(d, x, y, gdt, 0.2 + d.z * 0.8); x += d.gx; y += d.gy;
+      d.rot += d.gvx * 0.002 * dt;
       const tw = 0.55 + 0.45 * Math.sin(t * d.tw + d.ph), s = d.size * (d.kind ? 0.6 + 0.4 * tw : 1);
       g.globalAlpha = (0.45 + 0.55 * d.z) * (d.kind ? 0.5 + 0.5 * tw : 0.75 + 0.25 * tw);
       // Only the five-point stars turn; dots and sparkles are drawn straight (cheaper).
@@ -2545,6 +2552,211 @@ const Dust = {
   }
 };
 
+
+/* ================================================================
+   Gravity well: the pointer as a small black hole (after the "cursor
+   black hole" demo). Tap empty space and nearby particles scatter on a
+   shockwave; press and hold and they fall in and orbit while a ring
+   charges; let go and they are flung out, harder the longer the hold.
+   A mouse pulls gently just by hovering. Particle layers call
+   Grav.step(key) once per frame and Grav.push(o, x, y, dt, k) per
+   particle, then draw it at x + o.gx, y + o.gy.
+   ================================================================ */
+const Grav = {
+  x: -1e4, y: -1e4, down: false, holding: false, charge: 0, hover: 0, mouse: false,
+  blasts: [], sparks: [], until: 0, stir: 0, raf: null, last: 0, clock: {}, win: [0, 0],
+  K: 3, WAVE: 900, HOLD_MS: 240, SLOP: 12, CHARGE_S: 1.6,
+  get live() { return this.holding || this.hover > 0.02 || this.blasts.length > 0; },
+  // Stays on while anything is still displaced, so scattered particles always settle home.
+  get on() { const now = performance.now(); return this.live || now < this.until || now - this.stir < 400; },
+  init() {
+    this.c = $('#grav'); this.g = this.c && this.c.getContext('2d');
+    this.soft = REDUCED ? 0.4 : 1;
+    this.frame = this.frame.bind(this);
+    addEventListener('pointerdown', e => this.onDown(e), { passive: true });
+    addEventListener('pointermove', e => this.onMove(e), { passive: true });
+    addEventListener('pointerup', e => this.onUp(e), { passive: true });
+    addEventListener('pointercancel', () => this.release(true));
+    addEventListener('blur', () => this.release(true));
+    document.documentElement.addEventListener('mouseleave', () => { this.mouse = false; });
+    this.resize();
+  },
+  resize() {
+    if (!this.g) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.w = innerWidth; this.h = innerHeight;
+    this.c.width = this.w * dpr; this.c.height = this.h * dpr; this.g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  },
+  /** Only empty space reacts: the map's background and the title screen, never buttons, planets or sheets. */
+  ok(t) {
+    return t instanceof Element && !!t.closest('#map, #title') &&
+      !t.closest('button, a, input, select, textarea, label, [role="button"], [role="dialog"], .node, .map-head, .map-dock, .rocket-mark, [data-no-grav]');
+  },
+  onDown(e) {
+    if ((e.pointerType === 'mouse' && e.button !== 0) || !this.ok(e.target)) return;
+    if (this.down) { this.release(true); return; }   // a second finger (pinch) cancels
+    this.down = true; this.holding = false; this.charge = 0;
+    this.x = this.x0 = e.clientX; this.y = this.y0 = e.clientY; this.t0 = performance.now();
+    this.mouse = e.pointerType === 'mouse';
+    clearTimeout(this.holdT);
+    this.holdT = setTimeout(() => { if (this.down) { this.holding = true; this.wake(); } }, this.HOLD_MS);
+  },
+  onMove(e) {
+    if (this.down) {
+      if (!this.holding && Math.hypot(e.clientX - this.x0, e.clientY - this.y0) > this.SLOP) { this.release(true); return; }  // a drag or scroll
+      this.x = e.clientX; this.y = e.clientY;
+      return;
+    }
+    if (e.pointerType !== 'mouse' || REDUCED) return;
+    this.mouse = this.ok(e.target);
+    if (this.mouse) { this.x = e.clientX; this.y = e.clientY; this.wake(); }
+  },
+  onUp(e) {
+    if (!this.down) return;
+    if (this.holding) this.release(false);
+    else {
+      this.down = false; clearTimeout(this.holdT);
+      if (performance.now() - this.t0 < 500) this.blast(0);
+    }
+    if (e.pointerType !== 'mouse') this.mouse = false;
+  },
+  /** Let go: after a hold, launch with the stored charge (quiet = just drop it, e.g. the browser took the gesture for a scroll). */
+  release(quiet) {
+    clearTimeout(this.holdT);
+    const was = this.holding, c = this.charge;
+    this.down = this.holding = false; this.charge = 0;
+    if (was && (!quiet || c > 0.25)) this.blast(c);
+  },
+  /** A shockwave from the pointer; charge 0 is a tap, up to 1 after a full hold. */
+  blast(c) {
+    const e = c * (2 - c);   // ease out
+    this.blasts.push({ x: this.x, y: this.y, t0: performance.now(), c,
+      R: (c ? 190 + e * 330 : 210) * (PHONE ? 0.85 : 1), S: (c ? 520 + e * 1500 : 780) * this.soft, spin: c ? 0.2 + e * 0.5 : 0.15 });
+    if (!REDUCED) {
+      const n = Math.round((c ? 22 + e * 40 : 22) * clamp(Dust.fx, 0.5, 1.2));
+      for (let i = 0; i < n; i++) {
+        const a = Math.random() * 6.283, v = (c ? 160 + e * 420 : 150) * (0.4 + Math.random());
+        this.sparks.push({ x: this.x, y: this.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0.6 + Math.random() * 0.6, max: 1.2,
+          s: 1.2 + Math.random() * 2.2, rgb: GRAV_RGB[i % GRAV_RGB.length] });
+      }
+    }
+    if (c) { Sound.noise(0.9, { from: 260, to: 2200, gain: 0.25 + e * 0.2 }); Sound.tone(70, 0.7, { type: 'triangle', gain: 0.25, slide: 2.2 }); }
+    else { Sound.noise(0.45, { from: 1600, to: 180, gain: 0.22 }); Sound.tone(95, 0.35, { type: 'triangle', gain: 0.22, slide: 0.5 }); }
+    if (navigator.vibrate) navigator.vibrate(c ? 12 + Math.round(e * 25) : 8);
+    this.wake();
+  },
+  wake() { this.until = performance.now() + 1500; if (!this.raf && this.g) { this.last = performance.now(); this.raf = requestAnimationFrame(this.frame); } },
+  frame(now) {
+    const dt = Math.min(0.05, (now - this.last) / 1000 || 0.016); this.last = now;
+    if (this.holding) this.charge = Math.min(1, this.charge + dt / this.CHARGE_S);
+    this.hover = damp(this.hover, this.mouse && !this.down ? 1 : 0, this.mouse ? 4 : 2, dt);
+    this.blasts = this.blasts.filter(b => (now - b.t0) / 1000 * this.WAVE < b.R + 60);
+    this.draw(dt, now);
+    this.raf = this.on || this.sparks.length ? requestAnimationFrame(this.frame) : null;
+  },
+  /** Called once per frame by each particle layer; sets the time window the shockwaves sweep through for it. */
+  step(key) {
+    const now = performance.now(), prev = this.clock[key] ?? now;
+    this.clock[key] = now; this.win[0] = prev; this.win[1] = now;
+    return Math.min(0.05, (now - prev) / 1000);
+  },
+  /** Move one particle drawn at (x, y) by the well; its offset is o.gx/o.gy. k scales the effect (near = stronger). */
+  push(o, x, y, dt, k = 1) {
+    if (o.gvx === undefined) o.gx = o.gy = o.gvx = o.gvy = 0;
+    if (!this.on || !dt) return;
+    if (!this.live && Math.abs(o.gvx) + Math.abs(o.gvy) < 1 && Math.abs(o.gx) + Math.abs(o.gy) < 0.4) { o.gx = o.gy = o.gvx = o.gvy = 0; return; }
+    x += o.gx; y += o.gy;
+    let ax = -this.K * o.gx, ay = -this.K * o.gy;
+    // Shockwaves: an impulse when the expanding front sweeps past the particle.
+    for (const b of this.blasts) {
+      const dx = x - b.x, dy = y - b.y, d = Math.hypot(dx, dy) || 1;
+      if (d > b.R) continue;
+      const r0 = Math.max(0, this.win[0] - b.t0) / 1000 * this.WAVE, r1 = (this.win[1] - b.t0) / 1000 * this.WAVE;
+      if (d < r0 || d >= r1) continue;
+      const f = Math.pow(1 - d / b.R, 1.4) * b.S * k, ux = dx / d, uy = dy / d;
+      o.gvx += (ux - uy * b.spin) * f; o.gvy += (uy + ux * b.spin) * f;
+    }
+    // Hold: fall in and orbit, reaching further as the charge builds. Hover: a faint pull.
+    const pull = this.holding ? 1 : this.hover;
+    if (pull > 0.02) {
+      const c = this.holding ? this.charge : 0, reach = this.holding ? 130 + c * 280 : 120;
+      const dx = this.x - x, dy = this.y - y, d = Math.hypot(dx, dy);
+      if (d < reach) {
+        const w = 1 - d / reach, a = (this.holding ? 800 + c * 3600 : 150) * w * pull * k * this.soft, inv = 1 / (d + 10);
+        ax += (dx + dy * 0.9) * inv * a; ay += (dy - dx * 0.9) * inv * a;
+        if (d < 16 + c * 16) { const s = Math.exp(-6 * dt); o.gvx *= s; o.gvy *= s; }   // the horizon swallows speed
+      }
+    }
+    o.gvx += ax * dt; o.gvy += ay * dt;
+    const s = Math.exp(-2.2 * dt); o.gvx *= s; o.gvy *= s;
+    const v = Math.hypot(o.gvx, o.gvy); if (v > 2600) { o.gvx *= 2600 / v; o.gvy *= 2600 / v; }
+    o.gx += o.gvx * dt; o.gy += o.gvy * dt;
+    if (Math.abs(o.gx) + Math.abs(o.gy) > 0.4) this.stir = this.win[1];
+  },
+  /** The overlay: shockwave rings, sparks, and while held a dark core with a charging ring and infalling dust. */
+  draw(dt, now) {
+    const g = this.g, TAU = Math.PI * 2;
+    g.clearRect(0, 0, this.w, this.h);
+    for (const b of this.blasts) {
+      const age = (now - b.t0) / 1000, r = age * this.WAVE, life = 1 - r / (b.R + 60);
+      if (life <= 0) continue;
+      if (age < 0.18) {
+        const fr = 18 + b.c * 30, gr = g.createRadialGradient(b.x, b.y, 0, b.x, b.y, fr);
+        gr.addColorStop(0, `rgba(255,250,255,${(0.8 * (1 - age / 0.18)).toFixed(3)})`); gr.addColorStop(1, 'rgba(255,250,255,0)');
+        g.fillStyle = gr; g.beginPath(); g.arc(b.x, b.y, fr, 0, TAU); g.fill();
+      }
+      g.lineWidth = 1.5 + b.c * 2;
+      g.strokeStyle = `rgba(200,245,255,${(life * 0.55).toFixed(3)})`;
+      g.beginPath(); g.arc(b.x, b.y, r, 0, TAU); g.stroke();
+      g.lineWidth = 1;
+      g.strokeStyle = `rgba(255,190,230,${(life * 0.3).toFixed(3)})`;
+      g.beginPath(); g.arc(b.x, b.y, r * 0.72, 0, TAU); g.stroke();
+    }
+    if (this.holding && !REDUCED && Math.random() < 0.3 + this.charge * 0.7) {
+      // Dust drawn in from around the well.
+      const a = Math.random() * TAU, r = 70 + this.charge * 110 + Math.random() * 60;
+      this.sparks.push({ x: this.x + Math.cos(a) * r, y: this.y + Math.sin(a) * r, vx: -Math.sin(a) * 90, vy: Math.cos(a) * 90, life: 1.2, max: 1.2, s: 1 + Math.random() * 1.6,
+        rgb: GRAV_RGB[Math.floor(Math.random() * GRAV_RGB.length)], fall: true });
+    }
+    g.globalCompositeOperation = 'lighter';
+    this.sparks = this.sparks.filter(p => {
+      p.life -= dt; if (p.life <= 0) return false;
+      if (p.fall) {
+        const dx = this.x - p.x, dy = this.y - p.y, d = Math.hypot(dx, dy) || 1;
+        if (!this.holding) p.fall = false;
+        else if (d < 10) return false;
+        else { const a = 900 / (d + 20) * 60; p.vx += (dx + dy * 0.8) / d * a * dt; p.vy += (dy - dx * 0.8) / d * a * dt; }
+      }
+      const s = Math.exp(-(p.fall ? 1.5 : 3) * dt); p.vx *= s; p.vy *= s;
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      g.globalAlpha = Math.min(1, p.life / p.max * 1.6) * 0.9;
+      g.fillStyle = `rgb(${p.rgb})`;
+      g.beginPath(); g.arc(p.x, p.y, p.s, 0, TAU); g.fill();
+      return true;
+    });
+    g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+    if (this.holding) {
+      const c = this.charge, x = this.x, y = this.y, rc = 7 + c * 13, spin = now / 1000 * (2 + c * 6);
+      const halo = g.createRadialGradient(x, y, rc * 0.8, x, y, rc * 3.2);
+      halo.addColorStop(0, `rgba(170,230,255,${(0.35 + c * 0.4).toFixed(3)})`); halo.addColorStop(0.35, `rgba(255,150,220,${(0.12 + c * 0.2).toFixed(3)})`); halo.addColorStop(1, 'rgba(120,80,255,0)');
+      g.fillStyle = halo; g.beginPath(); g.arc(x, y, rc * 3.2, 0, TAU); g.fill();
+      g.fillStyle = '#05020c'; g.beginPath(); g.arc(x, y, rc, 0, TAU); g.fill();
+      g.strokeStyle = 'rgba(235,250,255,.85)'; g.lineWidth = 1.5;
+      g.beginPath(); g.arc(x, y, rc + 1, 0, TAU); g.stroke();
+      // Charge ring: a faint track and the filled arc.
+      const rr = rc + 16 + c * 8;
+      g.strokeStyle = 'rgba(255,255,255,.14)'; g.lineWidth = 2;
+      g.beginPath(); g.arc(x, y, rr, 0, TAU); g.stroke();
+      g.strokeStyle = c >= 1 ? 'rgba(255,214,120,.95)' : 'rgba(140,240,225,.9)'; g.lineWidth = 2.5; g.lineCap = 'round';
+      g.beginPath(); g.arc(x, y, rr, -Math.PI / 2, -Math.PI / 2 + TAU * Math.max(0.02, c)); g.stroke();
+      // Two arcs of the accretion disc turning around the core.
+      g.strokeStyle = `rgba(255,200,235,${(0.3 + c * 0.4).toFixed(3)})`; g.lineWidth = 1.2;
+      for (let i = 0; i < 2; i++) { g.beginPath(); g.arc(x, y, rc + 6 + c * 3, spin + i * Math.PI, spin + i * Math.PI + 1.3); g.stroke(); }
+      g.lineCap = 'butt'; g.lineWidth = 1;
+    }
+  }
+};
+const GRAV_RGB = ['255,244,255', '140,240,225', '255,170,210', '255,214,140'];
 const ROCKET_SVG = `<svg viewBox="0 0 120 120" aria-hidden="true"><g transform="rotate(45 60 60)">
 <path d="M42 70 24 88l20 2z" fill="#3fd6c6"/><path d="M78 70l18 18-20 2z" fill="#3fd6c6"/>
 <path d="M60 8c17 15 23 36 21 62H39C37 44 43 23 60 8z" fill="#f4f1ff"/>
@@ -4266,6 +4478,7 @@ class App {
   async init() {
     drawSky(); drawGrain();
     Dust.init();
+    Grav.init();
     const bar = $('[data-boot-bar]'), status = $('[data-boot-status]');
     const step = (p, text) => { bar.style.width = Math.round(p * 100) + '%'; if (text) status.textContent = text; };
     this.bindUI(); this.bindTitle();
@@ -4632,7 +4845,7 @@ class App {
     this.lastTop = top;
     this.pAcc = (this.pAcc || 0) + dt * this.state.speed;
     this.gFrame = (this.gFrame + 1) % 2;
-    if (!moved && (this.gFrame || this.state.speed === 0)) return;
+    if (!moved && !Grav.on && (this.gFrame || this.state.speed === 0)) return;
     if (!moved && this.lite && (this.liteN = ((this.liteN || 0) + 1) % 2)) return;   // low-power: every 4th frame
     const sdt = this.pAcc; this.pAcc = 0;
     this.spaceT += sdt;
@@ -4871,6 +5084,8 @@ class App {
 
     // Drifting swarms of small bodies (screen space, with a little scroll parallax).
     const sc = $('#mapScroll').scrollTop, share = (this.fxK || 1) / FX_LEVELS.high[0];
+    // Relative to the viewport, where the pointer is: #map fills the screen, so this is only its offset.
+    const gdt = Grav.step('map'), gox = mr.left, goy = mr.top;
     const nMotes = Math.round(this.motes.length * share), nSwarms = Math.round(this.swarms.length * share), nBalls = Math.round(this.balls.length * share);
     for (let z = 0; z < 3; z++) {
       g.fillStyle = ['rgba(200,190,255,.35)', 'rgba(220,215,255,.5)', 'rgba(240,236,255,.7)'][z];
@@ -4879,7 +5094,8 @@ class App {
         const m = this.motes[k];
         if (m.z !== z) continue;
         m.x += m.vx * (z + 1) * dt / W; m.y += m.vy * (z + 1) * dt / H;
-        const x = ((m.x % 1) + 1) % 1 * W, y = ((((m.y * H - sc * (0.05 + z * 0.08)) % H) + H) % H);
+        let x = ((m.x % 1) + 1) % 1 * W, y = ((((m.y * H - sc * (0.05 + z * 0.08)) % H) + H) % H);
+        Grav.push(m, x + gox, y + goy, gdt, 0.6 + z * 0.3); x += m.gx; y += m.gy;
         const rr = m.s * (0.7 + z * 0.35);
         g.moveTo(x + rr, y); g.arc(x, y, rr, 0, TAU);
       }
@@ -4890,9 +5106,13 @@ class App {
     for (let k = 0; k < nSwarms; k++) {
       const w = this.swarms[k];
       w.x += w.vx * dt / W; w.y += w.vy * dt / H; w.rot += dt * w.spin;
-      const cx = ((w.x % 1) + 1) % 1 * (W + 80) - 40, cy = ((((w.y * H - sc * 0.15) % (H + 80)) + H + 80) % (H + 80)) - 40;
+      let cx = ((w.x % 1) + 1) % 1 * (W + 80) - 40, cy = ((((w.y * H - sc * 0.15) % (H + 80)) + H + 80) % (H + 80)) - 40;
+      Grav.push(w, cx + gox, cy + goy, gdt, 0.7); cx += w.gx; cy += w.gy;
+      // A scattered swarm spreads out with its speed and gathers again as it settles.
+      const spread = 1 + Math.min(2, Math.hypot(w.gvx, w.gvy) / 400);
+      w.rot += dt * Math.min(3, Math.hypot(w.gvx, w.gvy) / 300);
       for (const m of w.m) {
-        const a = m.a + w.rot, x = cx + Math.cos(a) * m.d, y = cy + Math.sin(a) * m.d * 0.6;
+        const a = m.a + w.rot, x = cx + Math.cos(a) * m.d * spread, y = cy + Math.sin(a) * m.d * 0.6 * spread;
         g.moveTo(x + m.s, y); g.arc(x, y, m.s, 0, TAU);
       }
     }
@@ -4902,7 +5122,8 @@ class App {
       const b = this.balls[k];
       const d = 0.4 + b.z;
       b.x += b.vx * d * dt / W; b.y += b.vy * d * dt / H;
-      const x = ((b.x % 1) + 1) % 1 * (W + 40) - 20, y = ((((b.y * H - sc * (0.1 + b.z * 0.25)) % (H + 40)) + H + 40) % (H + 40)) - 20;
+      let x = ((b.x % 1) + 1) % 1 * (W + 40) - 20, y = ((((b.y * H - sc * (0.1 + b.z * 0.25)) % (H + 40)) + H + 40) % (H + 40)) - 20;
+      Grav.push(b, x + gox, y + goy, gdt, 0.5 + b.z * 0.7); x += b.gx; y += b.gy;
       const sz = b.s * (0.7 + b.z * 0.6), fade = clamp((y - 60) / 70, 0, 1);   // keep the header clear
       if (!fade) continue;
       g.globalAlpha = fade;
@@ -6468,7 +6689,7 @@ class App {
     addEventListener('resize', () => {
       clearTimeout(rt);
       rt = setTimeout(() => {
-        drawSky(); Dust.resize(); this.resizeSpace();
+        drawSky(); Dust.resize(); Grav.resize(); this.resizeSpace();
         if (this.sys3d && this.current < 0) this.enterSystem();
         if (this.stage && this.current >= 0) this.stage.resize();
         if (this.nodes) { const top = $('#mapScroll').scrollTop; this.buildMap(); $('#mapScroll').scrollTop = top; }
