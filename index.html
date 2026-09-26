@@ -69,14 +69,6 @@ h1,h2,h3{font-family:var(--f-head);font-weight:600;margin:0;line-height:1.2}
 #grain{position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.55;background-size:180px 180px}
 [data-bg="black"] #grain{opacity:.35}
 
-/* ------------------------------------------------------------------ Intro film (plays when the title's start button is pressed) */
-.film{position:fixed;inset:0;z-index:58;background:#0a0418;opacity:0;transition:opacity .5s var(--ease)}
-.film.is-on{opacity:1}
-.film.out{opacity:0;transition:opacity .7s var(--ease)}
-.film video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
-.film-skip{position:absolute;right:16px;bottom:calc(var(--safe-b) + 20px);padding:9px 18px;border-radius:20px;font-size:14px;color:#fff;
-  background:rgba(10,4,24,.45);border:1px solid rgba(255,255,255,.3);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-
 /* ------------------------------------------------------------------ Title screen */
 #map.arrive{animation:marrive .9s var(--ease) both}
 @keyframes marrive{from{opacity:0;transform:scale(1.08)}}
@@ -115,6 +107,12 @@ h1,h2,h3{font-family:var(--f-head);font-weight:600;margin:0;line-height:1.2}
 .title.go .title-top,.title.go .title-tip{opacity:0;transition:opacity .4s}
 .title.go{opacity:0;transition:opacity .6s .45s}
 @media (prefers-reduced-motion: reduce){.t-orbit,.t-pl,.t-star,.title-start{animation:none}}
+/* The looping film is the title's background; the drawn orbits are kept only as a fallback. */
+.title-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;pointer-events:none;transition:opacity .8s var(--ease),transform 1.1s cubic-bezier(.6,0,.3,1)}
+.title.has-video .title-bg{opacity:1}
+.title.has-video .title-sys{display:none}
+.title.has-video::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(10,4,26,.35) 0,transparent 22%,transparent 42%,rgba(10,4,26,.72) 72%,rgba(10,4,26,.88) 100%)}
+.title.go .title-bg{transform:scale(1.35);opacity:0}
 
 /* ------------------------------------------------------------------ Boot */
 .boot{position:fixed;inset:0;z-index:60;display:grid;place-items:center;overflow:hidden;transition:opacity .6s var(--ease);
@@ -533,14 +531,11 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 <div id="grain" aria-hidden="true"></div>
 <canvas id="dust" aria-hidden="true"></canvas>
 
-<div class="film" id="film" hidden>
-  <video muted playsinline webkit-playsinline preload="auto" disablepictureinpicture aria-hidden="true">
+<section class="title" id="title" aria-label="หน้าเริ่มต้น" hidden>
+  <video class="title-bg" data-title-video muted loop playsinline webkit-playsinline preload="auto" disablepictureinpicture aria-hidden="true">
     <source src="intro.mp4" type="video/mp4">
     <source src="intro.webm" type="video/webm">
   </video>
-  <button class="film-skip" type="button" data-film-skip>ข้าม ›</button>
-</div>
-<section class="title" id="title" aria-label="หน้าเริ่มต้น" hidden>
   <div class="title-sys" data-title-sys aria-hidden="true"><div class="t-star"></div></div>
   <div class="title-top">
     <button class="round" type="button" data-title-sound aria-label="เสียง">🔈</button>
@@ -769,7 +764,7 @@ const LANG = (() => { try { return JSON.parse(localStorage.getItem('suan-dao-v1'
 const tr = (th, en) => LANG === 'en' ? en : th;
 document.documentElement.lang = LANG;
 /** English for the static page text; applied once at start when the language is English. */
-const STATIC_EN = { "ข้าม ›": "Skip ›", "🌄 แบบสมจริง": "🌄 Realistic", "หน้าเริ่มต้น": "Title screen", "บินสำรวจ ปั้นดาว และสร้างชีวิตบนดาวเคราะห์ 7 ดวงในระบบดาวของคุณเอง": "Fly out, shape worlds and bring life to seven planets in a star system of your own.", "กำลังเตรียมยานสำรวจ": "Preparing the explorer ship", "แนะนำสวนดาว": "Welcome to Star Garden", "ข้าม": "Skip", "ออกสำรวจ": "Explore", "ระบบดาวของคุณเอง": "a star system of your own", "บินจากสถานีอวกาศไปยังดาว 7 ดวง ดูระยะทางและเวลาเดินทาง หรือเปิดมุมมอง 3 มิติเพื่อหมุนดูทั้งระบบ": "Fly from the space station to 7 planets, see distances and travel times, or switch to the 3D view and spin the whole system.", "ปั้นดาว": "Shape worlds", "ในแบบที่คุณชอบ": "just the way you like", "ปรับความร้อน น้ำ พืช น้ำแข็ง และพายุ แล้วดูดาวเปลี่ยนไปต่อหน้า ซูมเข้าไปดูรายละเอียดได้ใกล้ ๆ": "Adjust heat, water, plants, ice and storms and watch the planet change in front of you. Zoom right in to see the detail.", "สร้างชีวิต": "Create life", "แล้วลงไปเดินดู": "then walk among it", "สร้างระบบนิเวศ ดูแลเศรษฐกิจให้ยั่งยืน และกดลงสำรวจเพื่อเดินชมพื้นผิว นิคม และสัตว์บนดาว": "Build ecosystems, keep each economy sustainable, and land to walk the surface among settlements and wildlife.", "ถัดไป": "Next", "แผนที่ระบบดาว": "Star system map", "สวน": "Star ", "ดาว": "Garden", "เปิดเมนู": "Open menu", "มุมมองระบบดาว 3 มิติ": "3D system view", "ความเร็วของอวกาศ": "Space speed", "ความเร็วยานอวกาศ": "Ship speed", "ปกติ": "Normal", "โทนพื้นหลัง": "Background tone", "ปริมาณอนุภาคและเอฟเฟกต์": "Particles and effects", "ความคืบหน้าการสำรวจ": "Exploration progress", "ออกเดินทาง!": "Lift-off!", "แตะเพื่อข้าม": "Tap to skip", "รายละเอียดดาว": "Planet details", "กลับไปที่แผนที่": "Back to the map", "ลากเพื่อหมุน · บีบนิ้วเพื่อซูม · แตะดาวเพื่อส่งคลื่น": "Drag to spin · pinch to zoom · tap to send a ripple", "อุณหภูมิ": "Temperature", "ออกซิเจน": "Oxygen", "น้ำ": "Water", "สิ่งมีชีวิต": "Life", "หัวข้อของดาว": "Planet topics", "ปรับแต่ง": "Shape", "ระบบนิเวศ": "Ecosystem", "เศรษฐกิจ": "Economy", "ข้อมูล": "Info", "แสดงแผงปรับแต่ง": "Show controls", "แผงปรับแต่ง": "Controls", "สำรวจพื้นผิวดาว": "Surface exploration", "กลับขึ้นยาน": "Back to the ship", "ภารกิจสำรวจพื้นผิว": "Surface mission", "จุดก่อนหน้า": "Previous point", "▶ ทัวร์อัตโนมัติ": "▶ Auto tour", "จุดถัดไป": "Next point", "ลากเพื่อเลื่อนดู · บีบหรือหมุนล้อเมาส์เพื่อซูม · สองนิ้วหมุนเพื่อหมุนมุมมอง · แตะโฮโลแกรมเพื่อดูข้อมูล": "Drag to pan · pinch or scroll to zoom · twist with two fingers to rotate · tap a hologram for details", "ปิด": "Close", "‹ ก่อนหน้า": "‹ Previous", "ถัดไป ›": "Next ›", "กำลังลงจอด…": "Landing…", "สถานีอวกาศ": "Space station", "จุดเทียบท่าของยานสำรวจ": "The explorer ship's home port", "ลากเพื่อหมุน · บีบหรือเลื่อนเพื่อซูม · แตะชิ้นส่วนเพื่อดูข้อมูล": "Drag to spin · pinch or scroll to zoom · tap a part for details", "หัวข้อของสถานี": "Station topics", "โมดูล": "Modules", "วิศวกรรม": "Engineering", "สีสถานี": "Paint", "เมนู": "Menu", "ดูหน้าแนะนำอีกครั้ง": "Replay the introduction", "สามขั้นตอนเริ่มต้น": "Three steps to get started", "วิธีเล่น": "How to play", "บิน สำรวจ ปรับแต่ง และสร้างชีวิต": "Fly, explore, shape worlds and create life", "เสียง": "Sound", "ปิดอยู่ แตะเพื่อเปิด": "Off · tap to turn on", "ตัวเลขมาจากไหน": "Where the numbers come from", "ระยะทาง เวลาเดินทาง และการคำนวณ": "Distances, travel times and the maths", "เริ่มต้นใหม่ทั้งหมด": "Start over", "ล้างการปรับแต่งของทุกดาว": "Clear every planet's changes" };
+const STATIC_EN = { "🌄 แบบสมจริง": "🌄 Realistic", "หน้าเริ่มต้น": "Title screen", "บินสำรวจ ปั้นดาว และสร้างชีวิตบนดาวเคราะห์ 7 ดวงในระบบดาวของคุณเอง": "Fly out, shape worlds and bring life to seven planets in a star system of your own.", "กำลังเตรียมยานสำรวจ": "Preparing the explorer ship", "แนะนำสวนดาว": "Welcome to Star Garden", "ข้าม": "Skip", "ออกสำรวจ": "Explore", "ระบบดาวของคุณเอง": "a star system of your own", "บินจากสถานีอวกาศไปยังดาว 7 ดวง ดูระยะทางและเวลาเดินทาง หรือเปิดมุมมอง 3 มิติเพื่อหมุนดูทั้งระบบ": "Fly from the space station to 7 planets, see distances and travel times, or switch to the 3D view and spin the whole system.", "ปั้นดาว": "Shape worlds", "ในแบบที่คุณชอบ": "just the way you like", "ปรับความร้อน น้ำ พืช น้ำแข็ง และพายุ แล้วดูดาวเปลี่ยนไปต่อหน้า ซูมเข้าไปดูรายละเอียดได้ใกล้ ๆ": "Adjust heat, water, plants, ice and storms and watch the planet change in front of you. Zoom right in to see the detail.", "สร้างชีวิต": "Create life", "แล้วลงไปเดินดู": "then walk among it", "สร้างระบบนิเวศ ดูแลเศรษฐกิจให้ยั่งยืน และกดลงสำรวจเพื่อเดินชมพื้นผิว นิคม และสัตว์บนดาว": "Build ecosystems, keep each economy sustainable, and land to walk the surface among settlements and wildlife.", "ถัดไป": "Next", "แผนที่ระบบดาว": "Star system map", "สวน": "Star ", "ดาว": "Garden", "เปิดเมนู": "Open menu", "มุมมองระบบดาว 3 มิติ": "3D system view", "ความเร็วของอวกาศ": "Space speed", "ความเร็วยานอวกาศ": "Ship speed", "ปกติ": "Normal", "โทนพื้นหลัง": "Background tone", "ปริมาณอนุภาคและเอฟเฟกต์": "Particles and effects", "ความคืบหน้าการสำรวจ": "Exploration progress", "ออกเดินทาง!": "Lift-off!", "แตะเพื่อข้าม": "Tap to skip", "รายละเอียดดาว": "Planet details", "กลับไปที่แผนที่": "Back to the map", "ลากเพื่อหมุน · บีบนิ้วเพื่อซูม · แตะดาวเพื่อส่งคลื่น": "Drag to spin · pinch to zoom · tap to send a ripple", "อุณหภูมิ": "Temperature", "ออกซิเจน": "Oxygen", "น้ำ": "Water", "สิ่งมีชีวิต": "Life", "หัวข้อของดาว": "Planet topics", "ปรับแต่ง": "Shape", "ระบบนิเวศ": "Ecosystem", "เศรษฐกิจ": "Economy", "ข้อมูล": "Info", "แสดงแผงปรับแต่ง": "Show controls", "แผงปรับแต่ง": "Controls", "สำรวจพื้นผิวดาว": "Surface exploration", "กลับขึ้นยาน": "Back to the ship", "ภารกิจสำรวจพื้นผิว": "Surface mission", "จุดก่อนหน้า": "Previous point", "▶ ทัวร์อัตโนมัติ": "▶ Auto tour", "จุดถัดไป": "Next point", "ลากเพื่อเลื่อนดู · บีบหรือหมุนล้อเมาส์เพื่อซูม · สองนิ้วหมุนเพื่อหมุนมุมมอง · แตะโฮโลแกรมเพื่อดูข้อมูล": "Drag to pan · pinch or scroll to zoom · twist with two fingers to rotate · tap a hologram for details", "ปิด": "Close", "‹ ก่อนหน้า": "‹ Previous", "ถัดไป ›": "Next ›", "กำลังลงจอด…": "Landing…", "สถานีอวกาศ": "Space station", "จุดเทียบท่าของยานสำรวจ": "The explorer ship's home port", "ลากเพื่อหมุน · บีบหรือเลื่อนเพื่อซูม · แตะชิ้นส่วนเพื่อดูข้อมูล": "Drag to spin · pinch or scroll to zoom · tap a part for details", "หัวข้อของสถานี": "Station topics", "โมดูล": "Modules", "วิศวกรรม": "Engineering", "สีสถานี": "Paint", "เมนู": "Menu", "ดูหน้าแนะนำอีกครั้ง": "Replay the introduction", "สามขั้นตอนเริ่มต้น": "Three steps to get started", "วิธีเล่น": "How to play", "บิน สำรวจ ปรับแต่ง และสร้างชีวิต": "Fly, explore, shape worlds and create life", "เสียง": "Sound", "ปิดอยู่ แตะเพื่อเปิด": "Off · tap to turn on", "ตัวเลขมาจากไหน": "Where the numbers come from", "ระยะทาง เวลาเดินทาง และการคำนวณ": "Distances, travel times and the maths", "เริ่มต้นใหม่ทั้งหมด": "Start over", "ล้างการปรับแต่งของทุกดาว": "Clear every planet's changes" };
 function translateStatic() {
   if (LANG !== 'en') return;
   document.title = 'Star Garden — build and care for your own star system';
@@ -4203,7 +4198,7 @@ class App {
     $('#map').classList.add('is-active');
     let skip = false;   // a language switch mid-game reloads straight back into the map
     try { skip = sessionStorage.getItem('suan-dao-skip-title') === '1'; sessionStorage.removeItem('suan-dao-skip-title'); } catch (e) { /* no session storage */ }
-    if (skip) { this.onTitle = true; this.startFromTitle(false); } else this.showTitle();
+    if (skip) { this.onTitle = true; this.startFromTitle(); } else this.showTitle();
     setTimeout(() => $('#boot').remove(), 700);
   }
 
@@ -4243,44 +4238,30 @@ class App {
     const nextTip = () => { tipEl.style.opacity = 0; setTimeout(() => { tipEl.textContent = tips[ti = (ti + 1) % tips.length]; tipEl.style.opacity = 1; }, 450); };
     tipEl.textContent = tips[ti]; clearInterval(this.tipT); this.tipT = setInterval(nextTip, 4200);
     el.hidden = false; el.classList.remove('go');
+    // Background film: muted and inline, so phones autoplay it; the drawn orbits stay if it can't play.
+    const v = $('[data-title-video]');
+    if (v && !REDUCED && (v.canPlayType('video/mp4; codecs="avc1.640028"') || v.canPlayType('video/webm; codecs="vp9"'))) {
+      v.muted = true;
+      v.addEventListener('playing', () => el.classList.add('has-video'), { once: true });
+      const pl = v.play(); if (pl && pl.catch) pl.catch(() => { /* keep the drawn orbits */ });
+    }
     requestAnimationFrame(() => el.classList.add('is-on'));
     this.onTitle = true;
     setTimeout(() => { if (this.onTitle) $('[data-title-start]').focus({ preventScroll: true }); }, 400);
   }
-  /** From the title screen: play the intro film (muted), then open the map. */
-  startFromTitle(film = true) {
+  startFromTitle() {
     if (!this.onTitle) return;
     this.onTitle = false; clearInterval(this.tipT);
-    const wrap = $('#film'), v = wrap && $('video', wrap);
-    const playable = v && (v.canPlayType('video/mp4; codecs="avc1.640028"') || v.canPlayType('video/webm; codecs="vp9"'));
-    if (!film || REDUCED || !playable || v.error) { this.enterMap(); return; }
-    let done = false;
-    const finish = () => {
-      if (done) return; done = true;
-      clearTimeout(this.filmT);
-      $('#title').hidden = true; $('#title').classList.remove('is-on', 'go');
-      this.enterMap(true);
-      wrap.classList.add('out');
-      setTimeout(() => { v.pause(); wrap.hidden = true; wrap.classList.remove('is-on', 'out'); }, 700);
-    };
-    this.filmFinish = finish;
-    wrap.hidden = false; v.muted = true; v.currentTime = 0; this.filmAt = performance.now();
-    v.onended = finish;
-    // Started inside the tap, so phones allow it; if the device can't play it, go straight to the map.
-    const go = v.play();
-    const fail = () => { if (done) return; done = true; wrap.hidden = true; this.enterMap(); };
-    if (go && go.then) go.then(() => { if (!done) requestAnimationFrame(() => wrap.classList.add('is-on')); }, fail);
-    else wrap.classList.add('is-on');
-    this.filmT = setTimeout(finish, 12000);   // never get stuck on a stalled video
+    this.enterMap();
   }
-  /** Reveal the space map (with a warp-out of the title, unless the film already covered it). */
-  enterMap(afterFilm) {
+  /** Warp out of the title and reveal the space map. */
+  enterMap() {
     const el = $('#title');
     if (Sound.on) Sound.launch();
-    if (!afterFilm) el.classList.add('go');
+    el.classList.add('go');
     const map = $('#map');
-    setTimeout(() => { map.style.visibility = ''; map.classList.remove('arrive'); void map.offsetWidth; map.classList.add('arrive'); this.startMapLoop(); }, REDUCED || afterFilm ? 0 : 520);
-    setTimeout(() => { el.hidden = true; el.classList.remove('is-on', 'go'); map.classList.remove('arrive'); if (!this.state.intro) this.showIntro(); }, REDUCED ? 50 : afterFilm ? 650 : 1150);
+    setTimeout(() => { map.style.visibility = ''; map.classList.remove('arrive'); void map.offsetWidth; map.classList.add('arrive'); this.startMapLoop(); }, REDUCED ? 0 : 520);
+    setTimeout(() => { el.hidden = true; el.classList.remove('is-on', 'go'); map.classList.remove('arrive'); const v = $('[data-title-video]'); if (v) v.pause(); if (!this.state.intro) this.showIntro(); }, REDUCED ? 50 : 1150);
   }
   bindTitle() {
     const el = $('#title');
@@ -4293,9 +4274,6 @@ class App {
       if (!this.onTitle || e.repeat) return;
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.startFromTitle(); }
     });
-    $('[data-film-skip]').addEventListener('click', () => this.filmFinish && this.filmFinish());
-    // (the key press that started the film must not also skip it)
-    addEventListener('keydown', e => { if (!$('#film').hidden && performance.now() - this.filmAt > 400 && (e.key === 'Escape' || e.key === 'Enter')) { e.preventDefault(); this.filmFinish && this.filmFinish(); } });
   }
 
   /** Build (or rebuild) a planet's 3D body, map thumbnail and statistics from the saved state. */
