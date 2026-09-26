@@ -97,7 +97,7 @@ h1,h2,h3{font-family:var(--f-head);font-weight:600;margin:0;line-height:1.2}
 .confetti{position:fixed;left:50%;top:38%;z-index:80;pointer-events:none}
 .confetti i{position:absolute;width:8px;height:12px;border-radius:2px;animation:conf 1.4s cubic-bezier(.2,.7,.3,1) both}
 @keyframes conf{0%{transform:translate(0,0) rotate(0);opacity:1}80%{opacity:1}100%{transform:translate(var(--x),calc(var(--y) + 160px)) rotate(var(--r));opacity:0}}
-@media (max-width:420px){#map .map-dock{gap:5px;right:10px}#map .map-dock .dock-btn{min-width:42px;padding:0 8px}}
+@media (max-width:420px){#map .map-dock{right:12px}}
 
 /* ------------------------------------------------------------------ Title screen */
 #map.arrive{animation:marrive .9s var(--ease) both}
@@ -185,7 +185,7 @@ h1,h2,h3{font-family:var(--f-head);font-weight:600;margin:0;line-height:1.2}
 .zone b{font-weight:500;flex:none}
 .zone small{color:var(--ink-3);font-size:11px;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:620px){.zone small{display:none}}
-.mbar{padding:calc(var(--safe-t) + 6px) 10px 6px 16px}
+.mbar{padding:calc(var(--safe-t) + 6px) 10px 6px 16px;justify-content:flex-end}
 .mbar .logo{font-size:16px;gap:8px}
 .mbar .logo-mark{width:24px;height:24px}
 .mbar .logo-mark::after{top:8px;height:7px;left:-6px;right:-6px}
@@ -252,7 +252,26 @@ html[lang="th"] .lang-btn [data-l="th"],html[lang="en"] .lang-btn [data-l="en"]{
 .star-node .sun.poke{animation:sunpoke .35s var(--ease)}
 @keyframes sunpoke{50%{transform:scale(1.08)}}
 .rocket-mark{position:absolute;left:0;top:0;width:46px;height:46px;pointer-events:none;will-change:transform;z-index:2}
-.map-dock{position:absolute;right:14px;bottom:calc(var(--safe-b) + 14px);z-index:4;display:flex;gap:8px;align-items:center}
+.map-dock{position:absolute;right:14px;bottom:calc(var(--safe-b) + 14px);z-index:4}
+/* One main button; tapping it pops the controls out in a panel above it. */
+.dock-main{position:relative;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--grad);
+  box-shadow:0 8px 26px rgba(176,77,255,.55),inset 0 0 0 1px rgba(255,255,255,.25);transition:transform .3s var(--ease)}
+.dock-main svg{width:22px;height:22px;transition:transform .35s var(--ease),opacity .25s}
+.dock-main .dock-x{position:absolute;width:20px;height:20px;opacity:0;transform:rotate(-90deg) scale(.5);transition:transform .35s var(--ease),opacity .25s}
+.dock-main .dock-x::before,.dock-main .dock-x::after{content:"";position:absolute;left:9px;top:0;width:2.6px;height:20px;border-radius:2px;background:#fff;transform:rotate(45deg)}
+.dock-main .dock-x::after{transform:rotate(-45deg)}
+.map-dock.open .dock-main svg{opacity:0;transform:rotate(90deg) scale(.5)}
+.map-dock.open .dock-main .dock-x{opacity:1;transform:none}
+.dock-main:active{transform:scale(.92)}
+.dock-panel{position:absolute;right:0;bottom:68px;display:grid;grid-template-columns:repeat(4,auto);gap:10px;padding:12px;border-radius:24px;justify-items:center;
+  background:rgba(var(--head),.72);border:1px solid var(--line);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 14px 40px rgba(0,0,0,.45);
+  transform-origin:100% 100%;transform:scale(.6) translateY(20px);opacity:0;visibility:hidden;transition:transform .35s cubic-bezier(.3,1.4,.5,1),opacity .2s,visibility 0s .35s}
+.map-dock.open .dock-panel{transform:none;opacity:1;visibility:visible;transition:transform .4s cubic-bezier(.3,1.4,.5,1),opacity .2s,visibility 0s}
+.dock-panel .dock-btn{min-width:56px;opacity:0;transform:translateY(12px) scale(.8);transition:transform .35s cubic-bezier(.3,1.5,.5,1),opacity .25s}
+.map-dock.open .dock-panel .dock-btn{opacity:1;transform:none}
+.map-dock.open .dock-panel .dock-btn:nth-child(2){transition-delay:.03s}.map-dock.open .dock-panel .dock-btn:nth-child(3){transition-delay:.06s}
+.map-dock.open .dock-panel .dock-btn:nth-child(4){transition-delay:.09s}.map-dock.open .dock-panel .dock-btn:nth-child(5){transition-delay:.12s}
+.map-dock.open .dock-panel .dock-btn:nth-child(6){transition-delay:.15s}.map-dock.open .dock-panel .dock-btn:nth-child(7){transition-delay:.18s}
 .dock-btn.stack{display:flex;flex-direction:column;justify-content:center;gap:0;padding:0 8px;line-height:1.1}
 .dock-btn.stack small{font-size:9.5px;font-weight:400;color:var(--ink-2)}
 .dock-btn{position:relative;min-width:46px;height:46px;padding:0 12px;display:grid;place-items:center;border-radius:23px;font-size:13px;font-weight:500;
@@ -263,7 +282,7 @@ html[lang="th"] .lang-btn [data-l="th"],html[lang="en"] .lang-btn [data-l="en"]{
 .ring-bg{stroke:rgba(236,232,255,.14)}
 .ring-fg{stroke:var(--teal);stroke-linecap:round;stroke-dasharray:106.8;stroke-dashoffset:106.8;transition:stroke-dashoffset .8s var(--ease)}
 .dock-btn.ring b{position:relative;font-size:10.5px;font-weight:500}
-.fuel-pop{position:absolute;right:0;bottom:56px;width:250px;padding:14px;border-radius:20px;background:var(--panel);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--line);box-shadow:0 14px 40px rgba(0,0,0,.4)}
+.fuel-pop{position:absolute;right:0;bottom:calc(100% + 10px);width:250px;padding:14px;border-radius:20px;background:var(--panel);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--line);box-shadow:0 14px 40px rgba(0,0,0,.4)}
 .fuel-pop small{display:block;margin-top:8px;color:var(--ink-3);font-size:12px}
 .fuel-top{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-2);margin-bottom:8px}
 .fuel-top b{color:var(--ink);font-weight:500}
@@ -540,6 +559,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 .toast{position:fixed;left:50%;bottom:calc(var(--safe-b) + 90px);z-index:70;transform:translate(-50%,20px);padding:10px 18px;border-radius:16px;background:#fff;color:#2a2150;
   font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s var(--ease);box-shadow:0 10px 30px rgba(0,0,0,.3);white-space:nowrap}
 .toast.is-on{opacity:1;transform:translate(-50%,0)}
+.dock-open .toast{bottom:calc(var(--safe-b) + 250px)}
 
 /* ------------------------------------------------------------------ Wide screens */
 @media (min-width:900px){
@@ -612,8 +632,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   </div>
   <div class="map-head">
     <header class="bar mbar">
-      <div class="logo"><span class="logo-mark" aria-hidden="true"></span><span><b>สวน</b>ดาว</span></div>
-      <p class="zone" data-zone><b data-zone-name></b><small data-zone-note></small></p>
+      <p class="zone" data-zone hidden><b data-zone-name></b><small data-zone-note></small></p>
       <div class="head-r">
         <button class="lang-btn" type="button" data-lang-toggle aria-label="เปลี่ยนภาษา / Change language"><span data-l="th">TH</span><span data-l="en">EN</span></button>
         <button class="icon-btn" type="button" data-open-menu aria-label="เปิดเมนู">
@@ -623,6 +642,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     </header>
   </div>
   <div class="map-dock">
+    <div class="dock-panel" id="dockPanel">
     <button class="dock-btn" type="button" data-view3d aria-pressed="false" aria-label="มุมมองระบบดาว 3 มิติ"><span data-view-label>🪐 3D</span></button>
     <button class="dock-btn" type="button" data-speed aria-label="ความเร็วของอวกาศ"><span data-speed-label>1×</span></button>
     <button class="dock-btn stack" type="button" data-flight-toggle aria-label="ความเร็วยานอวกาศ"><span aria-hidden="true">🚀</span><small data-flight-label>ปกติ</small></button>
@@ -638,6 +658,11 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
       <div class="fuel-track"><i data-fuel-bar></i></div>
       <small data-fuel-detail></small>
     </div>
+    </div>
+    <button class="dock-main" type="button" data-dock-toggle aria-expanded="false" aria-controls="dockPanel" aria-label="เมนูควบคุม">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><circle cx="6" cy="6" r="2.4"/><circle cx="12" cy="6" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="6" cy="12" r="2.4"/><circle cx="12" cy="12" r="2.4"/><circle cx="18" cy="12" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="12" cy="18" r="2.4"/><circle cx="18" cy="18" r="2.4"/></g></svg>
+      <i class="dock-x" aria-hidden="true"></i>
+    </button>
   </div>
 </section>
 
@@ -802,7 +827,7 @@ const LANG = (() => { try { return JSON.parse(localStorage.getItem('suan-dao-v1'
 const tr = (th, en) => LANG === 'en' ? en : th;
 document.documentElement.lang = LANG;
 /** English for the static page text; applied once at start when the language is English. */
-const STATIC_EN = { "ภารกิจ": "Missions", "ภารกิจและรางวัล": "Missions & rewards", "ทำภารกิจ เก็บดาว ⭐ เลื่อนยศ และปลดล็อกสีสถานี": "Complete missions, earn ⭐, rank up and unlock station paints", "🌄 แบบสมจริง": "🌄 Realistic", "หน้าเริ่มต้น": "Title screen", "บินสำรวจ ปั้นดาว และสร้างชีวิตบนดาวเคราะห์ 7 ดวงในระบบดาวของคุณเอง": "Fly out, shape worlds and bring life to seven planets in a star system of your own.", "กำลังเตรียมยานสำรวจ": "Preparing the explorer ship", "แนะนำสวนดาว": "Welcome to Star Garden", "ข้าม": "Skip", "ออกสำรวจ": "Explore", "ระบบดาวของคุณเอง": "a star system of your own", "บินจากสถานีอวกาศไปยังดาว 7 ดวง ดูระยะทางและเวลาเดินทาง หรือเปิดมุมมอง 3 มิติเพื่อหมุนดูทั้งระบบ": "Fly from the space station to 7 planets, see distances and travel times, or switch to the 3D view and spin the whole system.", "ปั้นดาว": "Shape worlds", "ในแบบที่คุณชอบ": "just the way you like", "ปรับความร้อน น้ำ พืช น้ำแข็ง และพายุ แล้วดูดาวเปลี่ยนไปต่อหน้า ซูมเข้าไปดูรายละเอียดได้ใกล้ ๆ": "Adjust heat, water, plants, ice and storms and watch the planet change in front of you. Zoom right in to see the detail.", "สร้างชีวิต": "Create life", "แล้วลงไปเดินดู": "then walk among it", "สร้างระบบนิเวศ ดูแลเศรษฐกิจให้ยั่งยืน และกดลงสำรวจเพื่อเดินชมพื้นผิว นิคม และสัตว์บนดาว": "Build ecosystems, keep each economy sustainable, and land to walk the surface among settlements and wildlife.", "ถัดไป": "Next", "แผนที่ระบบดาว": "Star system map", "สวน": "Star ", "ดาว": "Garden", "เปิดเมนู": "Open menu", "มุมมองระบบดาว 3 มิติ": "3D system view", "ความเร็วของอวกาศ": "Space speed", "ความเร็วยานอวกาศ": "Ship speed", "ปกติ": "Normal", "โทนพื้นหลัง": "Background tone", "ปริมาณอนุภาคและเอฟเฟกต์": "Particles and effects", "ความคืบหน้าการสำรวจ": "Exploration progress", "ออกเดินทาง!": "Lift-off!", "แตะเพื่อข้าม": "Tap to skip", "รายละเอียดดาว": "Planet details", "กลับไปที่แผนที่": "Back to the map", "ลากเพื่อหมุน · บีบนิ้วเพื่อซูม · แตะดาวเพื่อส่งคลื่น": "Drag to spin · pinch to zoom · tap to send a ripple", "อุณหภูมิ": "Temperature", "ออกซิเจน": "Oxygen", "น้ำ": "Water", "สิ่งมีชีวิต": "Life", "หัวข้อของดาว": "Planet topics", "ปรับแต่ง": "Shape", "ระบบนิเวศ": "Ecosystem", "เศรษฐกิจ": "Economy", "ข้อมูล": "Info", "แสดงแผงปรับแต่ง": "Show controls", "แผงปรับแต่ง": "Controls", "สำรวจพื้นผิวดาว": "Surface exploration", "กลับขึ้นยาน": "Back to the ship", "ภารกิจสำรวจพื้นผิว": "Surface mission", "จุดก่อนหน้า": "Previous point", "▶ ทัวร์อัตโนมัติ": "▶ Auto tour", "จุดถัดไป": "Next point", "ลากเพื่อเลื่อนดู · บีบหรือหมุนล้อเมาส์เพื่อซูม · สองนิ้วหมุนเพื่อหมุนมุมมอง · แตะโฮโลแกรมเพื่อดูข้อมูล": "Drag to pan · pinch or scroll to zoom · twist with two fingers to rotate · tap a hologram for details", "ปิด": "Close", "‹ ก่อนหน้า": "‹ Previous", "ถัดไป ›": "Next ›", "กำลังลงจอด…": "Landing…", "สถานีอวกาศ": "Space station", "จุดเทียบท่าของยานสำรวจ": "The explorer ship's home port", "ลากเพื่อหมุน · บีบหรือเลื่อนเพื่อซูม · แตะชิ้นส่วนเพื่อดูข้อมูล": "Drag to spin · pinch or scroll to zoom · tap a part for details", "หัวข้อของสถานี": "Station topics", "โมดูล": "Modules", "วิศวกรรม": "Engineering", "สีสถานี": "Paint", "เมนู": "Menu", "ดูหน้าแนะนำอีกครั้ง": "Replay the introduction", "สามขั้นตอนเริ่มต้น": "Three steps to get started", "วิธีเล่น": "How to play", "บิน สำรวจ ปรับแต่ง และสร้างชีวิต": "Fly, explore, shape worlds and create life", "เสียง": "Sound", "ปิดอยู่ แตะเพื่อเปิด": "Off · tap to turn on", "ตัวเลขมาจากไหน": "Where the numbers come from", "ระยะทาง เวลาเดินทาง และการคำนวณ": "Distances, travel times and the maths", "เริ่มต้นใหม่ทั้งหมด": "Start over", "ล้างการปรับแต่งของทุกดาว": "Clear every planet's changes" };
+const STATIC_EN = { "เมนูควบคุม": "Controls", "ภารกิจ": "Missions", "ภารกิจและรางวัล": "Missions & rewards", "ทำภารกิจ เก็บดาว ⭐ เลื่อนยศ และปลดล็อกสีสถานี": "Complete missions, earn ⭐, rank up and unlock station paints", "🌄 แบบสมจริง": "🌄 Realistic", "หน้าเริ่มต้น": "Title screen", "บินสำรวจ ปั้นดาว และสร้างชีวิตบนดาวเคราะห์ 7 ดวงในระบบดาวของคุณเอง": "Fly out, shape worlds and bring life to seven planets in a star system of your own.", "กำลังเตรียมยานสำรวจ": "Preparing the explorer ship", "แนะนำสวนดาว": "Welcome to Star Garden", "ข้าม": "Skip", "ออกสำรวจ": "Explore", "ระบบดาวของคุณเอง": "a star system of your own", "บินจากสถานีอวกาศไปยังดาว 7 ดวง ดูระยะทางและเวลาเดินทาง หรือเปิดมุมมอง 3 มิติเพื่อหมุนดูทั้งระบบ": "Fly from the space station to 7 planets, see distances and travel times, or switch to the 3D view and spin the whole system.", "ปั้นดาว": "Shape worlds", "ในแบบที่คุณชอบ": "just the way you like", "ปรับความร้อน น้ำ พืช น้ำแข็ง และพายุ แล้วดูดาวเปลี่ยนไปต่อหน้า ซูมเข้าไปดูรายละเอียดได้ใกล้ ๆ": "Adjust heat, water, plants, ice and storms and watch the planet change in front of you. Zoom right in to see the detail.", "สร้างชีวิต": "Create life", "แล้วลงไปเดินดู": "then walk among it", "สร้างระบบนิเวศ ดูแลเศรษฐกิจให้ยั่งยืน และกดลงสำรวจเพื่อเดินชมพื้นผิว นิคม และสัตว์บนดาว": "Build ecosystems, keep each economy sustainable, and land to walk the surface among settlements and wildlife.", "ถัดไป": "Next", "แผนที่ระบบดาว": "Star system map", "สวน": "Star ", "ดาว": "Garden", "เปิดเมนู": "Open menu", "มุมมองระบบดาว 3 มิติ": "3D system view", "ความเร็วของอวกาศ": "Space speed", "ความเร็วยานอวกาศ": "Ship speed", "ปกติ": "Normal", "โทนพื้นหลัง": "Background tone", "ปริมาณอนุภาคและเอฟเฟกต์": "Particles and effects", "ความคืบหน้าการสำรวจ": "Exploration progress", "ออกเดินทาง!": "Lift-off!", "แตะเพื่อข้าม": "Tap to skip", "รายละเอียดดาว": "Planet details", "กลับไปที่แผนที่": "Back to the map", "ลากเพื่อหมุน · บีบนิ้วเพื่อซูม · แตะดาวเพื่อส่งคลื่น": "Drag to spin · pinch to zoom · tap to send a ripple", "อุณหภูมิ": "Temperature", "ออกซิเจน": "Oxygen", "น้ำ": "Water", "สิ่งมีชีวิต": "Life", "หัวข้อของดาว": "Planet topics", "ปรับแต่ง": "Shape", "ระบบนิเวศ": "Ecosystem", "เศรษฐกิจ": "Economy", "ข้อมูล": "Info", "แสดงแผงปรับแต่ง": "Show controls", "แผงปรับแต่ง": "Controls", "สำรวจพื้นผิวดาว": "Surface exploration", "กลับขึ้นยาน": "Back to the ship", "ภารกิจสำรวจพื้นผิว": "Surface mission", "จุดก่อนหน้า": "Previous point", "▶ ทัวร์อัตโนมัติ": "▶ Auto tour", "จุดถัดไป": "Next point", "ลากเพื่อเลื่อนดู · บีบหรือหมุนล้อเมาส์เพื่อซูม · สองนิ้วหมุนเพื่อหมุนมุมมอง · แตะโฮโลแกรมเพื่อดูข้อมูล": "Drag to pan · pinch or scroll to zoom · twist with two fingers to rotate · tap a hologram for details", "ปิด": "Close", "‹ ก่อนหน้า": "‹ Previous", "ถัดไป ›": "Next ›", "กำลังลงจอด…": "Landing…", "สถานีอวกาศ": "Space station", "จุดเทียบท่าของยานสำรวจ": "The explorer ship's home port", "ลากเพื่อหมุน · บีบหรือเลื่อนเพื่อซูม · แตะชิ้นส่วนเพื่อดูข้อมูล": "Drag to spin · pinch or scroll to zoom · tap a part for details", "หัวข้อของสถานี": "Station topics", "โมดูล": "Modules", "วิศวกรรม": "Engineering", "สีสถานี": "Paint", "เมนู": "Menu", "ดูหน้าแนะนำอีกครั้ง": "Replay the introduction", "สามขั้นตอนเริ่มต้น": "Three steps to get started", "วิธีเล่น": "How to play", "บิน สำรวจ ปรับแต่ง และสร้างชีวิต": "Fly, explore, shape worlds and create life", "เสียง": "Sound", "ปิดอยู่ แตะเพื่อเปิด": "Off · tap to turn on", "ตัวเลขมาจากไหน": "Where the numbers come from", "ระยะทาง เวลาเดินทาง และการคำนวณ": "Distances, travel times and the maths", "เริ่มต้นใหม่ทั้งหมด": "Start over", "ล้างการปรับแต่งของทุกดาว": "Clear every planet's changes" };
 function translateStatic() {
   if (LANG !== 'en') return;
   document.title = 'Star Garden — build and care for your own star system';
@@ -5823,6 +5848,15 @@ class App {
     this.syncSpeed(); this.save();
     this.toast(this.state.speed === 0 ? tr('หยุดการเคลื่อนที่ในอวกาศ', "Space motion paused") : `${tr('ความเร็วอวกาศ', 'Space speed')} ${this.state.speed}×`);
   }
+  /** Pop the map controls out of the main button, or fold them away. */
+  toggleDock(open) {
+    const d = $('.map-dock'), btn = $('[data-dock-toggle]');
+    open = open ?? !d.classList.contains('open');
+    if (open === d.classList.contains('open')) return;
+    d.classList.toggle('open', open); btn.setAttribute('aria-expanded', String(open));
+    document.body.classList.toggle('dock-open', open);   // toasts move above the panel
+    if (!open) this.toggleFuel(false); else Sound.tap();
+  }
   toggleFuel(open) {
     const pop = $('#fuelPop'), btn = $('[data-fuel-toggle]');
     open = open ?? pop.hidden;
@@ -6329,7 +6363,8 @@ class App {
     $('[data-bg-toggle]').addEventListener('click', () => this.cycleBg());
     $('[data-flight-toggle]').addEventListener('click', () => this.cycleFlight());
     $('[data-fx-toggle]').addEventListener('click', () => this.cycleFx());
-    $('[data-missions-open]').addEventListener('click', () => this.openMissions());
+    $('[data-dock-toggle]').addEventListener('click', () => this.toggleDock());
+    $('[data-missions-open]').addEventListener('click', () => { this.toggleDock(false); this.openMissions(); });
     $('#missions').addEventListener('click', e => { if (e.target.id === 'missions' || e.target.closest('[data-missions-close]')) this.closeMissions(); });
     $$('[data-lang-toggle]').forEach(b => b.addEventListener('click', () => this.switchLang()));
     $('[data-view3d]').addEventListener('click', () => this.setView(this.sys3d ? 'map' : '3d'));
@@ -6340,7 +6375,7 @@ class App {
       ro.observe($('#stage')); ro.observe($('#stationStage')); ro.observe($('#xstage'));
     }
     $('[data-fuel-toggle]').addEventListener('click', e => { e.stopPropagation(); this.toggleFuel(); });
-    $('#map').addEventListener('click', e => { if (!e.target.closest('.map-dock')) this.toggleFuel(false); });
+    $('#map').addEventListener('click', e => { if (!e.target.closest('.map-dock')) { this.toggleFuel(false); this.toggleDock(false); } });
     $$('.tab[data-tab]').forEach(t => t.addEventListener('click', () => this.setTab(t.dataset.tab)));
     this.bindStation();
     this.bindExplore();
@@ -6423,6 +6458,7 @@ class App {
       if (!$('#intro').hidden) this.closeIntro();
       else if (!$('#menu').hidden) this.closeMenu();
       else if (!$('#missions').hidden) this.closeMissions();
+      else if ($('.map-dock').classList.contains('open')) this.toggleDock(false);
       else if (this.inExplore) { if (this.xPoi != null) this.closePoi(); else this.closeExplore(); }
       else if (this.inStation) this.closeStation();
       else if (this.current >= 0) this.leaveDetail();
