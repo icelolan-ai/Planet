@@ -69,6 +69,36 @@ h1,h2,h3{font-family:var(--f-head);font-weight:600;margin:0;line-height:1.2}
 #grain{position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.55;background-size:180px 180px}
 [data-bg="black"] #grain{opacity:.35}
 
+/* ------------------------------------------------------------------ Missions */
+.mission-btn.bump{animation:mbump .7s cubic-bezier(.3,1.6,.5,1)}
+@keyframes mbump{40%{transform:scale(1.25)}}
+.rank-card{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px 12px;padding:14px;border-radius:20px;margin-bottom:6px;
+  background:linear-gradient(135deg,rgba(255,79,216,.22),rgba(106,53,255,.22));border:1px solid rgba(255,255,255,.18)}
+.rank-ic{font-size:34px;line-height:1}
+.rank-txt small,.rank-stars small{display:block;color:var(--ink-3);font-size:12px}
+.rank-txt b{font-family:var(--f-head);font-size:19px;font-weight:600}
+.rank-stars{text-align:right}.rank-stars b{font-size:24px;font-weight:600;color:#ffd66a}
+.rank-bar,.m-bar{grid-column:1/-1;height:8px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}
+.rank-bar i,.m-bar i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#33e1ff,#ff4fd8)}
+.rank-next{grid-column:1/-1;color:var(--ink-2);font-size:12.5px;line-height:1.5}
+#missions h3{display:flex;justify-content:space-between;margin:16px 2px 8px}
+#missions h3 span{color:var(--ink-3);font-weight:400;font-size:14px}
+.mission-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.mission{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:12px;border-radius:18px;background:var(--card);border:1px solid var(--line)}
+.mission .m-ic{font-size:22px;text-align:center}
+.mission b{font-size:14.5px;font-weight:500}
+.mission small{display:block;color:var(--ink-3);font-size:12px;line-height:1.45}
+.mission .m-bar{margin-top:7px;height:6px}
+.m-side{text-align:right;display:grid;gap:4px;justify-items:end}
+.m-reward{font-size:12px;padding:3px 8px;border-radius:10px;background:rgba(255,214,106,.16);color:#ffd66a;white-space:nowrap}
+.mission.done{opacity:.62}.mission.done .m-bar i{background:#7dff6a}
+.swatch.locked i{display:grid;place-items:center;font-size:16px;filter:saturate(.35) brightness(.7)}
+.swatch.locked{color:#ffd66a}
+.confetti{position:fixed;left:50%;top:38%;z-index:80;pointer-events:none}
+.confetti i{position:absolute;width:8px;height:12px;border-radius:2px;animation:conf 1.4s cubic-bezier(.2,.7,.3,1) both}
+@keyframes conf{0%{transform:translate(0,0) rotate(0);opacity:1}80%{opacity:1}100%{transform:translate(var(--x),calc(var(--y) + 160px)) rotate(var(--r));opacity:0}}
+@media (max-width:420px){#map .map-dock{gap:5px;right:10px}#map .map-dock .dock-btn{min-width:42px;padding:0 8px}}
+
 /* ------------------------------------------------------------------ Title screen */
 #map.arrive{animation:marrive .9s var(--ease) both}
 @keyframes marrive{from{opacity:0;transform:scale(1.08)}}
@@ -597,6 +627,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
     <button class="dock-btn" type="button" data-speed aria-label="ความเร็วของอวกาศ"><span data-speed-label>1×</span></button>
     <button class="dock-btn stack" type="button" data-flight-toggle aria-label="ความเร็วยานอวกาศ"><span aria-hidden="true">🚀</span><small data-flight-label>ปกติ</small></button>
     <button class="dock-btn" type="button" data-bg-toggle aria-label="โทนพื้นหลัง"><span data-bg-icon>🌘</span></button>
+    <button class="dock-btn stack mission-btn" type="button" data-missions-open aria-label="ภารกิจ"><span aria-hidden="true">🎯</span><small data-mission-count>0/17</small></button>
     <button class="dock-btn stack" type="button" data-fx-toggle aria-label="ปริมาณอนุภาคและเอฟเฟกต์"><span aria-hidden="true">✨</span><small data-fx-label>ปกติ</small></button>
     <button class="dock-btn ring" type="button" data-fuel-toggle aria-expanded="false" aria-controls="fuelPop" aria-label="ความคืบหน้าการสำรวจ">
       <svg viewBox="0 0 38 38" aria-hidden="true"><circle class="ring-bg" cx="19" cy="19" r="17"/><circle class="ring-fg" cx="19" cy="19" r="17" data-fuel-ring/></svg>
@@ -719,6 +750,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
   <div class="sheet-in" role="dialog" aria-modal="true" aria-label="เมนู">
     <div class="grab" aria-hidden="true"></div>
     <div data-menu-main>
+      <button class="menu-item" type="button" data-menu-missions><span class="em">🎯</span><span>ภารกิจและรางวัล<small>ทำภารกิจ เก็บดาว ⭐ เลื่อนยศ และปลดล็อกสีสถานี</small></span></button>
       <button class="menu-item" type="button" data-show-intro><span class="em">✨</span><span>ดูหน้าแนะนำอีกครั้ง<small>สามขั้นตอนเริ่มต้น</small></span></button>
       <button class="menu-item" type="button" data-menu="howto"><span class="em">🧭</span><span>วิธีเล่น<small>บิน สำรวจ ปรับแต่ง และสร้างชีวิต</small></span></button>
       <button class="menu-item" type="button" data-sound-toggle aria-pressed="false"><span class="em" data-sound-ic>🔈</span><span>เสียง<small data-sound-label>ปิดอยู่ แตะเพื่อเปิด</small></span></button>
@@ -726,6 +758,12 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
       <button class="menu-item" type="button" data-menu="reset"><span class="em">🧹</span><span>เริ่มต้นใหม่ทั้งหมด<small>ล้างการปรับแต่งของทุกดาว</small></span></button>
     </div>
     <div data-menu-page hidden></div>
+  </div>
+</div>
+<div class="sheet" id="missions" hidden>
+  <div class="sheet-in" role="dialog" aria-modal="true" aria-label="ภารกิจ">
+    <div class="grab" aria-hidden="true"></div>
+    <div data-missions></div>
   </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -764,7 +802,7 @@ const LANG = (() => { try { return JSON.parse(localStorage.getItem('suan-dao-v1'
 const tr = (th, en) => LANG === 'en' ? en : th;
 document.documentElement.lang = LANG;
 /** English for the static page text; applied once at start when the language is English. */
-const STATIC_EN = { "🌄 แบบสมจริง": "🌄 Realistic", "หน้าเริ่มต้น": "Title screen", "บินสำรวจ ปั้นดาว และสร้างชีวิตบนดาวเคราะห์ 7 ดวงในระบบดาวของคุณเอง": "Fly out, shape worlds and bring life to seven planets in a star system of your own.", "กำลังเตรียมยานสำรวจ": "Preparing the explorer ship", "แนะนำสวนดาว": "Welcome to Star Garden", "ข้าม": "Skip", "ออกสำรวจ": "Explore", "ระบบดาวของคุณเอง": "a star system of your own", "บินจากสถานีอวกาศไปยังดาว 7 ดวง ดูระยะทางและเวลาเดินทาง หรือเปิดมุมมอง 3 มิติเพื่อหมุนดูทั้งระบบ": "Fly from the space station to 7 planets, see distances and travel times, or switch to the 3D view and spin the whole system.", "ปั้นดาว": "Shape worlds", "ในแบบที่คุณชอบ": "just the way you like", "ปรับความร้อน น้ำ พืช น้ำแข็ง และพายุ แล้วดูดาวเปลี่ยนไปต่อหน้า ซูมเข้าไปดูรายละเอียดได้ใกล้ ๆ": "Adjust heat, water, plants, ice and storms and watch the planet change in front of you. Zoom right in to see the detail.", "สร้างชีวิต": "Create life", "แล้วลงไปเดินดู": "then walk among it", "สร้างระบบนิเวศ ดูแลเศรษฐกิจให้ยั่งยืน และกดลงสำรวจเพื่อเดินชมพื้นผิว นิคม และสัตว์บนดาว": "Build ecosystems, keep each economy sustainable, and land to walk the surface among settlements and wildlife.", "ถัดไป": "Next", "แผนที่ระบบดาว": "Star system map", "สวน": "Star ", "ดาว": "Garden", "เปิดเมนู": "Open menu", "มุมมองระบบดาว 3 มิติ": "3D system view", "ความเร็วของอวกาศ": "Space speed", "ความเร็วยานอวกาศ": "Ship speed", "ปกติ": "Normal", "โทนพื้นหลัง": "Background tone", "ปริมาณอนุภาคและเอฟเฟกต์": "Particles and effects", "ความคืบหน้าการสำรวจ": "Exploration progress", "ออกเดินทาง!": "Lift-off!", "แตะเพื่อข้าม": "Tap to skip", "รายละเอียดดาว": "Planet details", "กลับไปที่แผนที่": "Back to the map", "ลากเพื่อหมุน · บีบนิ้วเพื่อซูม · แตะดาวเพื่อส่งคลื่น": "Drag to spin · pinch to zoom · tap to send a ripple", "อุณหภูมิ": "Temperature", "ออกซิเจน": "Oxygen", "น้ำ": "Water", "สิ่งมีชีวิต": "Life", "หัวข้อของดาว": "Planet topics", "ปรับแต่ง": "Shape", "ระบบนิเวศ": "Ecosystem", "เศรษฐกิจ": "Economy", "ข้อมูล": "Info", "แสดงแผงปรับแต่ง": "Show controls", "แผงปรับแต่ง": "Controls", "สำรวจพื้นผิวดาว": "Surface exploration", "กลับขึ้นยาน": "Back to the ship", "ภารกิจสำรวจพื้นผิว": "Surface mission", "จุดก่อนหน้า": "Previous point", "▶ ทัวร์อัตโนมัติ": "▶ Auto tour", "จุดถัดไป": "Next point", "ลากเพื่อเลื่อนดู · บีบหรือหมุนล้อเมาส์เพื่อซูม · สองนิ้วหมุนเพื่อหมุนมุมมอง · แตะโฮโลแกรมเพื่อดูข้อมูล": "Drag to pan · pinch or scroll to zoom · twist with two fingers to rotate · tap a hologram for details", "ปิด": "Close", "‹ ก่อนหน้า": "‹ Previous", "ถัดไป ›": "Next ›", "กำลังลงจอด…": "Landing…", "สถานีอวกาศ": "Space station", "จุดเทียบท่าของยานสำรวจ": "The explorer ship's home port", "ลากเพื่อหมุน · บีบหรือเลื่อนเพื่อซูม · แตะชิ้นส่วนเพื่อดูข้อมูล": "Drag to spin · pinch or scroll to zoom · tap a part for details", "หัวข้อของสถานี": "Station topics", "โมดูล": "Modules", "วิศวกรรม": "Engineering", "สีสถานี": "Paint", "เมนู": "Menu", "ดูหน้าแนะนำอีกครั้ง": "Replay the introduction", "สามขั้นตอนเริ่มต้น": "Three steps to get started", "วิธีเล่น": "How to play", "บิน สำรวจ ปรับแต่ง และสร้างชีวิต": "Fly, explore, shape worlds and create life", "เสียง": "Sound", "ปิดอยู่ แตะเพื่อเปิด": "Off · tap to turn on", "ตัวเลขมาจากไหน": "Where the numbers come from", "ระยะทาง เวลาเดินทาง และการคำนวณ": "Distances, travel times and the maths", "เริ่มต้นใหม่ทั้งหมด": "Start over", "ล้างการปรับแต่งของทุกดาว": "Clear every planet's changes" };
+const STATIC_EN = { "ภารกิจ": "Missions", "ภารกิจและรางวัล": "Missions & rewards", "ทำภารกิจ เก็บดาว ⭐ เลื่อนยศ และปลดล็อกสีสถานี": "Complete missions, earn ⭐, rank up and unlock station paints", "🌄 แบบสมจริง": "🌄 Realistic", "หน้าเริ่มต้น": "Title screen", "บินสำรวจ ปั้นดาว และสร้างชีวิตบนดาวเคราะห์ 7 ดวงในระบบดาวของคุณเอง": "Fly out, shape worlds and bring life to seven planets in a star system of your own.", "กำลังเตรียมยานสำรวจ": "Preparing the explorer ship", "แนะนำสวนดาว": "Welcome to Star Garden", "ข้าม": "Skip", "ออกสำรวจ": "Explore", "ระบบดาวของคุณเอง": "a star system of your own", "บินจากสถานีอวกาศไปยังดาว 7 ดวง ดูระยะทางและเวลาเดินทาง หรือเปิดมุมมอง 3 มิติเพื่อหมุนดูทั้งระบบ": "Fly from the space station to 7 planets, see distances and travel times, or switch to the 3D view and spin the whole system.", "ปั้นดาว": "Shape worlds", "ในแบบที่คุณชอบ": "just the way you like", "ปรับความร้อน น้ำ พืช น้ำแข็ง และพายุ แล้วดูดาวเปลี่ยนไปต่อหน้า ซูมเข้าไปดูรายละเอียดได้ใกล้ ๆ": "Adjust heat, water, plants, ice and storms and watch the planet change in front of you. Zoom right in to see the detail.", "สร้างชีวิต": "Create life", "แล้วลงไปเดินดู": "then walk among it", "สร้างระบบนิเวศ ดูแลเศรษฐกิจให้ยั่งยืน และกดลงสำรวจเพื่อเดินชมพื้นผิว นิคม และสัตว์บนดาว": "Build ecosystems, keep each economy sustainable, and land to walk the surface among settlements and wildlife.", "ถัดไป": "Next", "แผนที่ระบบดาว": "Star system map", "สวน": "Star ", "ดาว": "Garden", "เปิดเมนู": "Open menu", "มุมมองระบบดาว 3 มิติ": "3D system view", "ความเร็วของอวกาศ": "Space speed", "ความเร็วยานอวกาศ": "Ship speed", "ปกติ": "Normal", "โทนพื้นหลัง": "Background tone", "ปริมาณอนุภาคและเอฟเฟกต์": "Particles and effects", "ความคืบหน้าการสำรวจ": "Exploration progress", "ออกเดินทาง!": "Lift-off!", "แตะเพื่อข้าม": "Tap to skip", "รายละเอียดดาว": "Planet details", "กลับไปที่แผนที่": "Back to the map", "ลากเพื่อหมุน · บีบนิ้วเพื่อซูม · แตะดาวเพื่อส่งคลื่น": "Drag to spin · pinch to zoom · tap to send a ripple", "อุณหภูมิ": "Temperature", "ออกซิเจน": "Oxygen", "น้ำ": "Water", "สิ่งมีชีวิต": "Life", "หัวข้อของดาว": "Planet topics", "ปรับแต่ง": "Shape", "ระบบนิเวศ": "Ecosystem", "เศรษฐกิจ": "Economy", "ข้อมูล": "Info", "แสดงแผงปรับแต่ง": "Show controls", "แผงปรับแต่ง": "Controls", "สำรวจพื้นผิวดาว": "Surface exploration", "กลับขึ้นยาน": "Back to the ship", "ภารกิจสำรวจพื้นผิว": "Surface mission", "จุดก่อนหน้า": "Previous point", "▶ ทัวร์อัตโนมัติ": "▶ Auto tour", "จุดถัดไป": "Next point", "ลากเพื่อเลื่อนดู · บีบหรือหมุนล้อเมาส์เพื่อซูม · สองนิ้วหมุนเพื่อหมุนมุมมอง · แตะโฮโลแกรมเพื่อดูข้อมูล": "Drag to pan · pinch or scroll to zoom · twist with two fingers to rotate · tap a hologram for details", "ปิด": "Close", "‹ ก่อนหน้า": "‹ Previous", "ถัดไป ›": "Next ›", "กำลังลงจอด…": "Landing…", "สถานีอวกาศ": "Space station", "จุดเทียบท่าของยานสำรวจ": "The explorer ship's home port", "ลากเพื่อหมุน · บีบหรือเลื่อนเพื่อซูม · แตะชิ้นส่วนเพื่อดูข้อมูล": "Drag to spin · pinch or scroll to zoom · tap a part for details", "หัวข้อของสถานี": "Station topics", "โมดูล": "Modules", "วิศวกรรม": "Engineering", "สีสถานี": "Paint", "เมนู": "Menu", "ดูหน้าแนะนำอีกครั้ง": "Replay the introduction", "สามขั้นตอนเริ่มต้น": "Three steps to get started", "วิธีเล่น": "How to play", "บิน สำรวจ ปรับแต่ง และสร้างชีวิต": "Fly, explore, shape worlds and create life", "เสียง": "Sound", "ปิดอยู่ แตะเพื่อเปิด": "Off · tap to turn on", "ตัวเลขมาจากไหน": "Where the numbers come from", "ระยะทาง เวลาเดินทาง และการคำนวณ": "Distances, travel times and the maths", "เริ่มต้นใหม่ทั้งหมด": "Start over", "ล้างการปรับแต่งของทุกดาว": "Clear every planet's changes" };
 function translateStatic() {
   if (LANG !== 'en') return;
   document.title = 'Star Garden — build and care for your own star system';
@@ -1722,7 +1760,39 @@ const MODULES = {
 };
 const STATION_CORE = { icon: '🛰️', name: tr('โมดูลแกนกลาง', "Core module"), desc: tr('ห้องควบคุมและระบบช่วยชีวิตหลัก เชื่อมทุกโมดูลเข้าด้วยกัน มีไฟสำรอง ที่พัก 2 คน และถังเชื้อเพลิงในตัว', "Command and main life support, linking every module, with backup power, room for 2 crew and a built-in fuel tank") };
 const STATION_DEFAULT = { solar: 2, reactor: 0, habitat: 1, ring: 0, lab: 1, telescope: 0, dish: 1, fuel: 1, engine: 1, radiator: 1, dock: 1 };
-const PAINTS = { teal: ['#3fd6c6', tr('ฟ้าอมเขียว', "Teal")], gold: ['#ffc94a', tr('ทอง', "Gold")], violet: ['#9a6bff', tr('ม่วง', "Violet")], coral: ['#ff6f7d', tr('ปะการัง', "Coral")], white: ['#eeeaf8', tr('ขาว', "White")] };
+const PAINTS = { teal: ['#3fd6c6', tr('ฟ้าอมเขียว', "Teal")], gold: ['#ffc94a', tr('ทอง', "Gold")], violet: ['#9a6bff', tr('ม่วง', "Violet")], coral: ['#ff6f7d', tr('ปะการัง', "Coral")], white: ['#eeeaf8', tr('ขาว', "White")],
+  // Unlocked with mission stars (third value).
+  neon: ['#ff4fd8', tr('นีออนชมพู', 'Neon pink'), 8], aurora: ['#5dffc0', tr('ออโรรา', 'Aurora'), 18], midnight: ['#2c2f6c', tr('ราตรี', 'Midnight'), 30] };
+
+/* ================================================================
+   Missions: goals checked against the saved game. Each gives stars;
+   stars raise the player's rank and unlock station paints.
+   `p(g)` returns [fraction 0..1, label] from the stats in missionStats().
+================================================================ */
+const frac = (cur, goal) => clamp(cur / goal, 0, 1);
+const MISSIONS = [
+  { id: 'fly1', icon: '🚀', r: 1, t: tr('ออกเดินทางครั้งแรก', 'First flight'), d: tr('บินไปยังดาวดวงใดก็ได้', 'Fly to any planet'), p: g => [frac(g.visited, 1), `${Math.min(g.visited, 1)}/1`] },
+  { id: 'land1', icon: '🛬', r: 1, t: tr('ก้าวแรกบนดาว', 'First footprints'), d: tr('กด 🛬 ลงสำรวจบนดาวดวงใดก็ได้', 'Press 🛬 Land on any planet'), p: g => [frac(g.landed, 1), `${Math.min(g.landed, 1)}/1`] },
+  { id: 'life1', icon: '🌱', r: 2, t: tr('จุดประกายชีวิต', 'Spark of life'), d: tr('สร้างระบบนิเวศบนดาวดวงแรก', 'Create your first ecosystem'), p: g => [frac(g.eco, 1), `${Math.min(g.eco, 1)}/1`] },
+  { id: 'fly4', icon: '🧭', r: 2, t: tr('นักเดินทาง', 'Voyager'), d: tr('สำรวจดาวให้ได้ 4 ดวง', 'Explore 4 planets'), p: g => [frac(g.visited, 4), `${Math.min(g.visited, 4)}/4`] },
+  { id: 'station', icon: '🛰️', r: 2, t: tr('วิศวกรสถานี', 'Station engineer'), d: tr('ปรับแต่งสถานีอวกาศให้ยานเร็วอย่างน้อย ×1.25', 'Tune the space station for ship speed ×1.25 or more'), p: g => [frac(g.speed - 1, 0.25), `×${g.speed.toFixed(2)} / ×1.25`] },
+  { id: 'o2', icon: '🫧', r: 2, t: tr('ลมหายใจแรก', 'First breath'), d: tr('เพิ่มออกซิเจนบนดาววารีให้ถึง 14% (ลองลดน้ำ เพิ่มพืช)', 'Raise oxygen on Waree to 14% (try less water, more plants)'), p: g => [frac(g.wareeO2, 14), `${g.wareeO2.toFixed(1)}% / 14%`] },
+  { id: 'calm', icon: '🌋', r: 2, t: tr('สยบภูเขาไฟ', 'Tame the volcano'), d: tr('ลดการปะทุของดาวอัคนีให้ต่ำกว่า 20%', "Bring Agni's eruptions under 20%"), p: g => [g.agniErupt <= 0.2 ? 1 : frac(1 - g.agniErupt, 0.8) * 0.95, `${pct(g.agniErupt * 100)} → <20%`] },
+  { id: 'home', icon: '🏡', r: 3, t: tr('บ้านหลังที่สอง', 'A second home'), d: tr('ทำให้ดาวดวงอื่นนอกจากมรกตน่าอยู่อาศัยอย่างน้อย 70/100', 'Make a planet other than Morakot at least 70/100 habitable'), p: g => [frac(g.maxHabit, 70), `${Math.round(g.maxHabit)}/70`] },
+  { id: 'thaw', icon: '🧊', r: 3, t: tr('ละลายหิมวันต์', 'Thaw Himawan'), d: tr('ทำให้ดาวหิมวันต์อุ่นกว่า 0°C', 'Warm Himawan above 0°C'), p: g => [g.himaT > 0 ? 1 : clamp((g.himaT + 90) / 90, 0, 0.95), `${Math.round(g.himaT)}°C → >0°C`] },
+  { id: 'land4', icon: '🗺️', r: 3, t: tr('นักสำรวจภาคพื้น', 'Ground explorer'), d: tr('ลงสำรวจพื้นผิวดาว 4 ดวง', 'Land on 4 different planets'), p: g => [frac(g.landed, 4), `${Math.min(g.landed, 4)}/4`] },
+  { id: 'life4', icon: '🌿', r: 3, t: tr('สวนแห่งดวงดาว', 'Garden of stars'), d: tr('สร้างชีวิตบนดาว 4 ดวง', 'Bring life to 4 planets'), p: g => [frac(g.eco, 4), `${Math.min(g.eco, 4)}/4`] },
+  { id: 'people', icon: '👥', r: 3, t: tr('เมืองแห่งอนาคต', 'City of tomorrow'), d: tr('มีผู้ตั้งถิ่นฐานรวมกัน 1 ล้านคน', 'Reach 1 million settlers in total'), p: g => [frac(g.colonists, 1e6), `${fmtBig(g.colonists)} / ${fmtBig(1e6)}`] },
+  { id: 'rich', icon: '💰', r: 3, t: tr('เศรษฐกิจรุ่งเรือง', 'Boom times'), d: tr('เศรษฐกิจรวมทุกดาว 10 ล้านเครดิตต่อปี', 'Reach 10 million credits a year across all planets'), p: g => [frac(g.gdp, 1e7), `${fmtBig(g.gdp)} / ${fmtBig(1e7)}`] },
+  { id: 'green', icon: '♻️', r: 3, t: tr('ผู้พิทักษ์ธรรมชาติ', 'Guardian of nature'), d: tr('มีดาวที่มีชีวิตและยั่งยืนอย่างน้อย 80/100 ให้ได้ 3 ดวง', 'Have 3 living planets at 80/100 sustainability or more'), p: g => [frac(g.green, 3), `${Math.min(g.green, 3)}/3`] },
+  { id: 'fly7', icon: '🌌', r: 4, t: tr('สำรวจครบระบบ', 'Every world'), d: tr('สำรวจดาวครบทั้ง 7 ดวง', 'Explore all 7 planets'), p: g => [frac(g.visited, 7), `${Math.min(g.visited, 7)}/7`] },
+  { id: 'life7', icon: '🌍', r: 5, t: tr('ผู้สร้างโลก', 'World maker'), d: tr('สร้างชีวิตบนดาวครบทั้ง 7 ดวง', 'Bring life to all 7 planets'), p: g => [frac(g.eco, 7), `${Math.min(g.eco, 7)}/7`] },
+  { id: 'secret', icon: '📡', r: 5, t: tr('สัญญาณจากความมืด', 'Signal from the dark'), d: tr('ค้นพบดาวลับที่ซ่อนอยู่ในระบบ', "Discover the system's hidden world"), p: g => [g.secret ? 1 : 0, g.secret ? '1/1' : '0/1'] }
+];
+const STARS_TOTAL = MISSIONS.reduce((a, m) => a + m.r, 0);
+const RANKS = [[0, '🧑‍🚀', tr('นักสำรวจฝึกหัด', 'Cadet')], [6, '🛩️', tr('นักบินอวกาศ', 'Pilot')], [15, '🔭', tr('นักสำรวจดวงดาว', 'Star explorer')],
+  [28, '🎖️', tr('ผู้บัญชาการ', 'Commander')], [40, '🌟', tr('ผู้สร้างดาว', 'World maker')], [STARS_TOTAL, '👑', tr('ตำนานแห่งสวนดาว', 'Legend of Star Garden')]];
+const rankOf = stars => { let k = 0; RANKS.forEach((r, i) => { if (stars >= r[0]) k = i; }); return k; };
 
 function cleanStation(st) {
   const out = { mods: { ...STATION_DEFAULT }, paint: 'teal' };
@@ -2228,6 +2298,8 @@ const Store = {
     if (FLIGHTS[s.flight] && s.theme >= 3) base.flight = s.flight;
     if (FX_LEVELS[s.fx]) base.fx = s.fx;
     if (s.xstyle === 'diorama') base.xstyle = 'diorama';
+    base.missions = Array.isArray(s.missions) ? s.missions.filter(id => MISSIONS.some(m => m.id === id)) : [];
+    base.landed = Array.isArray(s.landed) ? s.landed.filter(id => typeof id === 'string') : [];
     base.lang = s.lang === 'en' ? 'en' : 'th';
     base.station = cleanStation(s.station);
     base.visited = Array.isArray(s.visited) ? s.visited : [];
@@ -2241,7 +2313,7 @@ const Store = {
     return base;
   },
   fresh() {
-    return { v: 1, at: -1, visited: [], sound: false, secret: false, intro: false, bg: 'normal', theme: 3, speed: REDUCED ? 0 : 1, view: 'map', flight: 'slow', fx: 'normal', xstyle: 'real', lang: LANG, station: cleanStation(null), planets: Object.fromEntries(allPlanets().map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
+    return { v: 1, at: -1, visited: [], sound: false, secret: false, intro: false, bg: 'normal', theme: 3, speed: REDUCED ? 0 : 1, view: 'map', flight: 'slow', fx: 'normal', xstyle: 'real', missions: [], landed: [], lang: LANG, station: cleanStation(null), planets: Object.fromEntries(allPlanets().map(p => [p.id, { params: { ...p.d, extraction: 0.35 }, eco: false, seed: p.seed }])) };
   },
   save(state) { try { localStorage.setItem(CONFIG.storeKey, JSON.stringify(state)); } catch (e) { /* storage may be unavailable; progress stays in memory */ } }
 };
@@ -4193,6 +4265,7 @@ class App {
     this.buildMap();
     if (this.noGL) $('[data-view3d]').hidden = true;
     else if (this.state.view === '3d') this.setView('3d');
+    this.checkMissions(true);   // missions already met by an existing save are counted quietly
     await wait(250);
     $('#boot').classList.add('is-done');
     $('#map').classList.add('is-active');
@@ -4200,6 +4273,105 @@ class App {
     try { skip = sessionStorage.getItem('suan-dao-skip-title') === '1'; sessionStorage.removeItem('suan-dao-skip-title'); } catch (e) { /* no session storage */ }
     if (skip) { this.onTitle = true; this.startFromTitle(); } else this.showTitle();
     setTimeout(() => $('#boot').remove(), 700);
+  }
+
+  /* ---------------- Missions ---------------- */
+  stars() { return MISSIONS.reduce((a, m) => a + (this.state.missions.includes(m.id) ? m.r : 0), 0); }
+  /** Everything the missions look at, computed fresh from the saved planets. */
+  missionStats() {
+    const st = this.state, main = PLANETS.filter(p => !p.secret);
+    const sims = PLANETS.map(p => {
+      const ps = st.planets[p.id], terrain = this.terrains[p.id] || (this.terrains[p.id] = new Terrain(ps.seed));
+      return { p, eco: ps.eco, sim: simulate(p, terrain, ps.params, ps.eco) };
+    });
+    const g = { visited: st.visited.filter(id => main.some(p => p.id === id)).length, landed: st.landed.length, eco: main.filter(p => st.planets[p.id].eco).length,
+      speed: stationStats(st.station.mods).speed, secret: !!st.secret, wareeO2: 0, maxHabit: 0, colonists: 0, gdp: 0, green: 0, agniErupt: 1, himaT: -99 };
+    sims.forEach(({ p, eco, sim }) => {
+      if (p.id === 'waree') g.wareeO2 = sim.o2;
+      if (p.id !== 'morakot') g.maxHabit = Math.max(g.maxHabit, sim.habit);   // the rainforest starts out habitable
+      g.colonists += sim.colonists; g.gdp += sim.gdp;
+      if (eco && sim.sustain >= 80) g.green++;
+      if (p.id === 'agni') g.agniErupt = sim.e.eruption;
+      if (p.id === 'himawan') g.himaT = sim.temp;
+    });
+    return g;
+  }
+  /** Mark newly met missions; celebrate them (or, when `quiet`, keep a summary for later). */
+  checkMissions(quiet) {
+    if (!this.state) return;
+    const g = this.missionStats(), fresh = MISSIONS.filter(m => !this.state.missions.includes(m.id) && m.p(g)[0] >= 1);
+    if (fresh.length) {
+      fresh.forEach(m => this.state.missions.push(m.id));
+      clearTimeout(this.saveT); Store.save(this.state);
+      const before = this.stars() - fresh.reduce((a, m) => a + m.r, 0);
+      if (quiet || fresh.length > 2) {
+        this.missionSummary = (this.missionSummary || 0) + fresh.length;
+        this.missionStarsGain = (this.missionStarsGain || 0) + fresh.reduce((a, m) => a + m.r, 0);
+        if (!quiet) this.flushMissionSummary();
+      } else fresh.forEach((m, i) => setTimeout(() => this.celebrate(m), i * 2600));
+      const r0 = rankOf(before), r1 = rankOf(this.stars());
+      if (r1 > r0 && !quiet) setTimeout(() => this.toast(tr(`${RANKS[r1][1]} เลื่อนยศเป็น ${RANKS[r1][2]}!`, `${RANKS[r1][1]} Promoted to ${RANKS[r1][2]}!`), 3200), fresh.length * 2600 + 200);
+    }
+    this.syncMissionBadge();
+    if (!$('#missions').hidden) this.renderMissions(g);
+  }
+  flushMissionSummary() {
+    if (!this.missionSummary) return;
+    this.toast(tr(`🎯 ภารกิจที่ทำสำเร็จไว้แล้ว ${this.missionSummary} ภารกิจ · +${this.missionStarsGain} ⭐`, `🎯 ${this.missionSummary} missions already complete · +${this.missionStarsGain} ⭐`), 3600);
+    this.confetti(); Sound.life();
+    this.missionSummary = this.missionStarsGain = 0;
+  }
+  celebrate(m) {
+    this.toast(`${m.icon} ${tr('ภารกิจสำเร็จ', 'Mission complete')}: ${m.t} · +${m.r} ⭐`, 2800);
+    this.confetti(); Sound.life();
+    const b = $('[data-missions-open]'); if (b) { b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); }
+  }
+  confetti() {
+    if (REDUCED) return;
+    const box = document.createElement('div'); box.className = 'confetti'; box.setAttribute('aria-hidden', 'true');
+    const cols = ['#ff4fd8', '#33e1ff', '#ffc94a', '#7dff6a', '#b04dff', '#fff'];
+    for (let i = 0; i < 36; i++) {
+      const c = document.createElement('i'), a = Math.random() * Math.PI * 2, d = 90 + Math.random() * 190;
+      c.style.cssText = `--x:${(Math.cos(a) * d).toFixed(0)}px;--y:${(Math.sin(a) * d * 0.7 - 60).toFixed(0)}px;--r:${Math.round(Math.random() * 720 - 360)}deg;background:${cols[i % cols.length]};animation-delay:${(Math.random() * 0.12).toFixed(2)}s`;
+      box.appendChild(c);
+    }
+    document.body.appendChild(box); setTimeout(() => box.remove(), 1700);
+  }
+  syncMissionBadge() {
+    const n = this.state.missions.length, b = $('[data-mission-count]');
+    if (b) b.textContent = `${n}/${MISSIONS.length}`;
+    const btn = $('[data-missions-open]'); if (btn) btn.setAttribute('aria-label', `${tr('ภารกิจ', 'Missions')} ${n}/${MISSIONS.length}`);
+  }
+  openMissions() {
+    const m = $('#missions'); this.renderMissions(); m.hidden = false;
+    requestAnimationFrame(() => m.classList.add('is-on'));
+    setTimeout(() => { const c = $('[data-missions-close]'); if (c) c.focus(); }, 60);
+  }
+  closeMissions() { const m = $('#missions'); m.classList.remove('is-on'); setTimeout(() => { m.hidden = true; }, 300); }
+  renderMissions(g = this.missionStats()) {
+    const stars = this.stars(), rk = rankOf(stars), next = RANKS[rk + 1];
+    const toNext = next ? (stars - RANKS[rk][0]) / (next[0] - RANKS[rk][0]) : 1;
+    const nextPaint = Object.values(PAINTS).filter(v => v[2] && v[2] > stars).sort((a, b) => a[2] - b[2])[0];
+    const rows = MISSIONS.map(m => { const [f, label] = m.p(g), done = this.state.missions.includes(m.id); return { m, f: done ? 1 : f, label, done }; })
+      .sort((a, b) => (a.done - b.done) || (b.f - a.f));
+    $('[data-missions]').innerHTML = `
+      <div class="rank-card">
+        <div class="rank-ic">${RANKS[rk][1]}</div>
+        <div class="rank-txt"><small>${tr('ยศของคุณ', 'Your rank')}</small><b>${RANKS[rk][2]}</b></div>
+        <div class="rank-stars"><b class="num">${stars}</b><small>/ ${STARS_TOTAL} ⭐</small></div>
+        <div class="rank-bar"><i style="width:${(toNext * 100).toFixed(1)}%"></i></div>
+        <small class="rank-next">${next ? tr(`อีก ${next[0] - stars} ⭐ จะได้ยศ ${next[1]} ${next[2]}`, `${next[0] - stars} ⭐ more to reach ${next[1]} ${next[2]}`) : tr('คุณได้ยศสูงสุดแล้ว!', 'You have reached the highest rank!')}
+          ${nextPaint ? ' · ' + tr(`สีสถานี "${nextPaint[1]}" ปลดล็อกที่ ${nextPaint[2]} ⭐`, `"${nextPaint[1]}" station paint unlocks at ${nextPaint[2]} ⭐`) : ''}</small>
+      </div>
+      <h3>${tr('ภารกิจ', 'Missions')} <span class="num">${this.state.missions.length}/${MISSIONS.length}</span></h3>
+      <ul class="mission-list">${rows.map(({ m, f, label, done }) => `
+        <li class="mission${done ? ' done' : ''}">
+          <span class="m-ic">${done ? '✅' : m.icon}</span>
+          <div class="m-body"><b>${m.t}</b><small>${m.d}</small>
+            <div class="m-bar"><i style="width:${(f * 100).toFixed(1)}%"></i></div></div>
+          <div class="m-side"><span class="m-reward">+${m.r} ⭐</span><small class="num">${done ? tr('สำเร็จ', 'Done') : label}</small></div>
+        </li>`).join('')}</ul>
+      <button class="btn ghost" type="button" data-missions-close style="width:100%;margin-top:12px">${tr('ปิด', 'Close')}</button>`;
   }
 
   /* ---------------- Title screen: the system turning round its star, then Enter (or a tap) to begin ---------------- */
@@ -4221,7 +4393,8 @@ class App {
     const vis = this.state.visited.filter(id => PLANETS.some(p => p.id === id)).length, eco = PLANETS.filter(p => this.state.planets[p.id].eco).length;
     const fresh = !vis && !eco;
     $('[data-title-progress]').innerHTML = fresh ? tr('การเดินทางครั้งแรกของคุณกำลังจะเริ่มขึ้น', 'Your first voyage is about to begin')
-      : tr(`สำรวจแล้ว <b>${vis}/${PLANETS.length}</b> ดวง · มีชีวิต <b>${eco}/${PLANETS.length}</b> ดวง`, `Explored <b>${vis}/${PLANETS.length}</b> · alive <b>${eco}/${PLANETS.length}</b>`);
+      : tr(`สำรวจแล้ว <b>${vis}/${PLANETS.length}</b> ดวง · มีชีวิต <b>${eco}/${PLANETS.length}</b> ดวง`, `Explored <b>${vis}/${PLANETS.length}</b> · alive <b>${eco}/${PLANETS.length}</b>`)
+        + ` · ${RANKS[rankOf(this.stars())][1]} ${RANKS[rankOf(this.stars())][2]} <b>${this.stars()}⭐</b>`;
     const touch = matchMedia('(pointer: coarse)').matches;
     $('[data-title-kbd]').hidden = $('[data-title-pre]').hidden = touch;
     $('[data-title-pre]').textContent = tr('กด', 'Press');
@@ -4257,6 +4430,7 @@ class App {
   /** Warp out of the title and reveal the space map. */
   enterMap() {
     const el = $('#title');
+    if (this.missionSummary) setTimeout(() => this.flushMissionSummary(), 1600);
     if (Sound.on) Sound.launch();
     el.classList.add('go');
     const map = $('#map');
@@ -4290,7 +4464,10 @@ class App {
 
   webgl() { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl') || c.getContext('experimental-webgl')); } catch (e) { return false; } }
 
-  save() { clearTimeout(this.saveT); this.saveT = setTimeout(() => Store.save(this.state), 350); }
+  save() {
+    clearTimeout(this.saveT); this.saveT = setTimeout(() => Store.save(this.state), 350);
+    clearTimeout(this.misT); this.misT = setTimeout(() => this.checkMissions(), 900);   // anything saved may complete a mission
+  }
 
   toast(msg, ms = 2000) {
     const t = $('#toast'); t.textContent = msg; t.classList.add('is-on');
@@ -5130,6 +5307,7 @@ class App {
   openExplore() {
     if (this.inExplore || this.current < 0) return;
     const p = PLANETS[this.current];
+    if (!this.state.landed.includes(p.id)) { this.state.landed.push(p.id); this.save(); }
     this.inExplore = true;
     this.stopLoop();
     $('#detail').classList.remove('is-active');
@@ -5514,6 +5692,7 @@ class App {
 
   setPaint(key) {
     if (!PAINTS[key]) return;
+    if (PAINTS[key][2] && this.stars() < PAINTS[key][2]) { this.toast(tr(`🔒 ต้องมี ${PAINTS[key][2]} ⭐ จากภารกิจ`, `🔒 Needs ${PAINTS[key][2]} ⭐ from missions`)); return; }
     this.state.station.paint = key; this.save();
     if (this.station) { this.clearPart(); this.station.build(this.state.station.mods, key); }
     Sound.tap();
@@ -5555,7 +5734,8 @@ class App {
         <p class="note">${tr('ความเร็วยานมาจากเครื่องยนต์ไอออน หักด้วยมวลของสถานีที่เกิน 30 ตัน ถ้าไฟไม่พอหรือร้อนเกิน เครื่องยนต์จะทำงานได้ไม่เต็มที่', 'Ship speed comes from the ion engines, minus the station’s mass above 30 tonnes. Without enough power, or when overheating, the engines run below full thrust.')}</p>`;
     } else {
       html = `<p class="lead">${tr('เลือกสีประจำสถานี ใช้กับแถบลำตัว ถังเชื้อเพลิง และท่าเทียบยาน', 'Pick the station’s colour for its hull bands and trim.')}</p><div class="card"><div class="swatches">` +
-        Object.entries(PAINTS).map(([k, [c, n]]) => `<button class="swatch" type="button" data-paint="${k}" aria-pressed="${this.state.station.paint === k}"><i style="background:${c}"></i>${n}</button>`).join('') +
+        Object.entries(PAINTS).map(([k, [c, n, need]]) => { const lock = need && this.stars() < need;
+          return `<button class="swatch${lock ? ' locked' : ''}" type="button" data-paint="${k}" aria-pressed="${this.state.station.paint === k}"><i style="background:${c}">${lock ? '🔒' : ''}</i>${lock ? `${need} ⭐` : n}</button>`; }).join('') +
         `</div></div>`;
     }
     $('#stPanel').innerHTML = html;
@@ -6149,6 +6329,8 @@ class App {
     $('[data-bg-toggle]').addEventListener('click', () => this.cycleBg());
     $('[data-flight-toggle]').addEventListener('click', () => this.cycleFlight());
     $('[data-fx-toggle]').addEventListener('click', () => this.cycleFx());
+    $('[data-missions-open]').addEventListener('click', () => this.openMissions());
+    $('#missions').addEventListener('click', e => { if (e.target.id === 'missions' || e.target.closest('[data-missions-close]')) this.closeMissions(); });
     $$('[data-lang-toggle]').forEach(b => b.addEventListener('click', () => this.switchLang()));
     $('[data-view3d]').addEventListener('click', () => this.setView(this.sys3d ? 'map' : '3d'));
     $('[data-expand]').addEventListener('click', () => this.expandPanel());
@@ -6234,11 +6416,13 @@ class App {
       if (e.target.closest('[data-confirm-reset]')) this.resetAll();
       if (e.target.closest('[data-sound-toggle]')) this.toggleSound();
       if (e.target.closest('[data-show-intro]')) { this.closeMenu(); this.showIntro(); }
+      if (e.target.closest('[data-menu-missions]')) { this.closeMenu(); setTimeout(() => this.openMissions(), 320); }
     });
     addEventListener('keydown', e => {
       if (e.key !== 'Escape') return;
       if (!$('#intro').hidden) this.closeIntro();
       else if (!$('#menu').hidden) this.closeMenu();
+      else if (!$('#missions').hidden) this.closeMissions();
       else if (this.inExplore) { if (this.xPoi != null) this.closePoi(); else this.closeExplore(); }
       else if (this.inStation) this.closeStation();
       else if (this.current >= 0) this.leaveDetail();
@@ -6323,8 +6507,9 @@ class App {
   resetAll() {
     this.closeMenu();
     if (this.current >= 0) this.closeDetail();
-    const { sound, bg, speed, view, flight, intro } = this.state;
-    this.state = Store.fresh(); Object.assign(this.state, { sound, bg, speed, view, flight, intro }); Store.save(this.state);
+    const { sound, bg, speed, view, flight, intro, fx, xstyle } = this.state;
+    this.state = Store.fresh(); Object.assign(this.state, { sound, bg, speed, view, flight, intro, fx, xstyle }); Store.save(this.state);
+    this.syncMissionBadge();
     this.resetStation(true);
     // The secret planet hides again until it is earned.
     if (PLANETS.includes(SECRET)) PLANETS.splice(PLANETS.indexOf(SECRET), 1);
